@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "tc": "tsc --noEmit --watch",
+    "lint:format": "prettier . --write"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.10.0",
+    "dagre": "^0.8.5",
+    "mermaid": "^11.12.2"
+  },
+  "devDependencies": {
+    "@types/dagre": "^0.7.53",
+    "@types/node": "^25.1.0",
+    "prettier": "^3.8.1"
+  }
+}
