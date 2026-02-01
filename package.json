@@ -1,6 +1,6 @@
 {
   "name": "uigraph-diagram-sdk",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "sideEffects": false,
   "scripts": {
     "test": "bun test",
