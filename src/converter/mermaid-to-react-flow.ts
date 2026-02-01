@@ -1,7 +1,8 @@
-import { ComponentInputType } from '../constants/component-type'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
 import mermaid from 'mermaid'
+import { ComponentInputType } from '../constants/component-type'
 import { LAYOUT_SPACING } from '../constants/layout'
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
@@ -292,7 +293,7 @@ export function parseMermaidCode(code: string): {
       .replace(/\\u([0-9a-fA-F]{4})/g, (match, code) => {
         try {
           return String.fromCharCode(parseInt(code, 16))
-        } catch (e) {
+        } catch {
           debugLog(`Warning: Could not parse unicode character: ${match}`)
           return match
         }
@@ -333,10 +334,7 @@ export function parseMermaidCode(code: string): {
       processedMatches.add(matchStart)
 
       const openIndex = matchStart + nodeId.length // position of opening bracket
-      const closeChar =
-        openChar === '[' ? ']'
-        : openChar === '(' ? ')'
-        : '}'
+      const closeChar = openChar === '[' ? ']' : openChar === '(' ? ')' : '}'
 
       // Find the matching closing bracket, considering nesting
       let closeIndex = -1
@@ -451,12 +449,13 @@ export function parseMermaidCode(code: string): {
       if (subgraphId) {
         // Get parent from stack if this is a nested subgraph
         const parentId =
-          subgraphStack.length > 0 ?
-            subgraphStack[subgraphStack.length - 1]
-          : undefined
+          subgraphStack.length > 0
+            ? subgraphStack[subgraphStack.length - 1]
+            : undefined
 
-        const cleanTitle =
-          subgraphTitle ? enhancedCleanLabel(subgraphTitle) : subgraphId
+        const cleanTitle = subgraphTitle
+          ? enhancedCleanLabel(subgraphTitle)
+          : subgraphId
 
         debugLog(
           `Found subgraph: ${subgraphId}, title: "${cleanTitle}", parent: ${
@@ -505,10 +504,10 @@ export function parseMermaidCode(code: string): {
   subgraphStack.length = 0
 
   // Helper function to create or get existing node
-  const createOrGetNode = (
+  function createOrGetNode(
     nodeId: string,
     currentSubgraph?: string
-  ): MermaidNode => {
+  ): MermaidNode {
     // Check if node already exists
     if (nodeMap.has(nodeId)) {
       const existingNode = nodeMap.get(nodeId)!
@@ -553,9 +552,9 @@ export function parseMermaidCode(code: string): {
       shape,
       subgraph: currentSubgraph,
       parentSubgraph:
-        subgraphStack.length > 1 ?
-          subgraphStack[subgraphStack.length - 2]
-        : undefined,
+        subgraphStack.length > 1
+          ? subgraphStack[subgraphStack.length - 2]
+          : undefined,
     }
 
     nodes.push(node)
@@ -654,9 +653,9 @@ export function parseMermaidCode(code: string): {
 
     // Get current subgraph from the top of the stack
     const currentSubgraph =
-      subgraphStack.length > 0 ?
-        subgraphStack[subgraphStack.length - 1]
-      : undefined
+      subgraphStack.length > 0
+        ? subgraphStack[subgraphStack.length - 1]
+        : undefined
 
     debugLog(
       `Processing line: "${line}" in subgraph: ${currentSubgraph || 'none'}`
@@ -671,7 +670,7 @@ export function parseMermaidCode(code: string): {
       const idMatch = str.slice(startIndex).match(/^\s*([A-Za-z0-9_]+)/)
       if (!idMatch) return null
       const id = idMatch[1]
-      let idx = startIndex + idMatch[0].length // position after id (includes leading spaces)
+      const idx = startIndex + idMatch[0].length // position after id (includes leading spaces)
 
       // if next non-space char is an opening bracket, find its matching close
       const rest = str.slice(idx)
@@ -679,10 +678,7 @@ export function parseMermaidCode(code: string): {
       if (openCharMatch) {
         const openChar = openCharMatch[1]
         const openPos = idx + rest.indexOf(openChar)
-        const closeChar =
-          openChar === '[' ? ']'
-          : openChar === '(' ? ')'
-          : '}'
+        const closeChar = openChar === '[' ? ']' : openChar === '(' ? ')' : '}'
         const closePos = str.indexOf(closeChar, openPos + 1)
         if (closePos !== -1) {
           const full = str
@@ -806,7 +802,7 @@ export function parseMermaidCode(code: string): {
           edgeType: op!,
           edgeLabel,
         }
-      } catch (e) {
+      } catch {
         return null
       }
     }
@@ -1308,18 +1304,16 @@ function recalculateParentSubgraphSizes(
       const childLayout = subgraphLayouts.get(childSg.id)
       if (childLayout) {
         // Estimate child position accounting for dagre spacing and mixed content
-        const estimatedChildX =
-          isHorizontal ?
-            Math.max(
+        const estimatedChildX = isHorizontal
+          ? Math.max(
               SUBGRAPH_PADDING + childLayout.width / 2,
               maxContentRight +
                 MIXED_CONTENT_HORIZONTAL_SPACING +
                 childLayout.width / 2
             )
           : SUBGRAPH_PADDING + childLayout.width / 2
-        const estimatedChildY =
-          isHorizontal ?
-            Math.max(
+        const estimatedChildY = isHorizontal
+          ? Math.max(
               SUBGRAPH_HEADER_HEIGHT +
                 SUBGRAPH_CONTENT_TOP_MARGIN +
                 SUBGRAPH_PADDING +
@@ -1668,19 +1662,6 @@ function layoutMetaGraph(
     }
   })
 
-  // Dagre-based positioning for nested subgraphs within each parent container
-  // Access ordered subgraphs to read per-subgraph direction
-  const orderedForMeta = processSubgraphsInHierarchicalOrder(
-    Array.from(
-      new Set(
-        Array.from(subgraphLayouts.keys()).map((id) => ({
-          id,
-          parentId: subgraphLayouts.get(id)?.parentId,
-          title: subgraphLayouts.get(id)?.title || id,
-        }))
-      )
-    ) as any
-  )
   const processedSubgraphs = new Set<string>()
 
   function layoutChildrenWithinParent(parentId: string): boolean {
@@ -1832,10 +1813,12 @@ function layoutMetaGraph(
 
     // Align children within the available parent space
     // For vertical flows (TB/BT), left-align to avoid excess right whitespace; center only horizontally oriented layouts
-    const centerOffsetX =
-      isHorizontal ? Math.max(0, (availableWidth - contentWidth) / 2) : 0
-    const centerOffsetY =
-      isHorizontal ? 0 : Math.max(0, (availableHeight - contentHeight) / 2)
+    const centerOffsetX = isHorizontal
+      ? Math.max(0, (availableWidth - contentWidth) / 2)
+      : 0
+    const centerOffsetY = isHorizontal
+      ? 0
+      : Math.max(0, (availableHeight - contentHeight) / 2)
 
     // Position children with centering offset
     childIds.forEach((cid) => {
@@ -1851,9 +1834,8 @@ function layoutMetaGraph(
 
     // Ensure parent is large enough to contain both existing nodes and the centered children
     // Use generous padding to prevent overflow issues
-    const requiredWidth =
-      isHorizontal ?
-        Math.max(
+    const requiredWidth = isHorizontal
+      ? Math.max(
           contentWidth + SUBGRAPH_PADDING * 6,
           contentOriginX - parentPos.x + contentWidth + SUBGRAPH_PADDING * 3
         )
@@ -1862,9 +1844,8 @@ function layoutMetaGraph(
     // Calculate required height considering both node content and child subgraphs
     const childrenBottomBoundary =
       contentOriginY + centerOffsetY + (maxBottom - minTop) - parentPos.y
-    const minRequiredHeight =
-      isHorizontal ?
-        Math.max(
+    const minRequiredHeight = isHorizontal
+      ? Math.max(
           SUBGRAPH_HEADER_HEIGHT +
             SUBGRAPH_CONTENT_TOP_MARGIN +
             SUBGRAPH_PADDING * 2 +
@@ -1963,7 +1944,7 @@ function createReactFlowElements(
   debugLog('Creating React Flow elements')
 
   // Color schemes
-  const getNodeColors = (shape: string) => {
+  function getNodeColors(shape: string) {
     const colorSchemes = {
       rect: ['#E3F2FD', '#1976D2'], // Blue
       diamond: ['#FFF3E0', '#F57C00'], // Orange
@@ -1982,7 +1963,7 @@ function createReactFlowElements(
     }
   }
 
-  const getSubgraphColors = (index: number) => {
+  function getSubgraphColors(index: number) {
     const subgraphColors = [
       { bg: 'rgba(227, 242, 253, 0.4)', border: '#1976D2' }, // Blue
       { bg: 'rgba(232, 245, 233, 0.4)', border: '#388E3C' }, // Green
@@ -2230,7 +2211,7 @@ function createReactFlowElements(
     const edgeColors = ['#1976D2', '#388E3C', '#F57C00', '#7B1FA2', '#C2185B']
     const edgeColor = edgeColors[index % edgeColors.length]
 
-    let edgeStyle: {
+    const edgeStyle: {
       stroke: string
       strokeWidth: number
       strokeDasharray?: string
@@ -2240,7 +2221,7 @@ function createReactFlowElements(
     }
 
     const edgeType = 'default'
-    let animated = true // Default to animated for all edges
+    const animated = true // Default to animated for all edges
 
     // Style edges based on type, but keep animation consistent
     switch (edge.type) {
@@ -2261,10 +2242,12 @@ function createReactFlowElements(
     }
 
     // Adjust source and target IDs if they refer to subgraphs
-    const sourceId =
-      edge.isSourceSubgraph ? `subgraph-${edge.source}` : edge.source
-    const targetId =
-      edge.isTargetSubgraph ? `subgraph-${edge.target}` : edge.target
+    const sourceId = edge.isSourceSubgraph
+      ? `subgraph-${edge.source}`
+      : edge.source
+    const targetId = edge.isTargetSubgraph
+      ? `subgraph-${edge.target}`
+      : edge.target
 
     // Create edge with explicit properties - ensure consistent styling
     return {
@@ -2291,9 +2274,9 @@ function createReactFlowElements(
         color: edgeColor,
       },
       sourceHandle:
-        direction === 'LR' || direction === 'RL' ?
-          'source-right'
-        : 'source-bottom',
+        direction === 'LR' || direction === 'RL'
+          ? 'source-right'
+          : 'source-bottom',
       targetHandle:
         direction === 'LR' || direction === 'RL' ? 'target-left' : 'target-top',
       zIndex: 0,

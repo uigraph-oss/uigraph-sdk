@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "declaration": true,
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "strict": true,
     "noEmit": true,
-    "allowJs": true,
-    "skipLibCheck": true,
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["./src"]
+  "include": ["src"]
 }

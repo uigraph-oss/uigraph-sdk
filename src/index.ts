@@ -1,6 +1,6 @@
 export {
   extractMermaidFromFences,
   sanitizeMermaidLabels,
-} from './converter/mermaidSanitizer'
-export { convertMermaidToReactFlow } from './converter/mermaidToReactFlow'
-export type { ReactFlowData } from './converter/mermaidToReactFlow'
+} from './converter/mermaid-sanitizer'
+export { convertMermaidToReactFlow } from './converter/mermaid-to-react-flow'
+export type { ReactFlowData } from './converter/mermaid-to-react-flow'
