@@ -1,4 +1,5 @@
 import { ReactFlowData } from '@/types'
+import { mergeComponentFields } from './helpers'
 
 type Options = {
   keepPrev?: boolean
@@ -20,10 +21,10 @@ export function syncBaseData(
         data: {
           ...prevNode.data,
           ...nextNode.data,
-          componentFields: [
-            ...(prevNode.data?.componentFields ?? []),
-            ...(nextNode.data?.componentFields ?? []),
-          ],
+          componentFields: mergeComponentFields(
+            prevNode.data?.componentFields,
+            nextNode.data?.componentFields
+          ),
         },
       }
     }),
@@ -38,10 +39,10 @@ export function syncBaseData(
         data: {
           ...prevEdge.data,
           ...nextEdge.data,
-          componentFields: [
-            ...(prevEdge.data?.componentFields ?? []),
-            ...(nextEdge.data?.componentFields ?? []),
-          ],
+          componentFields: mergeComponentFields(
+            prevEdge.data?.componentFields,
+            nextEdge.data?.componentFields
+          ),
         },
       }
     }),
