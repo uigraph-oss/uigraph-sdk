@@ -64,25 +64,18 @@ export function syncBaseData(
   }
 
   if (options?.keepPrev) {
-    updated.nodes = [
-      ...prev.nodes.filter(
-        (n) =>
-          !updated.nodes.some(
-            (n2) => n2.id === n.id && n2.data?.source !== 'mermaid'
-          )
-      ),
-      ...updated.nodes,
-    ]
+    const missingNodes = prev.nodes.filter((n) => {
+      if (n.data?.source === 'mermaid') return false
+      return !updated.nodes.some((n2) => n2.id === n.id)
+    })
 
-    updated.edges = [
-      ...prev.edges.filter(
-        (e) =>
-          !updated.edges.some(
-            (e2) => e2.id === e.id && e2.data?.source !== 'mermaid'
-          )
-      ),
-      ...updated.edges,
-    ]
+    const missingEdges = prev.edges.filter((e) => {
+      if (e.data?.source === 'mermaid') return false
+      return !updated.edges.some((e2) => e2.id === e.id)
+    })
+
+    updated.nodes = [...missingNodes, ...updated.nodes]
+    updated.edges = [...missingEdges, ...updated.edges]
   }
 
   return updated
