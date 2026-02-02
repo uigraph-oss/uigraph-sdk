@@ -65,12 +65,22 @@ export function syncBaseData(
 
   if (options?.keepPrev) {
     updated.nodes = [
-      ...prev.nodes.filter((n) => !updated.nodes.some((n2) => n2.id === n.id)),
+      ...prev.nodes.filter(
+        (n) =>
+          !updated.nodes.some(
+            (n2) => n2.id === n.id && n2.data?.source !== 'mermaid'
+          )
+      ),
       ...updated.nodes,
     ]
 
     updated.edges = [
-      ...prev.edges.filter((e) => !updated.edges.some((e2) => e2.id === e.id)),
+      ...prev.edges.filter(
+        (e) =>
+          !updated.edges.some(
+            (e2) => e2.id === e.id && e2.data?.source !== 'mermaid'
+          )
+      ),
       ...updated.edges,
     ]
   }

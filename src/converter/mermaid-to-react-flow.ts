@@ -2381,7 +2381,18 @@ export async function convertMermaidToReactFlow(
     )
 
     // Layout the graph and return
-    return layoutGraph(nodes, edges, subgraphs, direction)
+    const graphedResult = layoutGraph(nodes, edges, subgraphs, direction)
+    return {
+      nodes: graphedResult.nodes.map((node) => ({
+        ...node,
+        data: { ...node.data, source: 'mermaid' },
+      })),
+
+      edges: graphedResult.edges.map((edge) => ({
+        ...edge,
+        data: { ...edge.data, source: 'mermaid' },
+      })),
+    }
   } catch (error) {
     console.error('Error converting Mermaid to React Flow:', error)
     return { nodes: [], edges: [] }
