@@ -20,6 +20,10 @@ export function syncBaseData(
         data: {
           ...prevNode.data,
           ...nextNode.data,
+          componentFields: [
+            ...(prevNode.data?.componentFields ?? []),
+            ...(nextNode.data?.componentFields ?? []),
+          ],
         },
       }
     }),
@@ -34,6 +38,10 @@ export function syncBaseData(
         data: {
           ...prevEdge.data,
           ...nextEdge.data,
+          componentFields: [
+            ...(prevEdge.data?.componentFields ?? []),
+            ...(nextEdge.data?.componentFields ?? []),
+          ],
         },
       }
     }),
