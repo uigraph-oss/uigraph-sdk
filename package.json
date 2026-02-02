@@ -1,7 +1,7 @@
 {
-  "name": "uigraph-diagram-sdk",
-  "version": "0.0.4",
-  "sideEffects": false,
+  "name": "@uigraph/diagram-sdk",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "prepare": "husky",
     "test": "vitest --run",
