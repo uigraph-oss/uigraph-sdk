@@ -3,6 +3,8 @@ import { mergeComponentFields } from './helpers'
 
 type Options = {
   keepPrev?: boolean
+  includeNodePositions?: boolean
+  includeNodeDimensions?: boolean
 }
 
 export function syncBaseData(
@@ -18,6 +20,17 @@ export function syncBaseData(
       return {
         ...prevNode,
         ...nextNode,
+
+        width: options?.includeNodeDimensions ? prevNode.width : nextNode.width,
+
+        height: options?.includeNodeDimensions
+          ? prevNode.height
+          : nextNode.height,
+
+        position: options?.includeNodePositions
+          ? prevNode.position
+          : nextNode.position,
+
         data: {
           ...prevNode.data,
           ...nextNode.data,

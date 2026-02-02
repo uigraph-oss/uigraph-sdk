@@ -1,6 +1,6 @@
 {
   "name": "@uigraph/diagram-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "prepare": "husky",
     "test": "vitest --run",
