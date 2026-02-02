@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "sideEffects": false,
   "scripts": {
+    "prepare": "husky",
     "test": "vitest --run",
     "lint": "eslint .",
     "fix": "eslint . --fix",

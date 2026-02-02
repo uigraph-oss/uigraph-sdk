@@ -98,9 +98,7 @@ describe('sanitizeMermaidLabels', () => {
 
   it('quotes node labels with comma and colon', () => {
     const src = 'N[Step 1: do this, then that]'
-    expect(sanitizeMermaidLabels(src)).toBe(
-      'N["Step 1: do this, then that"]'
-    )
+    expect(sanitizeMermaidLabels(src)).toBe('N["Step 1: do this, then that"]')
   })
 
   it('quotes node labels with square brackets inside (non-greedy match)', () => {
@@ -114,7 +112,8 @@ describe('sanitizeMermaidLabels', () => {
   })
 
   it('quotes multiple nodes with punctuation in same diagram', () => {
-    const src = 'flowchart LR\n  A[Process (main)] --> B[Result: ok]\n  B --> C[End;]'
+    const src =
+      'flowchart LR\n  A[Process (main)] --> B[Result: ok]\n  B --> C[End;]'
     expect(sanitizeMermaidLabels(src)).toContain('A["Process (main)"]')
     expect(sanitizeMermaidLabels(src)).toContain('B["Result: ok"]')
     expect(sanitizeMermaidLabels(src)).toContain('C["End;"]')

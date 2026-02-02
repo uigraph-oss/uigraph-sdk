@@ -105,8 +105,7 @@ describe('parseMermaidCode', () => {
   })
 
   it('parses node shapes: rect, round, diamond', () => {
-    const code =
-      'flowchart LR\n  A[rect] --> B(round)\n  B --> C{diamond}'
+    const code = 'flowchart LR\n  A[rect] --> B(round)\n  B --> C{diamond}'
     const result = parseMermaidCode(code)
     expect(result.nodes).toHaveLength(3)
     const nodeA = result.nodes.find((n) => n.id === 'A')
@@ -232,7 +231,9 @@ describe('convertMermaidToReactFlow', () => {
     const nodeIds = result.nodes.map((n) => n.id)
     expect(nodeIds).toContain('A')
     expect(nodeIds).toContain('B')
-    const withParent = result.nodes.filter((n) => 'parentNode' in n && n.parentNode)
+    const withParent = result.nodes.filter(
+      (n) => 'parentNode' in n && n.parentNode
+    )
     expect(withParent.length).toBeGreaterThanOrEqual(0)
   })
 
@@ -288,9 +289,7 @@ describe('debugConvertMermaid', () => {
     const result = await debugConvertMermaid(code)
     expect(result.subgraphs.length).toBeGreaterThanOrEqual(2)
     expect(result.subgraphLayouts).toBeDefined()
-    expect(Object.keys(result.subgraphLayouts).length).toBeGreaterThanOrEqual(
-      1
-    )
+    expect(Object.keys(result.subgraphLayouts).length).toBeGreaterThanOrEqual(1)
     expect(result.reactFlowData.nodes.length).toBeGreaterThanOrEqual(2)
   })
 
