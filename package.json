@@ -3,13 +3,13 @@
   "version": "0.0.3",
   "sideEffects": false,
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
     "lint": "eslint .",
     "fix": "eslint . --fix",
     "tc": "tsc --noEmit --watch",
     "exports": "tsx ./write-exports.ts",
     "build": "tsdown --config ./tsdown.config.ts",
-    "dev": "concurrently --names \"R,T\" --prefix-colors \"blue.dim,magenta.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\"",
+    "dev": "concurrently --names \"R,T,V\" --prefix-colors \"blue.dim,magenta.dim,green.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\" \"vitest dev\"",
     "start": "tsx --watch ./src/index.ts"
   },
   "dependencies": {
