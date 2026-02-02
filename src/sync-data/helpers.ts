@@ -9,11 +9,26 @@ export function mergeComponentFields(
   const prevFields = prev ?? []
   const nextFields = next ?? []
 
-  const updated: ComponentField[] = [...nextFields]
+  const prevFieldsMap = getFieldDataMap(prevFields)
+  const updated: ComponentField[] = nextFields.map((field) => {
+    const prevData = prevFieldsMap[field.label]
+    if (!prevData) return field
+
+    return { ...field, data: prevData }
+  })
 
   const missingFields = prevFields.filter(
     (field) => !nextFields.some((f) => f.label === field.label)
   )
 
   return [...updated, ...missingFields]
+}
+
+function getFieldDataMap(fields: ComponentField[]): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const field of fields) {
+    result[field.label] = field.data
+  }
+
+  return result
 }
