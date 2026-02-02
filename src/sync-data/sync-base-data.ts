@@ -1,22 +1,55 @@
 import { ReactFlowData } from '@/types'
 
-export function syncBaseData(
-  baseReactFlowData: ReactFlowData,
-  newReactFlowData: ReactFlowData
-): ReactFlowData {
-  return {
-    nodes: baseReactFlowData.nodes.map((node) => {
-      const newNode = newReactFlowData.nodes.find((n) => n.id === node.id)
-      if (!newNode) return node
+type Options = {
+  keepPrev?: boolean
+}
 
-      return { ...newNode, data: { ...node.data, ...newNode.data } }
+export function syncBaseData(
+  prev: ReactFlowData,
+  next: ReactFlowData,
+  options?: Options
+): ReactFlowData {
+  const updated = {
+    nodes: next.nodes.map((nextNode) => {
+      const prevNode = prev.nodes.find((n) => n.id === nextNode.id)
+      if (!prevNode) return nextNode
+
+      return {
+        ...prevNode,
+        ...nextNode,
+        data: {
+          ...prevNode.data,
+          ...nextNode.data,
+        },
+      }
     }),
 
-    edges: baseReactFlowData.edges.map((edge) => {
-      const newEdge = newReactFlowData.edges.find((e) => e.id === edge.id)
-      if (!newEdge) return edge
+    edges: next.edges.map((nextEdge) => {
+      const prevEdge = prev.edges.find((e) => e.id === nextEdge.id)
+      if (!prevEdge) return nextEdge
 
-      return { ...newEdge, data: { ...edge.data, ...newEdge.data } }
+      return {
+        ...prevEdge,
+        ...nextEdge,
+        data: {
+          ...prevEdge.data,
+          ...nextEdge.data,
+        },
+      }
     }),
   }
+
+  if (options?.keepPrev) {
+    updated.nodes = [
+      ...prev.nodes.filter((n) => !updated.nodes.some((n2) => n2.id === n.id)),
+      ...updated.nodes,
+    ]
+
+    updated.edges = [
+      ...prev.edges.filter((e) => !updated.edges.some((e2) => e2.id === e.id)),
+      ...updated.edges,
+    ]
+  }
+
+  return updated
 }
