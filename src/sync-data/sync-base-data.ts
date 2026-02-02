@@ -21,14 +21,16 @@ export function syncBaseData(
         ...prevNode,
         ...nextNode,
 
-        width: options?.includeNodeDimensions ? prevNode.width : nextNode.width,
+        width: options?.includeNodeDimensions
+          ? (prevNode.width ?? nextNode.width)
+          : nextNode.width,
 
         height: options?.includeNodeDimensions
-          ? prevNode.height
+          ? (prevNode.height ?? nextNode.height)
           : nextNode.height,
 
         position: options?.includeNodePositions
-          ? prevNode.position
+          ? (prevNode.position ?? nextNode.position)
           : nextNode.position,
 
         data: {
