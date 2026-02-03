@@ -3,6 +3,7 @@ import { ComponentInputType } from '../components/component-type'
 
 export type CustomData = {
   source?: 'mermaid'
+  childNodes?: string[]
   componentFields?: RFComponentField[]
 }
 

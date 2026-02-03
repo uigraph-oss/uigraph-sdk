@@ -1,4 +1,3 @@
-import { ComponentInputType } from '../components/component-type'
 import { convertMermaidToReactFlowWithContext } from '../context/convert-with-context'
 
 const mermaidCode = `
@@ -9,23 +8,11 @@ graph TD
 const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
   name: 'Test Context',
   description: 'Test Description',
-  nodes: {
-    A: {
-      type: 'text',
-
-      meta: {
-        text: {
-          type: ComponentInputType.TextInput,
-          value: 'Start',
-        },
-
-        NAME: {
-          type: ComponentInputType.NumberInput,
-          value: 10,
-        },
-      },
+  groups: {
+    group1: {
+      nodes: ['A', 'B'],
     },
   },
 })
 
-console.dir(result.nodes[0], { depth: null })
+console.dir(result.nodes, { depth: null })

@@ -27,8 +27,6 @@ export async function convertMermaidToReactFlowWithContext(
     const ctx = validatedContext.nodes?.[node.id]
     if (!ctx) return node
 
-    const groupEntries = Object.entries(validatedContext.groups ?? {})
-
     const clonedNode: Node<CustomData> = JSON.parse(JSON.stringify(node))
     const componentFields = clonedNode.data.componentFields ?? []
 
@@ -84,39 +82,46 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
-    const group = groupEntries.find(([_, group]) =>
-      group.nodes?.includes(node.id)
-    )
-
-    if (group) {
-      const [groupId] = group
-      clonedNode.parentId = groupId
-    }
-
     return clonedNode
   })
 
   const resolvedNodes = await Promise.all(rfNodesPromises)
 
-  for (const nodeId in context.groups ?? {}) {
-    const groupCtx = context.groups?.[nodeId]
-    if (!groupCtx) continue
-
-    const childNodes = groupCtx.nodes?.map((nodeId) =>
-      resolvedNodes.find((n) => n.id === nodeId)
+  const groupNodes: Node<CustomData>[] = Object.entries(
+    context.groups ?? {}
+  ).map(([nodeId, groupCtx]) => {
+    const groupChildNodeIds = groupCtx.nodes ?? []
+    const childNodes = arrayNonNullable(
+      groupChildNodeIds.map((nodeId) =>
+        resolvedNodes.find((n) => n.id === nodeId)
+      )
     )
 
-    const groupNode = generateGroupNodeFromNodes(
+    return generateGroupNodeFromNodes(
       nodeId,
       groupCtx.name ?? 'Group',
-      arrayNonNullable(childNodes)
+      childNodes
     )
-
-    resolvedNodes.unshift(groupNode)
-  }
+  })
 
   return {
     edges: reactFlowData.edges,
-    nodes: resolvedNodes,
+    nodes: [
+      ...groupNodes,
+      ...resolvedNodes.map((node) => {
+        const nodeParent = groupNodes.find((groupNode) =>
+          groupNode.data.childNodes?.includes(node.id)
+        )
+
+        if (nodeParent) {
+          return {
+            ...node,
+            parentId: nodeParent.id,
+          }
+        }
+
+        return node
+      }),
+    ],
   }
 }
