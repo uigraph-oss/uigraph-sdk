@@ -1,6 +1,6 @@
 {
   "name": "@uigraph/diagram-sdk",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "type": "module",
   "scripts": {
     "prepare": "husky",
@@ -16,12 +16,13 @@
   },
   "dependencies": {
     "dagre": "^0.8.5",
+    "daily-code": "^1.1.16",
     "mermaid": "^11.12.2"
   },
   "peerDependencies": {
-    "zod": "*",
+    "@xyflow/react": "^12",
     "quill": "*",
-    "@xyflow/react": "^12"
+    "zod": "*"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.1",

@@ -1,4 +1,5 @@
 import { Node } from '@xyflow/react'
+import { arrayNonNullable } from 'daily-code/.'
 import z from 'zod'
 import {
   generateComponentFieldInput,
@@ -6,11 +7,12 @@ import {
 } from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
 import { convertMermaidToReactFlow } from '../converter/mermaid-to-react-flow'
+import { generateGroupNodeFromNodes } from '../react-flow/group'
 import { CustomData, ReactFlowData, RFComponentField } from '../types'
 import { contextSchema } from './context-schema'
 
 type ResolverOptions = {
-  resolveCloudIcon?: (cloud: string) => Promise<string>
+  resolveCloudIcon?: (cloud: string) => Promise<string | undefined | null>
 }
 
 export async function convertMermaidToReactFlowWithContext(
@@ -22,8 +24,10 @@ export async function convertMermaidToReactFlowWithContext(
   const reactFlowData = await convertMermaidToReactFlow(mermaidCode)
 
   const rfNodesPromises = reactFlowData.nodes.map(async (node) => {
-    const ctx = validatedContext.nodes[node.id]
+    const ctx = validatedContext.nodes?.[node.id]
     if (!ctx) return node
+
+    const groupEntries = Object.entries(validatedContext.groups ?? {})
 
     const clonedNode: Node<CustomData> = JSON.parse(JSON.stringify(node))
     const componentFields = clonedNode.data.componentFields ?? []
@@ -80,11 +84,38 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
+    const group = groupEntries.find(([_, group]) =>
+      group.nodes?.includes(node.id)
+    )
+
+    if (group) {
+      const [groupId] = group
+      clonedNode.parentId = groupId
+    }
+
     return clonedNode
   })
 
+  const resolvedNodes = await Promise.all(rfNodesPromises)
+
+  for (const nodeId in context.groups ?? {}) {
+    const groupCtx = context.groups?.[nodeId]
+    if (!groupCtx) continue
+
+    const childNodes = groupCtx.nodes?.map((nodeId) =>
+      resolvedNodes.find((n) => n.id === nodeId)
+    )
+
+    const groupNode = generateGroupNodeFromNodes(
+      nodeId,
+      arrayNonNullable(childNodes)
+    )
+
+    resolvedNodes.push(groupNode)
+  }
+
   return {
     edges: reactFlowData.edges,
-    nodes: await Promise.all(rfNodesPromises),
+    nodes: resolvedNodes,
   }
 }

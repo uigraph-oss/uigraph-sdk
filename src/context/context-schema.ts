@@ -27,5 +27,14 @@ export const contextSchema = z.object({
           .optional(),
       })
     )
-    .default({}),
+    .optional(),
+
+  groups: z
+    .record(
+      z.string(),
+      z.object({
+        nodes: z.string().array().optional(),
+      })
+    )
+    .optional(),
 })

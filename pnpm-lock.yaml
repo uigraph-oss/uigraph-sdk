@@ -13,6 +13,9 @@ importers:
       dagre:
         specifier: ^0.8.5
         version: 0.8.5
+      daily-code:
+        specifier: ^1.1.16
+        version: 1.1.16
       mermaid:
         specifier: ^11.12.2
         version: 11.12.2
@@ -1890,6 +1893,12 @@ packages:
     resolution:
       {
         integrity: sha512-/aTqmnRta7x7MCCpExk7HQL2O4owCT2h8NT//9I1OQ9vt29Pa0BzSAkR5lwFUcQ7491yVi/3CXU9jQ5o0Mn2Sw==,
+      }
+
+  daily-code@1.1.16:
+    resolution:
+      {
+        integrity: sha512-n+GUu5/Jy6TQ69Q1+Z8VRE2fxzF8Tmf8G9YeJZiCtL7Q0/9Z2IG7BaAMXdWLXuBJfBMnBSTqq7U9/AMuzZKuvg==,
       }
 
   data-view-buffer@1.0.2:
@@ -5120,6 +5129,8 @@ snapshots:
     dependencies:
       graphlib: 2.1.8
       lodash: 4.17.23
+
+  daily-code@1.1.16: {}
 
   data-view-buffer@1.0.2:
     dependencies:
