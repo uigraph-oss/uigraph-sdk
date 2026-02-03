@@ -25,6 +25,7 @@ export async function convertMermaidToReactFlowWithContext(
 
     if (ctx.type) {
       clonedNode.type = ctx.type
+      delete clonedNode.style
     }
 
     if (ctx.name) {
