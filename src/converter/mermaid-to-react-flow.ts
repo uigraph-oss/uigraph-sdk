@@ -2,8 +2,8 @@
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
 import mermaid from 'mermaid'
+import { generateComponentFieldInput } from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
-import { generateComponentFieldInput } from '../components/generate-component-field'
 import { LAYOUT_SPACING } from '../constants/layout'
 import {
   MermaidEdge,

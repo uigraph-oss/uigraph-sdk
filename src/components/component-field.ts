@@ -19,3 +19,12 @@ export function generateComponentFieldInput(
 
   return metaData
 }
+
+export function getComponentFieldByLabel(
+  fields: ServerComponentField[],
+  label: string
+) {
+  return fields.find(
+    (field) => field.label?.toLowerCase() === label.toLowerCase()
+  )
+}

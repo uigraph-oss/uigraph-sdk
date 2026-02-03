@@ -1,6 +1,7 @@
 {
   "name": "@uigraph/diagram-sdk",
-  "version": "0.0.13",
+  "version": "0.0.14",
+  "type": "module",
   "scripts": {
     "prepare": "husky",
     "test": "vitest --run",
@@ -11,7 +12,7 @@
     "exports": "tsx ./write-exports.ts",
     "build": "tsdown --config ./tsdown.config.ts",
     "dev": "concurrently --names \"R,T,V\" --prefix-colors \"blue.dim,magenta.dim,green.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\" \"vitest dev\"",
-    "start": "tsx --watch ./src/index.ts"
+    "start": "bun run --watch ./src/__lab__/index.ts"
   },
   "dependencies": {
     "dagre": "^0.8.5",

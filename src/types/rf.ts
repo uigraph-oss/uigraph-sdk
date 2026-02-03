@@ -1,7 +1,7 @@
 import { Edge, Node } from '@xyflow/react'
 import { ComponentInputType } from '../components/component-type'
 
-type CustomData = {
+export type CustomData = {
   source?: 'mermaid'
   componentFields?: RFComponentField[]
 }
