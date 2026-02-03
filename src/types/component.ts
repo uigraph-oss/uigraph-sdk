@@ -12,12 +12,13 @@ export type ServerComponentField = {
 
 export type ServerComponentFieldInput = {
   componentFieldId: string
+  type: string
+  label: string
+  order: number
+  required: boolean
+
   isReadonly?: boolean | null
-  label?: string | null
   options?: (string | null)[] | null
-  order?: number | null
-  required?: boolean | null
-  type?: string | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any | null
 }
