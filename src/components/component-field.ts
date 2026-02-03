@@ -1,4 +1,5 @@
 import { ServerComponentField } from '../types'
+import { ComponentInputType } from './component-type'
 import { buildMetaData } from './data-structure'
 
 type GenerateComponentFieldOptions = Partial<ServerComponentField>
@@ -18,6 +19,15 @@ export function generateComponentFieldInput(
   })
 
   return metaData
+}
+
+export function generateComponentFieldNameInput(value: string) {
+  return generateComponentFieldInput({
+    componentFieldId: 'name',
+    label: 'Name',
+    type: ComponentInputType.TextInput,
+    data: value,
+  })
 }
 
 export function getComponentFieldByLabel(

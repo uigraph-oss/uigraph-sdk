@@ -2,7 +2,10 @@
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
 import mermaid from 'mermaid'
-import { generateComponentFieldInput } from '../components/component-field'
+import {
+  generateComponentFieldInput,
+  generateComponentFieldNameInput,
+} from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
 import { LAYOUT_SPACING } from '../constants/layout'
 import {
@@ -1916,13 +1919,7 @@ function createReactFlowElements(
           backgroundColor: colors.bg,
           borderColor: colors.border,
           childNodes: subgraph.nodes,
-          componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: subgraph.title,
-              type: ComponentInputType.TextInput,
-            }),
-          ],
+          componentFields: [generateComponentFieldNameInput(subgraph.title)],
         },
         style: {
           width: layout.width,
@@ -2014,13 +2011,7 @@ function createReactFlowElements(
         const portalShapeId = MERMAID_TO_PORTAL_SHAPE[node.shape] ?? 'rectangle'
         data = {
           shape: portalShapeId,
-          componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
-          ],
+          componentFields: [generateComponentFieldNameInput(displayLabel)],
           fill: colors.backgroundColor,
           stroke: colors.borderColor,
           strokeWidth: 2,
@@ -2039,11 +2030,7 @@ function createReactFlowElements(
         data = {
           componentName: 'file-note',
           componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
+            generateComponentFieldNameInput(displayLabel),
             generateComponentFieldInput({
               label: 'Label',
               data: displayLabel,
@@ -2060,11 +2047,7 @@ function createReactFlowElements(
       case 'text':
         data = {
           componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
+            generateComponentFieldNameInput(displayLabel),
             generateComponentFieldInput({
               label: 'Text',
               data: displayLabel,
@@ -2076,11 +2059,7 @@ function createReactFlowElements(
       case 'code':
         data = {
           componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
+            generateComponentFieldNameInput(displayLabel),
             generateComponentFieldInput({
               label: 'Code',
               data: '',
@@ -2091,13 +2070,7 @@ function createReactFlowElements(
         break
       case 'table':
         data = {
-          componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
-          ],
+          componentFields: [generateComponentFieldNameInput(displayLabel)],
           title: displayLabel,
           columns: ['Task', 'Owner', 'Status', 'Due'],
           rows: [
@@ -2108,24 +2081,12 @@ function createReactFlowElements(
         break
       case 'cloud':
         data = {
-          componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
-          ],
+          componentFields: [generateComponentFieldNameInput(displayLabel)],
         }
         break
       case 'comment':
         data = {
-          componentFields: [
-            generateComponentFieldInput({
-              label: 'Name',
-              data: displayLabel,
-              type: ComponentInputType.TextInput,
-            }),
-          ],
+          componentFields: [generateComponentFieldNameInput(displayLabel)],
         }
         break
       default:
