@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react'
-import { arrayNonNullable } from 'daily-code/.'
+import { arrayNonNullable } from 'daily-code'
 import z from 'zod'
 import {
   generateComponentFieldInput,
