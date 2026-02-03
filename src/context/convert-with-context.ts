@@ -112,7 +112,7 @@ export async function convertMermaidToReactFlowWithContext(
       arrayNonNullable(childNodes)
     )
 
-    resolvedNodes.push(groupNode)
+    resolvedNodes.unshift(groupNode)
   }
 
   return {
