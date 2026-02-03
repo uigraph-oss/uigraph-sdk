@@ -1,4 +1,4 @@
-import { ServerComponentField } from '@/types'
+import { ServerComponentField, ServerComponentFieldInput } from '@/types'
 import { ComponentInputType } from './component-type'
 
 export function flattenMetaData(
@@ -69,7 +69,7 @@ export function buildMetaData(
   fields: ServerComponentField[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any | null>
-): ServerComponentField[] {
+): ServerComponentFieldInput[] {
   return fields.map((field) => {
     let localData
     const value = data[field.componentFieldId!]
