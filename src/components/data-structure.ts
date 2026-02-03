@@ -1,4 +1,4 @@
-import { ServerComponentField, ServerComponentFieldInput } from '@/types'
+import { ServerComponentField, ServerComponentFieldInput } from '../types'
 import { ComponentInputType } from './component-type'
 
 export function flattenMetaData(

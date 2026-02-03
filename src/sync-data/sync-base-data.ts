@@ -1,4 +1,4 @@
-import { ReactFlowData } from '@/types'
+import { ReactFlowData } from '../types'
 import { mergeComponentFields } from './helpers'
 
 type Options = {

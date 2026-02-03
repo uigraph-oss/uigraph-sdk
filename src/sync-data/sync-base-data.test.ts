@@ -1,5 +1,5 @@
-import type { ReactFlowData } from '@/types'
 import { describe, expect, it } from 'vitest'
+import type { ReactFlowData } from '../types'
 import { syncBaseData } from './sync-base-data'
 
 function makeNode(
@@ -117,8 +117,18 @@ describe('syncBaseData', () => {
       ],
     }
     const result = syncBaseData(prev, next)
-    expect(result.nodes.map((n) => n.id)).toEqual(['n0', 'n1', 'n2', 'n3'])
-    expect(result.edges.map((e) => e.id)).toEqual(['e0', 'e1', 'e2', 'e3'])
+    expect(result.nodes.map((n: { id: string }) => n.id)).toEqual([
+      'n0',
+      'n1',
+      'n2',
+      'n3',
+    ])
+    expect(result.edges.map((e: { id: string }) => e.id)).toEqual([
+      'e0',
+      'e1',
+      'e2',
+      'e3',
+    ])
     expect(result.nodes[1].data).toEqual({ x: 1 })
     expect(result.nodes[2].data).toEqual({ x: 2 })
     expect(result.edges[1].data).toEqual({ x: 1 })

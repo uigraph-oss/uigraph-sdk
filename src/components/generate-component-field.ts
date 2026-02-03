@@ -1,4 +1,4 @@
-import { ServerComponentField } from '@/types'
+import { ServerComponentField } from '../types'
 import { buildMetaData } from './data-structure'
 
 type GenerateComponentFieldOptions = Partial<ServerComponentField>

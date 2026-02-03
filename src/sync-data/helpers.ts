@@ -1,4 +1,4 @@
-import { RFComponentField } from '@/types'
+import { RFComponentField } from '../types'
 
 export function mergeComponentFields(
   prev?: RFComponentField[],

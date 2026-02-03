@@ -1,6 +1,6 @@
-import { ServerComponentField } from '@/types'
 import Quill, { Delta } from 'quill'
 import { z } from 'zod'
+import { ServerComponentField } from '../types'
 import { ComponentInputType } from './component-type'
 
 export function buildDynamicZodSchema(fields: ServerComponentField[]) {

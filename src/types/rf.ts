@@ -1,5 +1,5 @@
-import { ComponentInputType } from '@/components/component-type'
 import { Edge, Node } from '@xyflow/react'
+import { ComponentInputType } from '../components/component-type'
 
 type CustomData = {
   source?: 'mermaid'

@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { generateComponentFieldInput } from '@/components/generate-component-field'
+import { Edge, MarkerType, Node, Position } from '@xyflow/react'
+import dagre from 'dagre'
+import mermaid from 'mermaid'
+import { ComponentInputType } from '../components/component-type'
+import { generateComponentFieldInput } from '../components/generate-component-field'
+import { LAYOUT_SPACING } from '../constants/layout'
 import {
   MermaidEdge,
   MermaidNode,
   ReactFlowData,
   SubgraphInfo,
   SubgraphLayout,
-} from '@/types'
-import { Edge, MarkerType, Node, Position } from '@xyflow/react'
-import dagre from 'dagre'
-import mermaid from 'mermaid'
-import { ComponentInputType } from '../components/component-type'
-import { LAYOUT_SPACING } from '../constants/layout'
+} from '../types'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
