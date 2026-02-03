@@ -9,14 +9,19 @@ import { convertMermaidToReactFlow } from '../converter/mermaid-to-react-flow'
 import { CustomData, ReactFlowData, RFComponentField } from '../types'
 import { contextSchema } from './context-schema'
 
+type ResolverOptions = {
+  resolveCloudIcon?: (cloud: string) => Promise<string>
+}
+
 export async function convertMermaidToReactFlowWithContext(
   mermaidCode: string,
-  context: z.infer<typeof contextSchema>
+  context: z.infer<typeof contextSchema>,
+  options?: ResolverOptions
 ): Promise<ReactFlowData> {
   const validatedContext = contextSchema.parse(context)
   const reactFlowData = await convertMermaidToReactFlow(mermaidCode)
 
-  const rfNodes = reactFlowData.nodes.map((node) => {
+  const rfNodesPromises = reactFlowData.nodes.map(async (node) => {
     const ctx = validatedContext.nodes[node.id]
     if (!ctx) return node
 
@@ -26,6 +31,19 @@ export async function convertMermaidToReactFlowWithContext(
     if (ctx.type) {
       clonedNode.type = ctx.type
       delete clonedNode.style
+
+      if (ctx.type === 'cloud') {
+        clonedNode.height = 150
+        clonedNode.width = 150
+
+        if (ctx.cloud) {
+          const cloudIcon = await options?.resolveCloudIcon?.(ctx.cloud)
+          if (cloudIcon) {
+            ctx.data ??= {}
+            ctx.data.iconSrc = cloudIcon
+          }
+        }
+      }
     }
 
     if (ctx.name) {
@@ -66,7 +84,7 @@ export async function convertMermaidToReactFlowWithContext(
   })
 
   return {
-    nodes: rfNodes,
     edges: reactFlowData.edges,
+    nodes: await Promise.all(rfNodesPromises),
   }
 }
