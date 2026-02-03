@@ -1,6 +1,6 @@
 {
   "name": "@uigraph/diagram-sdk",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "type": "module",
   "scripts": {
     "prepare": "husky",
@@ -55,6 +55,10 @@
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
+    },
+    "./headless": {
+      "import": "./dist/headless.mjs",
+      "require": "./dist/headless.cjs"
     }
   },
   "typesVersions": {
@@ -62,6 +66,10 @@
       ".": [
         "./dist/index.d.mts",
         "./dist/index.d.cts"
+      ],
+      "headless": [
+        "./dist/headless.d.mts",
+        "./dist/headless.d.cts"
       ]
     }
   }
