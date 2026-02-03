@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { generateComponentFieldInput } from '@/components/generate-component-field'
 import {
   MermaidEdge,
   MermaidNode,
@@ -11,6 +12,7 @@ import dagre from 'dagre'
 import mermaid from 'mermaid'
 import { ComponentInputType } from '../components/component-type'
 import { LAYOUT_SPACING } from '../constants/layout'
+import { parseLabelTag, resolvePortalNodeType } from './helpers'
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   rect: 'rectangle',
@@ -18,66 +20,6 @@ const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   stadium: 'terminator',
   circle: 'ellipse',
   diamond: 'diamond',
-}
-
-function mermaidShapeToPortalShapeId(mermaidShape: string): string {
-  return MERMAID_TO_PORTAL_SHAPE[mermaidShape] ?? 'rectangle'
-}
-
-const LABEL_TYPE_PREFIX = /^\s*type:(\w+)\s*[:|-]\s*/i
-
-function parseLabelTag(label: string): {
-  tag: string | null
-  displayLabel: string
-} {
-  const match = label.match(LABEL_TYPE_PREFIX)
-  if (match) {
-    return {
-      tag: match[1].toLowerCase(),
-      displayLabel: label.slice(match[0].length).trim(),
-    }
-  }
-  return { tag: null, displayLabel: label }
-}
-
-type PortalNodeType =
-  | 'shape'
-  | 'image'
-  | 'default'
-  | 'builder'
-  | 'code'
-  | 'text'
-  | 'table'
-  | 'cloud'
-  | 'comment'
-
-const TAG_TO_NODE_TYPE: Record<string, PortalNodeType> = {
-  builder: 'builder',
-  code: 'code',
-  text: 'text',
-  table: 'table',
-  image: 'image',
-  cloud: 'cloud',
-  comment: 'comment',
-  default: 'default',
-}
-
-function resolvePortalNodeType(
-  hasImageUrl: boolean,
-  tag: string | null
-): PortalNodeType {
-  if (hasImageUrl || tag === 'image') return 'image'
-  if (tag && TAG_TO_NODE_TYPE[tag]) return TAG_TO_NODE_TYPE[tag]
-  return 'shape'
-}
-
-function nameComponentField(value: string) {
-  return {
-    componentFieldId: 'name',
-    type: ComponentInputType.TextInput,
-    label: 'Name',
-    data: [{ value }],
-  }
 }
 
 mermaid.initialize({
@@ -1974,7 +1916,13 @@ function createReactFlowElements(
           backgroundColor: colors.bg,
           borderColor: colors.border,
           childNodes: subgraph.nodes,
-          componentFields: [nameComponentField(subgraph.title)],
+          componentFields: [
+            generateComponentFieldInput({
+              label: 'Name',
+              data: subgraph.title,
+              type: ComponentInputType.TextInput,
+            }),
+          ],
         },
         style: {
           width: layout.width,
@@ -2063,10 +2011,16 @@ function createReactFlowElements(
         data = { src: imageUrl ?? '' }
         break
       case 'shape': {
-        const portalShapeId = mermaidShapeToPortalShapeId(node.shape)
+        const portalShapeId = MERMAID_TO_PORTAL_SHAPE[node.shape] ?? 'rectangle'
         data = {
           shape: portalShapeId,
-          componentFields: [nameComponentField(displayLabel)],
+          componentFields: [
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
+              type: ComponentInputType.TextInput,
+            }),
+          ],
           fill: colors.backgroundColor,
           stroke: colors.borderColor,
           strokeWidth: 2,
@@ -2085,51 +2039,65 @@ function createReactFlowElements(
         data = {
           componentName: 'file-note',
           componentFields: [
-            nameComponentField(displayLabel),
-            {
-              componentFieldId: 'label',
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
               type: ComponentInputType.TextInput,
+            }),
+            generateComponentFieldInput({
               label: 'Label',
-              data: [{ value: displayLabel }],
-            },
-            {
-              componentFieldId: 'description',
+              data: displayLabel,
               type: ComponentInputType.TextInput,
+            }),
+            generateComponentFieldInput({
               label: 'Description',
-              data: [{ value: '' }],
-            },
+              data: '',
+              type: ComponentInputType.TextBox,
+            }),
           ],
         }
         break
       case 'text':
         data = {
           componentFields: [
-            nameComponentField(displayLabel),
-            {
-              componentFieldId: 'text',
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
               type: ComponentInputType.TextInput,
+            }),
+            generateComponentFieldInput({
               label: 'Text',
-              data: [{ value: displayLabel }],
-            },
+              data: displayLabel,
+              type: ComponentInputType.TextBox,
+            }),
           ],
         }
         break
       case 'code':
         data = {
           componentFields: [
-            nameComponentField(displayLabel),
-            {
-              componentFieldId: 'code',
-              type: ComponentInputType.CodeEditor,
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
+              type: ComponentInputType.TextInput,
+            }),
+            generateComponentFieldInput({
               label: 'Code',
-              data: [{ value: '' }],
-            },
+              data: '',
+              type: ComponentInputType.CodeEditor,
+            }),
           ],
         }
         break
       case 'table':
         data = {
-          componentFields: [nameComponentField(displayLabel)],
+          componentFields: [
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
+              type: ComponentInputType.TextInput,
+            }),
+          ],
           title: displayLabel,
           columns: ['Task', 'Owner', 'Status', 'Due'],
           rows: [
@@ -2140,12 +2108,24 @@ function createReactFlowElements(
         break
       case 'cloud':
         data = {
-          componentFields: [nameComponentField(displayLabel)],
+          componentFields: [
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
+              type: ComponentInputType.TextInput,
+            }),
+          ],
         }
         break
       case 'comment':
         data = {
-          componentFields: [nameComponentField(displayLabel)],
+          componentFields: [
+            generateComponentFieldInput({
+              label: 'Name',
+              data: displayLabel,
+              type: ComponentInputType.TextInput,
+            }),
+          ],
         }
         break
       default:
