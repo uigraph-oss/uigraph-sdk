@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react'
-import { generateUUID } from 'daily-code/.'
+import { generateUUID } from 'daily-code'
 import { generateComponentFieldNameInput } from '../components/component-field'
 
 const BOUND_PADDING = 20
