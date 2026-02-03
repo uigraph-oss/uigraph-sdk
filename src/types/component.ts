@@ -2,7 +2,7 @@ export type ServerComponentField = {
   componentFieldId?: string | null
   isReadonly?: boolean | null
   label?: string | null
-  options?: string[] | null
+  options?: (string | null)[] | null
   order?: number | null
   required?: boolean | null
   type?: string | null
@@ -14,7 +14,7 @@ export type ServerComponentFieldInput = {
   componentFieldId: string
   isReadonly?: boolean | null
   label?: string | null
-  options?: string[] | null
+  options?: (string | null)[] | null
   order?: number | null
   required?: boolean | null
   type?: string | null
