@@ -1,12 +1,12 @@
 import { ComponentInputType } from '../components/component-type'
-import { convertWithContext } from '../context/convert-with-context'
+import { convertMermaidToReactFlowWithContext } from '../context/convert-with-context'
 
 const mermaidCode = `
 graph TD
   A[Start] --> B[Stop]
 `
 
-const result = await convertWithContext(mermaidCode, {
+const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
   name: 'Test Context',
   description: 'Test Description',
   nodes: {

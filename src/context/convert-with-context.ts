@@ -9,7 +9,7 @@ import { convertMermaidToReactFlow } from '../converter/mermaid-to-react-flow'
 import { CustomData, ReactFlowData, RFComponentField } from '../types'
 import { contextSchema } from './context-schema'
 
-export async function convertWithContext(
+export async function convertMermaidToReactFlowWithContext(
   mermaidCode: string,
   context: z.infer<typeof contextSchema>
 ): Promise<ReactFlowData> {
