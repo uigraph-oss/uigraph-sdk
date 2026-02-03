@@ -1,44 +1,41 @@
 import { Node } from '@xyflow/react'
-import { ComponentInputType } from '../components/component-type'
+import { generateUUID } from 'daily-code/.'
+import { generateComponentFieldNameInput } from '../components/component-field'
 
 const BOUND_PADDING = 20
 
-export function createGroupNode(
-  id: string,
-  nodes: string[],
+type GroupNodeOptions = {
+  id?: string
+  name?: string
+  nodes: string[]
   bounds: { x: number; y: number; width: number; height: number }
-): Node {
+}
+
+export function createGroupNode(options: GroupNodeOptions): Node {
   return {
-    id,
+    id: options.id ?? generateUUID(),
     type: 'group',
-    position: { x: bounds.x, y: bounds.y },
+    position: { x: options.bounds.x, y: options.bounds.y },
+
     data: {
-      childNodes: nodes,
+      childNodes: options.nodes,
       componentFields: [
-        {
-          componentFieldId: 'name',
-          type: ComponentInputType.TextInput,
-          label: 'Name',
-          isReadonly: true,
-          data: [{ value: 'Group' }],
-        },
-        {
-          componentFieldId: 'label',
-          type: ComponentInputType.TextInput,
-          label: 'Label',
-          data: [{ value: 'DEV' }],
-        },
+        generateComponentFieldNameInput(options.name ?? 'Group'),
       ],
     },
 
     style: {
-      width: bounds.width + 20,
-      height: bounds.height + 50,
+      width: options.bounds.width + 20,
+      height: options.bounds.height + 50,
     },
   }
 }
 
-export function generateGroupNodeFromNodes(id: string, nodes: Node[]) {
+export function generateGroupNodeFromNodes(
+  id: string,
+  name: string,
+  nodes: Node[]
+) {
   const bounds = nodes.map((node) => ({
     top: node.position.y,
     left: node.position.x,
@@ -52,14 +49,15 @@ export function generateGroupNodeFromNodes(id: string, nodes: Node[]) {
   const maxX = Math.max(...bounds.map((b) => b.right))
   const maxY = Math.max(...bounds.map((b) => b.bottom))
 
-  return createGroupNode(
+  return createGroupNode({
     id,
-    nodes.map((node) => node.id),
-    {
+    name,
+    nodes: nodes.map((node) => node.id),
+    bounds: {
       x: minX - BOUND_PADDING,
       y: minY - BOUND_PADDING,
       width: maxX - minX + BOUND_PADDING * 2,
       height: maxY - minY + BOUND_PADDING * 2,
-    }
-  )
+    },
+  })
 }

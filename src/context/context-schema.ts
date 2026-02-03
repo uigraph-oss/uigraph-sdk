@@ -33,6 +33,7 @@ export const contextSchema = z.object({
     .record(
       z.string(),
       z.object({
+        name: z.string().optional(),
         nodes: z.string().array().optional(),
       })
     )

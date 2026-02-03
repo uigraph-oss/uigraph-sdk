@@ -108,6 +108,7 @@ export async function convertMermaidToReactFlowWithContext(
 
     const groupNode = generateGroupNodeFromNodes(
       nodeId,
+      groupCtx.name ?? 'Group',
       arrayNonNullable(childNodes)
     )
 
