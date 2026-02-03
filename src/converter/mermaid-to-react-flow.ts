@@ -9,7 +9,7 @@ import {
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
 import mermaid from 'mermaid'
-import { ComponentInputType } from '../constants/component-type'
+import { ComponentInputType } from '../components/component-type'
 import { LAYOUT_SPACING } from '../constants/layout'
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {

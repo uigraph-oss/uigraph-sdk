@@ -1,9 +1,9 @@
-import { ComponentInputType } from '@/constants/component-type'
+import { ComponentInputType } from '@/components/component-type'
 import { Edge, Node } from '@xyflow/react'
 
 type CustomData = {
   source?: 'mermaid'
-  componentFields?: ComponentField[]
+  componentFields?: RFComponentField[]
 }
 
 export interface ReactFlowData {
@@ -11,7 +11,7 @@ export interface ReactFlowData {
   edges: Edge<CustomData>[]
 }
 
-export interface ComponentField {
+export interface RFComponentField {
   componentFieldId: string
   type: ComponentInputType
   label: string
