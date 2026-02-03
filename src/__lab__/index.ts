@@ -13,13 +13,13 @@ const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
     A: {
       type: 'text',
 
-      data: {
+      meta: {
         text: {
           type: ComponentInputType.TextInput,
           value: 'Start',
         },
 
-        name: {
+        NAME: {
           type: ComponentInputType.NumberInput,
           value: 10,
         },

@@ -29,15 +29,15 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     if (ctx.name) {
-      ctx.data ??= {}
-      ctx.data['Name'] = {
+      ctx.meta ??= {}
+      ctx.meta['Name'] = {
         type: ComponentInputType.TextInput,
         value: ctx.name,
       }
     }
 
-    for (const key in ctx.data) {
-      const metaInput = ctx.data[key]
+    for (const key in ctx.meta) {
+      const metaInput = ctx.meta[key]
       if (metaInput === undefined) continue
 
       const componentField = getComponentFieldByLabel(componentFields, key)
@@ -52,6 +52,13 @@ export async function convertMermaidToReactFlowWithContext(
       } else {
         componentField.type = newComponentField.type
         componentField.data = newComponentField.data
+      }
+    }
+
+    if (ctx.data) {
+      clonedNode.data = {
+        ...clonedNode.data,
+        ...ctx.data,
       }
     }
 

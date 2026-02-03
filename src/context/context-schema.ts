@@ -12,7 +12,9 @@ export const contextSchema = z.object({
 
         name: z.string().optional(),
 
-        data: z
+        data: z.record(z.string(), z.unknown()).optional(),
+
+        meta: z
           .record(
             z.string(),
             z.object({
