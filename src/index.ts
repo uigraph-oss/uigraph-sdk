@@ -4,3 +4,7 @@ export { syncBaseData } from './sync-data/sync-base-data'
 
 export { sanitizeMermaidLabels } from './converter/mermaid-sanitizer'
 export { convertMermaidToReactFlow } from './converter/mermaid-to-react-flow'
+
+export { ComponentInputType } from './components/component-type'
+export { flattenMetaData } from './components/data-structure'
+export { buildDynamicZodSchema } from './components/dynamic-schema'
