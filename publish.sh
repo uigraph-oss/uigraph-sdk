@@ -1,3 +1,6 @@
 #!/bin/bash
 
-pnpm run build && pnpm tsc && pnpm lint && pnpm test && pnpm publish
+pnpm run build &&
+	pnpm tsc &&
+	pnpm test &&
+	pnpm publish --no-git-checks

@@ -2510,11 +2510,13 @@ async function convertSequenceDiagramToReactFlow(
       data: { source: 'mermaid' },
     })
 
+    const messageSourceSide =
+      goesRight || isSelf ? 'source-right' : 'source-left'
     edges.push({
       id: `edge-${m.rowIndex}-b`,
       source: messageId,
       target: `participant-${m.to}`,
-      sourceHandle: goesRight ? 'source-right' : 'source-left',
+      sourceHandle: messageSourceSide,
       targetHandle: rowHandleId(m.rowIndex, targetSide, 'target'),
       type: 'smoothstep',
       style:
