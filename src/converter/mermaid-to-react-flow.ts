@@ -2428,7 +2428,14 @@ async function convertSequenceDiagramToReactFlow(
         source: 'mermaid',
         label: p.name,
         rowCount,
-        componentFields: [generateComponentFieldNameInput(p.name)],
+        componentFields: [
+          generateComponentFieldNameInput(p.name),
+          generateComponentFieldInput({
+            label: 'Color',
+            data: '#000000',
+            type: ComponentInputType.ColorPicker,
+          }),
+        ],
       },
     })
   }
