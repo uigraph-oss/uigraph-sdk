@@ -2412,7 +2412,8 @@ async function convertSequenceDiagramToReactFlow(
     SELF_LOOP_OFFSET,
   } = SEQUENCE_LAYOUT
 
-  const rowCount = messages.length
+  const hasSelfLoop = messages.some((m) => m.from === m.to)
+  const rowCount = messages.length + (hasSelfLoop ? 1 : 0)
   const nodes: Node[] = []
   const edges: Edge[] = []
 
@@ -2498,14 +2499,18 @@ async function convertSequenceDiagramToReactFlow(
         : undefined
 
     const sourceSide = goesRight || isSelf ? 'right' : 'left'
-    const targetSide = goesRight ? 'left' : 'right'
+    const targetSide = isSelf ? 'right' : goesRight ? 'left' : 'right'
 
     edges.push({
       id: `edge-${m.rowIndex}-a`,
       source: `participant-${m.from}`,
       target: messageId,
       sourceHandle: rowHandleId(m.rowIndex, sourceSide, 'source'),
-      targetHandle: sourceSide === 'right' ? 'target-left' : 'target-right',
+      targetHandle: isSelf
+        ? 'target-top'
+        : sourceSide === 'right'
+          ? 'target-left'
+          : 'target-right',
       type: 'smoothstep',
       style: edgeStyle,
       data: { source: 'mermaid' },
@@ -2515,8 +2520,16 @@ async function convertSequenceDiagramToReactFlow(
       id: `edge-${m.rowIndex}-b`,
       source: messageId,
       target: `participant-${m.to}`,
-      sourceHandle: goesRight ? 'source-right' : 'source-left',
-      targetHandle: rowHandleId(m.rowIndex, targetSide, 'target'),
+      sourceHandle: isSelf
+        ? 'source-bottom'
+        : goesRight
+          ? 'source-right'
+          : 'source-left',
+      targetHandle: rowHandleId(
+        m.rowIndex + (isSelf ? 1 : 0),
+        targetSide,
+        'target'
+      ),
       type: 'smoothstep',
       style:
         m.lineStyle === 'dashed'
