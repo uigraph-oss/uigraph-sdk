@@ -2431,6 +2431,7 @@ async function convertSequenceDiagramToReactFlow(
         componentFields: [
           generateComponentFieldNameInput(p.name),
           generateComponentFieldInput({
+            componentFieldId: 'color',
             label: 'Color',
             data: '#000000',
             type: ComponentInputType.ColorPicker,
@@ -2510,13 +2511,11 @@ async function convertSequenceDiagramToReactFlow(
       data: { source: 'mermaid' },
     })
 
-    const messageSourceSide =
-      goesRight || isSelf ? 'source-right' : 'source-left'
     edges.push({
       id: `edge-${m.rowIndex}-b`,
       source: messageId,
       target: `participant-${m.to}`,
-      sourceHandle: messageSourceSide,
+      sourceHandle: goesRight ? 'source-right' : 'source-left',
       targetHandle: rowHandleId(m.rowIndex, targetSide, 'target'),
       type: 'smoothstep',
       style:
