@@ -3,6 +3,7 @@ import {
   convertMermaidToReactFlow,
   debugConvertMermaid,
   parseMermaidCode,
+  parseSequenceDiagram,
 } from './mermaid-to-react-flow'
 
 describe('parseMermaidCode', () => {
@@ -296,5 +297,60 @@ describe('debugConvertMermaid', () => {
   it('returns direction in debug output', async () => {
     const result = await debugConvertMermaid('flowchart RL\nA --> B')
     expect(result.direction).toBe('RL')
+  })
+})
+
+describe('parseSequenceDiagram', () => {
+  it('parses participants with aliases', () => {
+    const code = `sequenceDiagram
+    participant A as Alice
+    participant B as Bob`
+    const result = parseSequenceDiagram(code)
+    expect(result.participants).toHaveLength(2)
+    expect(result.participants[0].name).toBe('Alice')
+    expect(result.participants[1].name).toBe('Bob')
+  })
+
+  it('parses messages with labels', () => {
+    const code = `sequenceDiagram
+    A->>B: Hello`
+    const result = parseSequenceDiagram(code)
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0].label).toBe('Hello')
+    expect(result.messages[0].lineStyle).toBe('solid')
+    expect(result.messages[0].arrowType).toBe('filled')
+  })
+
+  it('parses dashed arrows', () => {
+    const code = `sequenceDiagram
+    A-->>B: Response`
+    const result = parseSequenceDiagram(code)
+    expect(result.messages[0].lineStyle).toBe('dashed')
+  })
+
+  it('auto-creates participants from messages', () => {
+    const code = `sequenceDiagram
+    Client->>Server: Request`
+    const result = parseSequenceDiagram(code)
+    expect(result.participants).toHaveLength(2)
+  })
+})
+
+describe('convertMermaidToReactFlow - sequence diagrams', () => {
+  it('detects and converts sequence diagrams', async () => {
+    const code = `sequenceDiagram
+    participant A
+    participant B
+    A->>B: Hello`
+    const result = await convertMermaidToReactFlow(code)
+    expect(result.nodes).toHaveLength(3)
+    expect(result.edges).toHaveLength(2)
+  })
+
+  it('still converts flowcharts correctly', async () => {
+    const code = 'flowchart LR\n  A --> B'
+    const result = await convertMermaidToReactFlow(code)
+    expect(result.nodes).toHaveLength(2)
+    expect(result.edges).toHaveLength(1)
   })
 })

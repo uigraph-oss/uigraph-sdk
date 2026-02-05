@@ -33,3 +33,24 @@ export interface SubgraphLayout {
   position?: { x: number; y: number }
   parentId?: string
 }
+
+export interface SequenceParticipant {
+  id: string
+  name: string
+  alias?: string
+  index: number
+}
+
+export interface SequenceMessage {
+  from: string
+  to: string
+  label: string
+  lineStyle: 'solid' | 'dashed'
+  arrowType: 'filled' | 'open' | 'none'
+  rowIndex: number
+}
+
+export interface SequenceDiagramData {
+  participants: SequenceParticipant[]
+  messages: SequenceMessage[]
+}

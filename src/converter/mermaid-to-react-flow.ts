@@ -7,15 +7,96 @@ import {
   generateComponentFieldNameInput,
 } from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
-import { LAYOUT_SPACING } from '../constants/layout'
+import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from '../constants/layout'
 import {
   MermaidEdge,
   MermaidNode,
   ReactFlowData,
+  SequenceDiagramData,
+  SequenceMessage,
+  SequenceParticipant,
   SubgraphInfo,
   SubgraphLayout,
 } from '../types'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
+
+type DiagramType = 'sequence' | 'flowchart'
+
+function detectDiagramType(code: string): DiagramType {
+  const lines = code.split('\n')
+  for (const line of lines) {
+    const trimmed = line.trim().toLowerCase()
+    if (trimmed.startsWith('sequencediagram')) return 'sequence'
+    if (trimmed.startsWith('flowchart') || trimmed.startsWith('graph')) {
+      return 'flowchart'
+    }
+  }
+  return 'flowchart'
+}
+
+export function parseSequenceDiagram(code: string): SequenceDiagramData {
+  const participants: SequenceParticipant[] = []
+  const messages: SequenceMessage[] = []
+  const participantMap = new Map<string, number>()
+
+  const lines = code.split('\n')
+  let messageRow = 0
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.toLowerCase() === 'sequencediagram') continue
+
+    const participantMatch = trimmed.match(
+      /^(?:participant|actor)\s+(\S+)(?:\s+as\s+(.+))?$/i
+    )
+    if (participantMatch) {
+      const id = participantMatch[1]
+      const alias = participantMatch[2]?.trim()
+      if (!participantMap.has(id)) {
+        const index = participants.length
+        participantMap.set(id, index)
+        participants.push({ id, name: alias ?? id, alias, index })
+      }
+      continue
+    }
+
+    const messageMatch = trimmed.match(
+      /^([A-Za-z0-9_]+)\s*(-->>|-->|--\)|->>|->|-\))\s*([A-Za-z0-9_]+)\s*:\s*(.*)$/
+    )
+    if (messageMatch) {
+      const [, from, arrow, to, label] = messageMatch
+
+      if (!participantMap.has(from)) {
+        const index = participants.length
+        participantMap.set(from, index)
+        participants.push({ id: from, name: from, index })
+      }
+      if (!participantMap.has(to)) {
+        const index = participants.length
+        participantMap.set(to, index)
+        participants.push({ id: to, name: to, index })
+      }
+
+      const lineStyle = arrow.startsWith('--') ? 'dashed' : 'solid'
+      const arrowType = arrow.includes('>>')
+        ? 'filled'
+        : arrow.includes(')')
+          ? 'open'
+          : 'none'
+
+      messages.push({
+        from,
+        to,
+        label: label.trim(),
+        lineStyle,
+        arrowType,
+        rowIndex: messageRow++,
+      })
+    }
+  }
+
+  return { participants, messages }
+}
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   rect: 'rectangle',
@@ -2302,38 +2383,186 @@ export async function debugConvertMermaid(mermaidCode: string): Promise<any> {
   }
 }
 
+function getParticipantX(index: number): number {
+  const { COLUMN_WIDTH } = SEQUENCE_LAYOUT
+  return index * COLUMN_WIDTH + COLUMN_WIDTH / 2
+}
+
+function getRowY(rowIndex: number): number {
+  const { HEADER_HEIGHT, ROW_HEIGHT } = SEQUENCE_LAYOUT
+  return HEADER_HEIGHT + rowIndex * ROW_HEIGHT + ROW_HEIGHT / 2
+}
+
+function rowHandleId(
+  rowIndex: number,
+  side: 'left' | 'right',
+  handleType: 'source' | 'target'
+): string {
+  return `row-${rowIndex}-${side}-${handleType}`
+}
+
+async function convertSequenceDiagramToReactFlow(
+  mermaidCode: string
+): Promise<ReactFlowData> {
+  const { participants, messages } = parseSequenceDiagram(mermaidCode)
+  const {
+    PARTICIPANT_NODE_WIDTH,
+    MESSAGE_NODE_WIDTH,
+    MESSAGE_NODE_HEIGHT,
+    SELF_LOOP_OFFSET,
+  } = SEQUENCE_LAYOUT
+
+  const rowCount = messages.length
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+
+  for (const p of participants) {
+    nodes.push({
+      id: `participant-${p.id}`,
+      type: 'sequenceParticipant',
+      position: {
+        x: getParticipantX(p.index) - PARTICIPANT_NODE_WIDTH / 2,
+        y: 0,
+      },
+      data: {
+        source: 'mermaid',
+        label: p.name,
+        rowCount,
+        componentFields: [generateComponentFieldNameInput(p.name)],
+      },
+    })
+  }
+
+  for (const m of messages) {
+    const fromParticipant = participants.find((p) => p.id === m.from)
+    const toParticipant = participants.find((p) => p.id === m.to)
+    if (!fromParticipant || !toParticipant) continue
+
+    const fromIndex = fromParticipant.index
+    const toIndex = toParticipant.index
+    const isSelf = fromIndex === toIndex
+    const goesRight = fromIndex < toIndex
+
+    const centerX = isSelf
+      ? getParticipantX(fromIndex) + SELF_LOOP_OFFSET
+      : (getParticipantX(fromIndex) + getParticipantX(toIndex)) / 2
+
+    const messageId = `message-${m.rowIndex}`
+
+    nodes.push({
+      id: messageId,
+      type: 'shape',
+      position: {
+        x: centerX - MESSAGE_NODE_WIDTH / 2,
+        y: getRowY(m.rowIndex) - MESSAGE_NODE_HEIGHT / 2,
+      },
+      data: {
+        source: 'mermaid',
+        shape: 'rectangle',
+        fill: '#f8fafc',
+        stroke: '#CCCCCC',
+        strokeWidth: 1,
+        componentFields: [generateComponentFieldNameInput(m.label)],
+      },
+      style: {
+        width: MESSAGE_NODE_WIDTH,
+        height: MESSAGE_NODE_HEIGHT,
+      },
+    })
+
+    const edgeStyle = {
+      stroke: '#94a3b8',
+      strokeWidth: 2,
+      ...(m.lineStyle === 'dashed' ? { strokeDasharray: '4 4' as const } : {}),
+    }
+
+    const markerEnd =
+      m.arrowType !== 'none'
+        ? {
+            type:
+              m.arrowType === 'filled'
+                ? MarkerType.ArrowClosed
+                : MarkerType.Arrow,
+            width: 16,
+            height: 16,
+            color: '#94a3b8',
+          }
+        : undefined
+
+    const sourceSide = goesRight || isSelf ? 'right' : 'left'
+    const targetSide = goesRight ? 'left' : 'right'
+
+    edges.push({
+      id: `edge-${m.rowIndex}-a`,
+      source: `participant-${m.from}`,
+      target: messageId,
+      sourceHandle: rowHandleId(m.rowIndex, sourceSide, 'source'),
+      targetHandle: sourceSide === 'right' ? 'target-left' : 'target-right',
+      type: 'smoothstep',
+      style: edgeStyle,
+      data: { source: 'mermaid' },
+    })
+
+    edges.push({
+      id: `edge-${m.rowIndex}-b`,
+      source: messageId,
+      target: `participant-${m.to}`,
+      sourceHandle: goesRight ? 'source-right' : 'source-left',
+      targetHandle: rowHandleId(m.rowIndex, targetSide, 'target'),
+      type: 'smoothstep',
+      style:
+        m.lineStyle === 'dashed'
+          ? edgeStyle
+          : { stroke: '#94a3b8', strokeWidth: 2 },
+      ...(markerEnd ? { markerEnd } : {}),
+      data: { source: 'mermaid' },
+    })
+  }
+
+  return { nodes, edges }
+}
+
+async function convertFlowchartToReactFlow(
+  mermaidCode: string
+): Promise<ReactFlowData> {
+  debugLog('Starting Mermaid to React Flow conversion')
+  debugLog('Mermaid code:', mermaidCode)
+
+  const { nodes, edges, subgraphs, direction } = parseMermaidCode(mermaidCode)
+
+  if (nodes.length === 0) {
+    debugLog('No nodes found in Mermaid diagram')
+    return { nodes: [], edges: [] }
+  }
+
+  debugLog(
+    `Parsed ${nodes.length} nodes, ${edges.length} edges, ${subgraphs.length} subgraphs`
+  )
+
+  const graphedResult = layoutGraph(nodes, edges, subgraphs, direction)
+  return {
+    nodes: graphedResult.nodes.map((node) => ({
+      ...node,
+      data: { ...node.data, source: 'mermaid' },
+    })),
+    edges: graphedResult.edges.map((edge) => ({
+      ...edge,
+      data: { ...edge.data, source: 'mermaid' },
+    })),
+  }
+}
+
 export async function convertMermaidToReactFlow(
   mermaidCode: string
 ): Promise<ReactFlowData> {
   try {
-    debugLog('Starting Mermaid to React Flow conversion')
-    debugLog('Mermaid code:', mermaidCode)
+    const diagramType = detectDiagramType(mermaidCode)
 
-    // Parse the Mermaid code
-    const { nodes, edges, subgraphs, direction } = parseMermaidCode(mermaidCode)
-
-    if (nodes.length === 0) {
-      debugLog('No nodes found in Mermaid diagram')
-      return { nodes: [], edges: [] }
+    if (diagramType === 'sequence') {
+      return convertSequenceDiagramToReactFlow(mermaidCode)
     }
 
-    debugLog(
-      `Parsed ${nodes.length} nodes, ${edges.length} edges, ${subgraphs.length} subgraphs`
-    )
-
-    // Layout the graph and return
-    const graphedResult = layoutGraph(nodes, edges, subgraphs, direction)
-    return {
-      nodes: graphedResult.nodes.map((node) => ({
-        ...node,
-        data: { ...node.data, source: 'mermaid' },
-      })),
-
-      edges: graphedResult.edges.map((edge) => ({
-        ...edge,
-        data: { ...edge.data, source: 'mermaid' },
-      })),
-    }
+    return convertFlowchartToReactFlow(mermaidCode)
   } catch (error) {
     console.error('Error converting Mermaid to React Flow:', error)
     return { nodes: [], edges: [] }
