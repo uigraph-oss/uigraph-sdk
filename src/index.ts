@@ -1,5 +1,7 @@
 export type * from './types'
 
+export * from './sql-parser'
+
 export { syncBaseData } from './sync-data/sync-base-data'
 
 export { sanitizeMermaidLabels } from './converter/mermaid-sanitizer'
