@@ -1,0 +1,23 @@
+{
+  "collections": [
+    {
+      "name": "users",
+      "fields": {
+        "id": "string",
+        "age": "number",
+        "isActive": "boolean",
+        "createdAt": "date",
+        "tags": "array<string>"
+      }
+    },
+    {
+      "name": "orders",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "total": "number",
+        "lines": "array<string>"
+      }
+    }
+  ]
+}

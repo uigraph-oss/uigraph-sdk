@@ -5,12 +5,12 @@ import { SqlToAstParser } from '../ast-parser'
 
 const SQL_SAMPLES = {
   eCom: {
-    src: './sample/ecommerce-schema.sql',
+    src: './demo/ecommerce-schema.sql',
     expectedTables: 10,
     expectedRelationships: 13,
   },
   simple: {
-    src: './sample/sample.sql',
+    src: './demo/sample.sql',
     expectedTables: 4,
     expectedRelationships: 3,
   },
@@ -18,7 +18,7 @@ const SQL_SAMPLES = {
 
 Object.entries(SQL_SAMPLES).forEach(([name, info]) => {
   describe(name, () => {
-    const fullPath = path.join(__dirname, info.src)
+    const fullPath = path.resolve(info.src)
     const sampleSQL = fs.readFileSync(fullPath, 'utf8')
 
     const dialect = SqlToAstParser.detectDialect(sampleSQL)

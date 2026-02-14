@@ -1,0 +1,7 @@
+flowchart TD
+    A[Start] --> B{Is user logged in?}
+    B -- Yes --> C[Show dashboard]
+    B -- No --> D[Show login page]
+    D --> E[User logs in]
+    E --> C
+    C --> F[End]

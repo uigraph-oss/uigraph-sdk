@@ -1,0 +1,293 @@
+{
+  "name": "mongo-db",
+  "description": "",
+  "dialect": "mongodb",
+  "collections": [
+    {
+      "id": "1df6a80a-77a6-4182-3774-ccda467ea2ef",
+      "name": "collection_1",
+      "tags": "",
+      "description": "",
+      "fields": [
+        {
+          "id": "0ae9ef61-f3c3-4165-f86f-85c122472164",
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "a61058be-21da-4ed5-a285-69ebdad8f59e",
+          "name": "description",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "95eee4a9-ebe0-4acd-ddd0-9999301569ab",
+          "name": "dialect",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "aeef2513-df7a-425f-d554-5fc814e3565d",
+          "name": "primaryKey",
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "id": "0b39c6ca-d0ec-4959-99e9-7342420f82ed",
+              "name": "partitionKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "3c0bfa2c-6bbb-4f91-495a-17ca70cfb322",
+              "name": "partitionKeyType",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "42c5d343-1c29-4532-aef9-0c9793b47ff2",
+              "name": "sortKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "0e2b64fe-469c-4e32-c04f-f01b997985d0",
+              "name": "sortKeyType",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "8220f2e5-2866-407a-eb1d-74fad6130f94",
+          "name": "globalSecondaryIndexes",
+          "type": "array",
+          "required": true,
+          "itemType": "object",
+          "itemFields": [
+            {
+              "id": "44710e8f-c9dd-4990-007e-bdc849db3a6a",
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "33c4a713-1138-4d5b-e1a9-6c13059a6a3a",
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "81ce1f50-56cc-4dfe-52f7-267d40a1b9d6",
+              "name": "partitionKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "c10777e0-52a8-4ce0-0769-54aad8c11212",
+              "name": "partitionKeyType",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "4829c429-3ce2-4529-129a-d97edb9e96a8",
+              "name": "sortKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "eb4a8e77-5d6e-431b-2c6d-eb700759ffe4",
+              "name": "sortKeyType",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "2c24e6bb-d2ed-4d4f-a297-8a6b51031bd4",
+          "name": "attributes",
+          "type": "array",
+          "required": true,
+          "itemType": "object",
+          "itemFields": [
+            {
+              "id": "2e6040da-fb61-4376-0573-0d4ad0cc9b50",
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "69d8fd50-3551-4474-7a2a-fecad8d60be6",
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "441d5b88-7b93-4266-069a-820c103e0534",
+              "name": "type",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "078f66aa-41ee-4227-5ee5-05ab07875fa4",
+              "name": "required",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "id": "3df4de77-f799-4044-feaf-0aa7af98587d",
+              "name": "notes",
+              "type": "string",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "id": "c0a1ea8c-e6ee-493c-e584-dbfd5d18ad5e",
+      "name": "collection_2",
+      "tags": "",
+      "description": "",
+      "fields": [
+        {
+          "id": "95776977-1b1c-4a4d-5398-83b2fe183da0",
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "e8933701-63c0-4ba0-e18e-f4ded7d9e302",
+          "name": "description",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "3433114f-b6ed-4a40-d030-8dbb7130e16d",
+          "name": "dialect",
+          "type": "string",
+          "required": true
+        },
+        {
+          "id": "8a15099c-637f-42db-186a-cc0508a5449e",
+          "name": "primaryKey",
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "id": "d4a4901b-4ca1-4472-7e65-58e67fcec68f",
+              "name": "partitionKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "0c06ace2-fc4f-4f77-e767-f73297b7faee",
+              "name": "partitionKeyType",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "d93f5a96-0436-4dfc-6b95-1e05cd6b116a",
+              "name": "sortKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "3378540e-31ea-4ea3-e476-757b092689e1",
+              "name": "sortKeyType",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "12e954c0-4b80-468b-df4f-f03eb606ab4c",
+          "name": "globalSecondaryIndexes",
+          "type": "array",
+          "required": true,
+          "itemType": "object",
+          "itemFields": [
+            {
+              "id": "90be207b-825b-4e6c-9cfc-25ef4b5a4fdd",
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "262101d4-bc68-4752-dd5b-75106eda26a9",
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "fc3a6ecd-54d3-4914-9e3e-84eba40f878c",
+              "name": "partitionKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "f02923d1-4b71-4110-103b-82ef05ea738f",
+              "name": "partitionKeyType",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "cb23a7c6-3770-4eaf-fad7-a6cf83e1f0c5",
+              "name": "sortKey",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "8dee5f06-9fd2-41fd-ec07-ff1357c2b5b0",
+              "name": "sortKeyType",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "66db3cb1-246c-4c9d-98c0-1706fb9d4221",
+          "name": "attributes",
+          "type": "array",
+          "required": true,
+          "itemType": "object",
+          "itemFields": [
+            {
+              "id": "3c593764-073f-4b7e-deff-79efa25f4e0d",
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "6d46a90d-6aa6-4e74-005d-9618c3bbfdaa",
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "df68e38f-99cd-40f9-3eaf-68026e73a0c3",
+              "name": "type",
+              "type": "string",
+              "required": true
+            },
+            {
+              "id": "a19ff29c-676f-46ef-ef8f-3e8aadd37d50",
+              "name": "required",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "id": "0b1be807-0dd1-4ff6-ad3c-ff9f6ad8cbe7",
+              "name": "notes",
+              "type": "string",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "indexes": []
+    }
+  ]
+}
