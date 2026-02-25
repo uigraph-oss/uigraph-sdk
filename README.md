@@ -1,11 +1,11 @@
-# uigraph-diagram-sdk
+# @uigraph/sdk
 
 Convert Mermaid flowchart syntax to [React Flow](https://reactflow.dev/) nodes and edges. Use with `@xyflow/react` to render diagrams from Mermaid source or from text that contains Mermaid (e.g. LLM output).
 
 ## Install
 
 ```bash
-pnpm add uigraph-diagram-sdk @xyflow/react
+pnpm add @uigraph/sdk @xyflow/react
 ```
 
 Peer dependencies: `@xyflow/react`, `dagre`, `mermaid` (listed in the package).
@@ -47,7 +47,7 @@ Parses Mermaid flowchart/graph code and returns React Flow data: nodes and edges
 **Type:**
 
 ```ts
-import type { ReactFlowData } from 'uigraph-diagram-sdk'
+import type { ReactFlowData } from '@uigraph/sdk'
 ```
 
 ## Example
@@ -57,7 +57,7 @@ import {
   extractMermaidFromFences,
   sanitizeMermaidLabels,
   convertMermaidToReactFlow,
-} from 'uigraph-diagram-sdk'
+} from '@uigraph/sdk'
 import { ReactFlow } from '@xyflow/react'
 
 const raw = `
