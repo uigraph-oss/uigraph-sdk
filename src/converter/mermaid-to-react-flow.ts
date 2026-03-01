@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
-import mermaid from 'mermaid'
 import {
   generateComponentFieldInput,
   generateComponentFieldNameInput,
@@ -106,14 +105,8 @@ const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   diamond: 'diamond',
 }
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  flowchart: {
-    htmlLabels: false,
-    curve: 'linear',
-  },
-})
+// Mermaid package is not imported so this module runs in Node (Lambda). Conversion uses
+// custom parsers (parseMermaidCode, parseSequenceDiagram) only.
 
 // Layout spacing constants - Fine-tune these for better visual separation
 const SUBGRAPH_HEADER_HEIGHT = LAYOUT_SPACING.SUBGRAPH_HEADER_HEIGHT // Increased for proper title clearance
