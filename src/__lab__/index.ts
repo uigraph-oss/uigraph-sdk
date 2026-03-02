@@ -5,10 +5,9 @@ const mermaidCode = `flowchart TD
 `
 
 const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
-  name: 'Test Context',
-  description: 'Test Description',
   nodes: {
     A: {
+      name: 'Test Image',
       type: 'image',
       src: 'https://via.placeholder.com/150',
     },

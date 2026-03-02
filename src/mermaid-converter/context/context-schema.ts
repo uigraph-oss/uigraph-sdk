@@ -11,8 +11,9 @@ export const contextSchema = z.object({
         type: z.string().optional(),
         name: z.string().optional(),
 
+        text: z.string().optional(),
         cloud: z.string().optional(),
-        serviceName: z.string().optional(),
+        service: z.string().optional(),
 
         src: z.string().optional(),
         animatedIcon: z.string().optional(),
@@ -34,7 +35,7 @@ export const contextSchema = z.object({
           .object({ name: z.string(), tableName: z.string() })
           .optional(),
 
-        nodeData: z.record(z.string(), z.unknown()).optional(),
+        internal: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
