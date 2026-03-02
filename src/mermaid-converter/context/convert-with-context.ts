@@ -93,6 +93,7 @@ export async function convertMermaidToReactFlowWithContext(
         label: key,
         type: metaInput.type,
         data: metaInput.value,
+        options: metaInput.options,
       })
 
       if (!componentField) {

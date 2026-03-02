@@ -22,6 +22,7 @@ export const contextSchema = z.object({
             z.string(),
             z.object({
               type: z.enum(Object.values(ComponentInputType)),
+              options: z.array(z.string()).optional(),
               value: z.unknown(),
             })
           )
