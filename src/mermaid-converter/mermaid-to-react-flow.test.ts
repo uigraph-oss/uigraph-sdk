@@ -210,16 +210,26 @@ describe('parseMermaidCode', () => {
     })
   })
 
-  it('parses pseudo-state [*] transitions in state diagrams', () => {
+  it('ignores pseudo-state [*] transitions in state diagrams', () => {
     const code = `stateDiagram-v2
   [*] --> Unauthenticated
+  Unauthenticated --> Authenticated : auth_success
   Authenticated --> [*]`
     const result = parseMermaidCode(code)
 
+    expect(result.nodes.some((node) => node.id === '[*]')).toBe(false)
+    expect(
+      result.edges.some(
+        (edge) => edge.source === '[*]' || edge.target === '[*]'
+      )
+    ).toBe(false)
     expect(result.edges).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ source: '[*]', target: 'Unauthenticated' }),
-        expect.objectContaining({ source: 'Authenticated', target: '[*]' }),
+        expect.objectContaining({
+          source: 'Unauthenticated',
+          target: 'Authenticated',
+          label: 'auth_success',
+        }),
       ])
     )
   })
@@ -232,6 +242,12 @@ describe('parseMermaidCode', () => {
     const result = parseMermaidCode(code)
     const labels = result.edges.map((edge) => edge.label).filter(Boolean)
 
+    expect(result.nodes.some((node) => node.id === '[*]')).toBe(false)
+    expect(
+      result.edges.some(
+        (edge) => edge.source === '[*]' || edge.target === '[*]'
+      )
+    ).toBe(false)
     expect(labels.length).toBeGreaterThan(0)
     expect(labels).toContain('submit_credentials')
     expect(labels).toContain('auth_success && !mfa_enabled')
