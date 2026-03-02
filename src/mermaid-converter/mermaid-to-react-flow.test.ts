@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   convertMermaidToReactFlow,
@@ -187,6 +189,53 @@ describe('parseMermaidCode', () => {
     const result = parseMermaidCode(code)
     expect(result.edges).toHaveLength(1)
     expect(result.edges[0].type).toBeDefined()
+  })
+
+  it('parses state diagram transition labels with colon syntax', () => {
+    const code = `stateDiagram-v2
+  A --> B : submit_credentials
+  B --> C : auth_success && !mfa_enabled`
+    const result = parseMermaidCode(code)
+
+    expect(result.edges).toHaveLength(2)
+    expect(result.edges[0]).toMatchObject({
+      source: 'A',
+      target: 'B',
+      label: 'submit_credentials',
+    })
+    expect(result.edges[1]).toMatchObject({
+      source: 'B',
+      target: 'C',
+      label: 'auth_success && !mfa_enabled',
+    })
+  })
+
+  it('parses pseudo-state [*] transitions in state diagrams', () => {
+    const code = `stateDiagram-v2
+  [*] --> Unauthenticated
+  Authenticated --> [*]`
+    const result = parseMermaidCode(code)
+
+    expect(result.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ source: '[*]', target: 'Unauthenticated' }),
+        expect.objectContaining({ source: 'Authenticated', target: '[*]' }),
+      ])
+    )
+  })
+
+  it('parses edge labels from demo/complex-mermaid.txt', () => {
+    const code = readFileSync(
+      join(process.cwd(), 'demo', 'complex-mermaid.txt'),
+      'utf8'
+    )
+    const result = parseMermaidCode(code)
+    const labels = result.edges.map((edge) => edge.label).filter(Boolean)
+
+    expect(labels.length).toBeGreaterThan(0)
+    expect(labels).toContain('submit_credentials')
+    expect(labels).toContain('auth_success && !mfa_enabled')
+    expect(labels).toContain('session_timeout')
   })
 })
 
