@@ -1,4 +1,4 @@
-import { convertMermaidToReactFlowWithContext } from '../context/convert-with-context'
+import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/context/convert-with-context'
 
 const mermaidCode = `
 graph TD

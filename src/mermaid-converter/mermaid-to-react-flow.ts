@@ -7,7 +7,6 @@ import {
   generateComponentFieldNameInput,
 } from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
-import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from '../constants/layout'
 import {
   MermaidEdge,
   MermaidNode,
@@ -18,6 +17,7 @@ import {
   SubgraphInfo,
   SubgraphLayout,
 } from '../types'
+import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from './constants/layout'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
 
 mermaid.initialize({

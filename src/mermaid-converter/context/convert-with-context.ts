@@ -4,11 +4,11 @@ import z from 'zod'
 import {
   generateComponentFieldInput,
   getComponentFieldByLabel,
-} from '../components/component-field'
-import { ComponentInputType } from '../components/component-type'
-import { convertMermaidToReactFlow } from '../converter/mermaid-to-react-flow'
-import { generateGroupNodeFromNodes } from '../react-flow/group'
-import { CustomData, ReactFlowData, RFComponentField } from '../types'
+} from '../../components/component-field'
+import { ComponentInputType } from '../../components/component-type'
+import { generateGroupNodeFromNodes } from '../../react-flow/group'
+import { CustomData, ReactFlowData, RFComponentField } from '../../types'
+import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
 import { contextSchema } from './context-schema'
 
 type ResolverOptions = {
