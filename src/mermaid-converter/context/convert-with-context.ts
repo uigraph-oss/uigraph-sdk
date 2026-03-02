@@ -31,6 +31,8 @@ export async function convertMermaidToReactFlowWithContext(
     const ctx = validatedContext.nodes?.[node.id]
     if (!ctx) return node
 
+    ctx.data ??= {}
+
     const clonedNode: Node<CustomData> = JSON.parse(JSON.stringify(node))
     const componentFields = clonedNode.data.componentFields ?? []
 
@@ -48,8 +50,8 @@ export async function convertMermaidToReactFlowWithContext(
             : await resolveCloudIcon(ctx.cloud, ctx.service)
 
           if (cloudIcon) {
-            ctx.nodeData ??= {}
-            ctx.nodeData.iconSrc = cloudIcon
+            ctx.internal ??= {}
+            ctx.internal.iconSrc = cloudIcon
           }
         }
       }
@@ -78,10 +80,20 @@ export async function convertMermaidToReactFlowWithContext(
           }
         }
       }
+
+      if (ctx.type === 'text' && ctx.text) {
+        const textComponentField = generateComponentFieldInput({
+          componentFieldId: 'text',
+          label: 'Text',
+          type: ComponentInputType.TextInput,
+          data: ctx.text,
+        })
+
+        componentFields.unshift(textComponentField as RFComponentField)
+      }
     }
 
     if (ctx.name) {
-      ctx.data ??= {}
       ctx.data['Name'] = {
         type: ComponentInputType.TextInput,
         value: ctx.name,
@@ -108,11 +120,10 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
-    if (ctx.nodeData) {
-      clonedNode.data = {
-        ...clonedNode.data,
-        ...ctx.nodeData,
-      }
+    clonedNode.data = {
+      ...clonedNode.data,
+      ...ctx.internal,
+      componentFields: componentFields,
     }
 
     return clonedNode

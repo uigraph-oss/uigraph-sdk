@@ -2095,10 +2095,11 @@ function createReactFlowElements(
     }
 
     let data: Record<string, unknown>
-    switch (portalType) {
+    switch (portalType.toLowerCase()) {
       case 'image':
         data = { src: imageUrl ?? '' }
         break
+
       case 'shape': {
         const portalShapeId = MERMAID_TO_PORTAL_SHAPE[node.shape] ?? 'rectangle'
         data = {
@@ -2110,6 +2111,7 @@ function createReactFlowElements(
         }
         break
       }
+
       case 'default':
         data = {
           name: displayLabel,
@@ -2118,6 +2120,7 @@ function createReactFlowElements(
           componentId: 'file-note',
         }
         break
+
       case 'builder':
         data = {
           componentName: 'file-note',
@@ -2136,6 +2139,7 @@ function createReactFlowElements(
           ],
         }
         break
+
       case 'text':
         data = {
           componentFields: [
@@ -2148,6 +2152,7 @@ function createReactFlowElements(
           ],
         }
         break
+
       case 'code':
         data = {
           componentFields: [
@@ -2160,6 +2165,7 @@ function createReactFlowElements(
           ],
         }
         break
+
       case 'table':
         data = {
           componentFields: [generateComponentFieldNameInput(displayLabel)],
@@ -2171,16 +2177,19 @@ function createReactFlowElements(
           ],
         }
         break
+
       case 'cloud':
         data = {
           componentFields: [generateComponentFieldNameInput(displayLabel)],
         }
         break
+
       case 'comment':
         data = {
           componentFields: [generateComponentFieldNameInput(displayLabel)],
         }
         break
+
       default:
         data = {
           name: displayLabel,
@@ -2225,16 +2234,21 @@ function createReactFlowElements(
     // Style edges based on type, but keep animation consistent
     switch (edge.type) {
       case '-->':
+
       case '->':
         // Already has default animation and width
         break
+
       case '---':
         edgeStyle.strokeDasharray = '8,4'
         break
+
       case '-.-':
         edgeStyle.strokeDasharray = '4,4'
         break
+
       case '==>':
+
       case '===>':
         edgeStyle.strokeWidth = 4
         break
