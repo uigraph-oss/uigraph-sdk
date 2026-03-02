@@ -6,6 +6,7 @@ export default defineConfig({
   entry: {
     index: './src/index.ts',
     headless: './src/headless.ts',
+    browser: './src/browser/index.ts',
   },
 
   outDir: './dist',

@@ -59,6 +59,10 @@
     "./headless": {
       "import": "./dist/headless.mjs",
       "require": "./dist/headless.cjs"
+    },
+    "./browser": {
+      "import": "./dist/browser.mjs",
+      "require": "./dist/browser.cjs"
     }
   },
   "typesVersions": {
@@ -70,6 +74,10 @@
       "headless": [
         "./dist/headless.d.mts",
         "./dist/headless.d.cts"
+      ],
+      "browser": [
+        "./dist/browser.d.mts",
+        "./dist/browser.d.cts"
       ]
     }
   }
