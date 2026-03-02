@@ -1,3 +1,4 @@
+import { ComponentInputType } from '../components/component-type'
 import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/context/convert-with-context'
 
 const mermaidCode = `flowchart TD
@@ -10,8 +11,14 @@ const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
       name: 'Test Image',
       type: 'image',
       src: 'https://via.placeholder.com/150',
+      data: {
+        Text: {
+          type: ComponentInputType.RichTextEditor,
+          value: '# Hello World',
+        },
+      },
     },
   },
 })
 
-console.dir(result.nodes, { depth: null })
+console.dir(result.nodes[0], { depth: null })

@@ -1,3 +1,4 @@
+import markdownToDelta from 'markdown-to-quill-delta'
 import { ServerComponentField } from '../types'
 import { ComponentInputType } from './component-type'
 import { buildMetaData } from './data-structure'
@@ -15,7 +16,10 @@ export function generateComponentFieldInput(
   }
 
   const [metaData] = buildMetaData([field], {
-    [componentId]: options.data,
+    [componentId]:
+      options.type === ComponentInputType.RichTextEditor
+        ? markdownToDelta(options.data)
+        : options.data,
   })
 
   return metaData
