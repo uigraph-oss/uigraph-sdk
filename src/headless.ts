@@ -1,1 +1,1 @@
-export { contextSchema } from './context/context-schema'
+export { contextSchema } from './mermaid-converter/context/context-schema'

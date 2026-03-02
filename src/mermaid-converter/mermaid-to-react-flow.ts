@@ -7,7 +7,6 @@ import {
   generateComponentFieldNameInput,
 } from '../components/component-field'
 import { ComponentInputType } from '../components/component-type'
-import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from '../constants/layout'
 import {
   MermaidEdge,
   MermaidNode,
@@ -18,6 +17,7 @@ import {
   SubgraphInfo,
   SubgraphLayout,
 } from '../types'
+import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from './constants/layout'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
 
 mermaid.initialize({
@@ -662,7 +662,7 @@ export function parseMermaidCode(code: string): {
     // (same bracket type) and supports optional edge labels like |label|.
     function extractToken(str: string, startIndex: number) {
       // Match identifier
-      const idMatch = str.slice(startIndex).match(/^\s*([A-Za-z0-9_]+)/)
+      const idMatch = str.slice(startIndex).match(/^\s*(\[\*\]|[A-Za-z0-9_]+)/)
       if (!idMatch) return null
       const id = idMatch[1]
       const idx = startIndex + idMatch[0].length // position after id (includes leading spaces)
@@ -788,6 +788,14 @@ export function parseMermaidCode(code: string): {
         while (i < str.length && /\s/.test(str[i])) i++
         const tgt = extractToken(str, i)
         if (!tgt) return null
+
+        const trailing = str.slice(tgt.endIndex).trimStart()
+        if (!edgeLabel && !trailing.startsWith(':::')) {
+          const colonLabelMatch = trailing.match(/^:\s*(.+)$/)
+          if (colonLabelMatch) {
+            edgeLabel = colonLabelMatch[1].trim()
+          }
+        }
 
         return {
           sourceId: src.id,

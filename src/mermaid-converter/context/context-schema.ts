@@ -1,5 +1,5 @@
 import z from 'zod'
-import { ComponentInputType } from '../components/component-type'
+import { ComponentInputType } from '../../components/component-type'
 
 export const contextSchema = z.object({
   name: z.string().optional(),
