@@ -42,11 +42,11 @@ export function generateGroupNodeFromNodes(
 
     bottom:
       node.position.y +
-      (node.height ?? node.style.height ?? node.measured?.height ?? 0),
+      (node.height ?? node.style?.height ?? node.measured?.height ?? 0),
 
     right:
       node.position.x +
-      (node.width ?? node.style.width ?? node.measured?.width ?? 0),
+      (node.width ?? node.style?.width ?? node.measured?.width ?? 0),
   }))
 
   const minX = Math.min(...bounds.map((b) => b.left))
