@@ -10,9 +10,13 @@ import { generateGroupNodeFromNodes } from '../../react-flow/group'
 import { CustomData, ReactFlowData, RFComponentField } from '../../types'
 import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
 import { contextSchema } from './context-schema'
+import { resolveAnimatedNode, resolveCloudIcon } from './helpers'
 
 type ResolverOptions = {
-  resolveCloudIcon?: (cloud: string) => Promise<string | undefined | null>
+  resolveCloudIcon?: (
+    cloud: string,
+    serviceName: string
+  ) => Promise<string | undefined | null>
 }
 
 export async function convertMermaidToReactFlowWithContext(
@@ -38,8 +42,11 @@ export async function convertMermaidToReactFlowWithContext(
         clonedNode.height = 150
         clonedNode.width = 150
 
-        if (ctx.cloud) {
-          const cloudIcon = await options?.resolveCloudIcon?.(ctx.cloud)
+        if (ctx.cloud && ctx.serviceName) {
+          const cloudIcon = options?.resolveCloudIcon
+            ? await options.resolveCloudIcon(ctx.cloud, ctx.serviceName)
+            : await resolveCloudIcon(ctx.cloud, ctx.serviceName)
+
           if (cloudIcon) {
             ctx.nodeData ??= {}
             ctx.nodeData.iconSrc = cloudIcon
@@ -47,10 +54,24 @@ export async function convertMermaidToReactFlowWithContext(
         }
       }
 
-      if ((ctx.type === 'image' || ctx.type === 'gif') && ctx.src) {
+      if (ctx.type === 'image' && ctx.src) {
         clonedNode.data = {
           ...clonedNode.data,
           src: ctx.src,
+        }
+      }
+
+      if (ctx.type === 'gif') {
+        if (ctx.animatedIcon) {
+          clonedNode.data = {
+            ...clonedNode.data,
+            src: await resolveAnimatedNode(ctx.animatedIcon),
+          }
+        } else if (ctx.src) {
+          clonedNode.data = {
+            ...clonedNode.data,
+            src: ctx.src,
+          }
         }
       }
     }
@@ -72,6 +93,7 @@ export async function convertMermaidToReactFlowWithContext(
         label: key,
         type: metaInput.type,
         data: metaInput.value,
+        options: metaInput.options,
       })
 
       if (!componentField) {

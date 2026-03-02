@@ -10,16 +10,19 @@ export const contextSchema = z.object({
       z.object({
         type: z.string().optional(),
         name: z.string().optional(),
-        src: z.string().optional(),
 
         cloud: z.string().optional(),
         serviceName: z.string().optional(),
+
+        src: z.string().optional(),
+        animatedIcon: z.string().optional(),
 
         data: z
           .record(
             z.string(),
             z.object({
               type: z.enum(Object.values(ComponentInputType)),
+              options: z.array(z.string()).optional(),
               value: z.unknown(),
             })
           )
