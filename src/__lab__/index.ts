@@ -2,16 +2,17 @@ import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/conte
 
 const mermaidCode = `flowchart TD
     A[Start] --> B{Is user logged in?}
-    B -- Yes --> C[Show dashboard]
-    B -- No --> D[Show login page]
-    D --> E[User logs in]
-    E --> C
-    C --> F[End]
 `
 
 const result = await convertMermaidToReactFlowWithContext(mermaidCode, {
   name: 'Test Context',
   description: 'Test Description',
+  nodes: {
+    A: {
+      type: 'image',
+      src: 'https://via.placeholder.com/150',
+    },
+  },
 })
 
-console.dir(result.edges, { depth: null })
+console.dir(result.nodes, { depth: null })

@@ -2139,8 +2139,8 @@ function createReactFlowElements(
       case 'text':
         data = {
           componentFields: [
-            generateComponentFieldNameInput(displayLabel),
             generateComponentFieldInput({
+              componentFieldId: 'text',
               label: 'Text',
               data: displayLabel,
               type: ComponentInputType.TextBox,

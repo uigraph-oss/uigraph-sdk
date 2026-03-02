@@ -41,23 +41,30 @@ export async function convertMermaidToReactFlowWithContext(
         if (ctx.cloud) {
           const cloudIcon = await options?.resolveCloudIcon?.(ctx.cloud)
           if (cloudIcon) {
-            ctx.data ??= {}
-            ctx.data.iconSrc = cloudIcon
+            ctx.nodeData ??= {}
+            ctx.nodeData.iconSrc = cloudIcon
           }
+        }
+      }
+
+      if ((ctx.type === 'image' || ctx.type === 'gif') && ctx.src) {
+        clonedNode.data = {
+          ...clonedNode.data,
+          src: ctx.src,
         }
       }
     }
 
     if (ctx.name) {
-      ctx.meta ??= {}
-      ctx.meta['Name'] = {
+      ctx.data ??= {}
+      ctx.data['Name'] = {
         type: ComponentInputType.TextInput,
         value: ctx.name,
       }
     }
 
-    for (const key in ctx.meta) {
-      const metaInput = ctx.meta[key]
+    for (const key in ctx.data) {
+      const metaInput = ctx.data[key]
       if (metaInput === undefined) continue
 
       const componentField = getComponentFieldByLabel(componentFields, key)
@@ -75,10 +82,10 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
-    if (ctx.data) {
+    if (ctx.nodeData) {
       clonedNode.data = {
         ...clonedNode.data,
-        ...ctx.data,
+        ...ctx.nodeData,
       }
     }
 

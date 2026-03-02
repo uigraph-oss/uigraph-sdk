@@ -9,14 +9,13 @@ export const contextSchema = z.object({
       z.string(),
       z.object({
         type: z.string().optional(),
+        name: z.string().optional(),
+        src: z.string().optional(),
 
         cloud: z.string().optional(),
+        serviceName: z.string().optional(),
 
-        name: z.string().optional(),
-
-        data: z.record(z.string(), z.unknown()).optional(),
-
-        meta: z
+        data: z
           .record(
             z.string(),
             z.object({
@@ -25,6 +24,14 @@ export const contextSchema = z.object({
             })
           )
           .optional(),
+
+        style: z.record(z.string(), z.unknown()).optional(),
+
+        dbConfig: z
+          .object({ name: z.string(), tableName: z.string() })
+          .optional(),
+
+        nodeData: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
