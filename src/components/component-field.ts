@@ -17,7 +17,8 @@ export function generateComponentFieldInput(
 
   const [metaData] = buildMetaData([field], {
     [componentId]:
-      options.type === ComponentInputType.RichTextEditor
+      options.type === ComponentInputType.RichTextEditor &&
+      typeof options.data === 'string'
         ? markdownToDelta(options.data)
         : options.data,
   })
