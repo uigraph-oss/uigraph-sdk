@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Edge, MarkerType, Node, Position } from '@xyflow/react'
 import dagre from 'dagre'
+import mermaid from 'mermaid'
 import {
   generateComponentFieldInput,
   generateComponentFieldNameInput,
@@ -18,6 +19,15 @@ import {
   SubgraphLayout,
 } from '../types'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'default',
+  flowchart: {
+    htmlLabels: false,
+    curve: 'linear',
+  },
+})
 
 type DiagramType = 'sequence' | 'flowchart'
 
