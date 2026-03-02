@@ -12,7 +12,7 @@ export const contextSchema = z.object({
         name: z.string().optional(),
 
         cloud: z.string().optional(),
-        serviceName: z.string().optional(),
+        service: z.string().optional(),
 
         src: z.string().optional(),
         animatedIcon: z.string().optional(),

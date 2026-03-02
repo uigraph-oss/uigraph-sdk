@@ -1,20 +1,35 @@
-export async function resolveCloudIcon(cloud: string, serviceName: string) {
-  const cloudName = cloud.toLowerCase()
+export async function resolveCloudIcon(
+  cloud: string | undefined,
+  serviceName: string
+) {
+  const cloudName = cloud?.toLowerCase()
 
   const iconsLib =
     cloudName === 'azure'
-      ? await import('../../assets/azure-icons.json')
+      ? [...(await import('../../assets/azure-icons.json')).default]
       : cloudName === 'aws'
-        ? await import('../../assets/aws-icons.json')
-        : undefined
+        ? [...(await import('../../assets/aws-icons.json')).default]
+        : [
+            ...(await import('../../assets/aws-icons.json')).default,
+            ...(await import('../../assets/azure-icons.json')).default,
+          ]
 
-  if (!iconsLib) return null
+  const icon = iconsLib.find(
+    (icon) => icon.name.toLowerCase() === serviceName.toLowerCase()
+  )
 
-  const icon = iconsLib.default.find((icon) => icon.name === serviceName)
-  return `/${cloudName}-icons/${icon?.category}/${icon?.fileName}`
+  if (!icon) return null
+
+  return `/${icon.cloud.toLowerCase()}-icons/${icon.category}/${icon.fileName}`
 }
 
 export async function resolveAnimatedNode(animatedIcon: string) {
   const animatedNodes = await import('../../assets/animated-nodes.json')
-  return `/animated-nodes/${animatedNodes.default.find((node) => node.name === animatedIcon)?.fileName}`
+  const node = animatedNodes.default.find(
+    (node) => node.name.toLowerCase() === animatedIcon.toLowerCase()
+  )
+
+  if (!node) return null
+
+  return `/animated-nodes/${node.fileName}`
 }
