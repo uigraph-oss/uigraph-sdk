@@ -63,6 +63,18 @@
     "./browser": {
       "import": "./dist/browser.mjs",
       "require": "./dist/browser.cjs"
+    },
+    "./aws-icons": {
+      "import": "./dist/aws-icons.mjs",
+      "require": "./dist/aws-icons.cjs"
+    },
+    "./azure-icons": {
+      "import": "./dist/azure-icons.mjs",
+      "require": "./dist/azure-icons.cjs"
+    },
+    "./animated-nodes": {
+      "import": "./dist/animated-nodes.mjs",
+      "require": "./dist/animated-nodes.cjs"
     }
   },
   "typesVersions": {
@@ -78,6 +90,18 @@
       "browser": [
         "./dist/browser.d.mts",
         "./dist/browser.d.cts"
+      ],
+      "aws-icons": [
+        "./dist/aws-icons.d.mts",
+        "./dist/aws-icons.d.cts"
+      ],
+      "azure-icons": [
+        "./dist/azure-icons.d.mts",
+        "./dist/azure-icons.d.cts"
+      ],
+      "animated-nodes": [
+        "./dist/animated-nodes.d.mts",
+        "./dist/animated-nodes.d.cts"
       ]
     }
   }

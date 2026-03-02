@@ -10,10 +10,12 @@ export const contextSchema = z.object({
       z.object({
         type: z.string().optional(),
         name: z.string().optional(),
-        src: z.string().optional(),
 
         cloud: z.string().optional(),
         serviceName: z.string().optional(),
+
+        src: z.string().optional(),
+        animatedIcon: z.string().optional(),
 
         data: z
           .record(

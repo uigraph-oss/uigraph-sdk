@@ -7,6 +7,10 @@ export default defineConfig({
     index: './src/index.ts',
     headless: './src/headless.ts',
     browser: './src/browser/index.ts',
+
+    'aws-icons': './src/icons/aws-icons.ts',
+    'azure-icons': './src/icons/azure-icons.ts',
+    'animated-nodes': './src/icons/animated-nodes.ts',
   },
 
   outDir: './dist',

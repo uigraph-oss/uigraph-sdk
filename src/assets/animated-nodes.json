@@ -1,0 +1,93 @@
+[
+  {
+    "category": "Security",
+    "subcategory": null,
+    "name": "Authentication",
+    "fileName": "Authentication.gif",
+    "relativePath": "animated-nodes/Authentication.gif"
+  },
+  {
+    "category": "Analytics",
+    "subcategory": null,
+    "name": "Data Analysis",
+    "fileName": "Data-Analysis.gif",
+    "relativePath": "animated-nodes/Data-Analysis.gif"
+  },
+  {
+    "category": "Content",
+    "subcategory": null,
+    "name": "Document",
+    "fileName": "Document.gif",
+    "relativePath": "animated-nodes/Document.gif"
+  },
+  {
+    "category": "Devices",
+    "subcategory": null,
+    "name": "Laptop",
+    "fileName": "Laptop.gif",
+    "relativePath": "animated-nodes/Laptop.gif"
+  },
+  {
+    "category": "UI States",
+    "subcategory": null,
+    "name": "Loading",
+    "fileName": "Loading.gif",
+    "relativePath": "animated-nodes/Loading.gif"
+  },
+  {
+    "category": "Communication",
+    "subcategory": null,
+    "name": "Message",
+    "fileName": "Message.gif",
+    "relativePath": "animated-nodes/Message.gif"
+  },
+  {
+    "category": "Analytics",
+    "subcategory": "Mobile",
+    "name": "Mobile Analytics",
+    "fileName": "Mobile-Analytics.gif",
+    "relativePath": "animated-nodes/Mobile-Analytics.gif"
+  },
+  {
+    "category": "Communication",
+    "subcategory": null,
+    "name": "Notification",
+    "fileName": "Notification.gif",
+    "relativePath": "animated-nodes/Notification.gif"
+  },
+  {
+    "category": "Security",
+    "subcategory": null,
+    "name": "Security",
+    "fileName": "Security.gif",
+    "relativePath": "animated-nodes/Security.gif"
+  },
+  {
+    "category": "Communication",
+    "subcategory": null,
+    "name": "Send Message",
+    "fileName": "Send-Message.gif",
+    "relativePath": "animated-nodes/Send-Message.gif"
+  },
+  {
+    "category": "Infrastructure",
+    "subcategory": null,
+    "name": "Server",
+    "fileName": "Server.gif",
+    "relativePath": "animated-nodes/Server.gif"
+  },
+  {
+    "category": "Configuration",
+    "subcategory": null,
+    "name": "Settings",
+    "fileName": "Settings.gif",
+    "relativePath": "animated-nodes/Settings.gif"
+  },
+  {
+    "category": "Analytics",
+    "subcategory": null,
+    "name": "Stats",
+    "fileName": "Stats.gif",
+    "relativePath": "animated-nodes/Stats.gif"
+  }
+]
