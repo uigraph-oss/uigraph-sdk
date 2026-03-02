@@ -662,7 +662,7 @@ export function parseMermaidCode(code: string): {
     // (same bracket type) and supports optional edge labels like |label|.
     function extractToken(str: string, startIndex: number) {
       // Match identifier
-      const idMatch = str.slice(startIndex).match(/^\s*(\[\*\]|[A-Za-z0-9_]+)/)
+      const idMatch = str.slice(startIndex).match(/^\s*([A-Za-z0-9_]+)/)
       if (!idMatch) return null
       const id = idMatch[1]
       const idx = startIndex + idMatch[0].length // position after id (includes leading spaces)
