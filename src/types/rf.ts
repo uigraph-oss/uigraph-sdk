@@ -2,8 +2,11 @@ import { Edge, Node } from '@xyflow/react'
 import { ComponentInputType } from '../components/component-type'
 
 export type CustomData = {
-  src?: string
   source?: 'mermaid'
+
+  src?: string
+  iconSrc?: string
+
   childNodes?: string[]
   componentFields?: RFComponentField[]
 }

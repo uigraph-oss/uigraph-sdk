@@ -31,10 +31,11 @@ export async function convertMermaidToReactFlowWithContext(
     const ctx = validatedContext.nodes?.[node.id]
     if (!ctx) return node
 
-    ctx.data ??= {}
-
     const clonedNode: Node<CustomData> = JSON.parse(JSON.stringify(node))
     const componentFields = clonedNode.data.componentFields ?? []
+
+    ctx.data ??= {}
+    clonedNode.data ??= {}
 
     if (ctx.type) {
       clonedNode.type = ctx.type
@@ -50,8 +51,7 @@ export async function convertMermaidToReactFlowWithContext(
             : await resolveCloudIcon(ctx.cloud, ctx.service)
 
           if (cloudIcon) {
-            ctx.internal ??= {}
-            ctx.internal.iconSrc = cloudIcon
+            clonedNode.data.iconSrc = cloudIcon
           }
         }
       }
@@ -121,8 +121,8 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     clonedNode.data = {
+      ...ctx.style,
       ...clonedNode.data,
-      ...ctx.internal,
       componentFields: componentFields,
     }
 
