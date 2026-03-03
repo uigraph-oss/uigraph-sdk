@@ -1,9 +1,3 @@
----
-title: SQL SDK Guide
-description: Use the SDK to parse SQL into AST and render database diagrams in React Flow.
-slug: /sdk/sql
----
-
 # SQL SDK Guide
 
 Use the SQL SDK to parse SQL, convert schema AST into diagram data, update diagrams, and generate SQL. This page covers only: `SchemaDialect`, `SqlToAstParser`, `AstToUiConverter`, and `AstToSqlGenerator`.

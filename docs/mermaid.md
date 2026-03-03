@@ -1,9 +1,3 @@
----
-title: Mermaid SDK Guide
-description: Use the SDK to convert Mermaid diagrams into React Flow data with or without context.
-slug: /sdk/mermaid
----
-
 # Mermaid SDK Guide
 
 Use the Mermaid SDK to convert Mermaid source into React Flow nodes and edges, then apply end-user context overrides when needed.

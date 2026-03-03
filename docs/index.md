@@ -1,9 +1,3 @@
----
-title: UiGraph SDK
-description: Learn about the UiGraph SDK.
-slug: /sdk
----
-
 # UiGraph SDK
 
 Use the UiGraph SDK to parse SQL, convert Mermaid diagrams, and build React Flow data for your diagrams.
