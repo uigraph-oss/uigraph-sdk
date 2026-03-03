@@ -20,7 +20,7 @@ export async function resolveCloudIcon(
 
   if (!icon) return null
 
-  return `/${icon.cloud.toLowerCase()}-icons/${icon.category.toLowerCase()}/${icon.fileName}`
+  return `/${icon.cloud.toLowerCase()}-icons/${icon.relativePath}`
 }
 
 export async function resolveAnimatedNode(animatedIcon: string) {
