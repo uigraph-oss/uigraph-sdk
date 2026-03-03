@@ -148,8 +148,37 @@ export async function convertMermaidToReactFlowWithContext(
     )
   })
 
+  const rfEdgesPromises = reactFlowData.edges.map(async (edge) => {
+    const ctx = validatedContext.edges?.[`${edge.source}-${edge.target}`]
+    if (!ctx) return edge
+
+    return {
+      ...edge,
+      label: ctx.label ?? edge.label,
+      animated: ctx.style?.borderAnimationEnabled ?? edge.animated,
+      style: {
+        ...edge.style,
+        stroke: ctx.style?.stroke ?? edge.style?.stroke,
+        strokeWidth: ctx.style?.strokeWidth ?? edge.style?.strokeWidth,
+        strokeDasharray:
+          ctx.style?.strokeStyle === 'dashed'
+            ? '4 2'
+            : ctx.style?.strokeStyle === 'dotted'
+              ? '1 2'
+              : ctx.style?.strokeStyle === 'solid'
+                ? undefined
+                : edge.style?.strokeDasharray,
+
+        markerStart: ctx.markerStart ?? edge.markerStart,
+        markerEnd: ctx.markerEnd ?? edge.markerEnd,
+      },
+    }
+  })
+
+  const resolvedEdges = await Promise.all(rfEdgesPromises)
+
   return {
-    edges: reactFlowData.edges,
+    edges: resolvedEdges,
     nodes: [
       ...groupNodes,
       ...resolvedNodes.map((node) => {
