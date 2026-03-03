@@ -35,13 +35,44 @@ export const contextSchema = z.object({
             stroke: z.string().optional(),
             strokeWidth: z.number().optional(),
             borderRadius: z.number().optional(),
-            strokeStyle: z.string().optional(),
+            strokeStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
             borderAnimationEnabled: z.boolean().optional(),
           })
           .optional(),
 
         dbConfig: z
           .object({ name: z.string(), tableName: z.string() })
+          .optional(),
+      })
+    )
+    .optional(),
+
+  edges: z
+    .record(
+      z.string(),
+      z.object({
+        label: z.string().optional(),
+        style: z
+          .object({
+            stroke: z.string().optional(),
+            strokeWidth: z.number().optional(),
+            strokeStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
+            borderAnimationEnabled: z.boolean().optional(),
+          })
+          .optional(),
+
+        markerStart: z
+          .object({
+            type: z.string(),
+            color: z.string().optional(),
+          })
+          .optional(),
+
+        markerEnd: z
+          .object({
+            type: z.string(),
+            color: z.string().optional(),
+          })
           .optional(),
       })
     )
