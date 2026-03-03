@@ -29,13 +29,20 @@ export const contextSchema = z.object({
           )
           .optional(),
 
-        style: z.record(z.string(), z.unknown()).optional(),
+        style: z
+          .object({
+            fill: z.string().optional(),
+            stroke: z.string().optional(),
+            strokeWidth: z.number().optional(),
+            borderRadius: z.number().optional(),
+            strokeStyle: z.string().optional(),
+            borderAnimationEnabled: z.boolean().optional(),
+          })
+          .optional(),
 
         dbConfig: z
           .object({ name: z.string(), tableName: z.string() })
           .optional(),
-
-        internal: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
