@@ -1,5 +1,6 @@
 export type * from './types'
 
+export * from './nosql-parser'
 export * from './sql-parser'
 
 export { syncBaseData } from './sync-data/sync-base-data'
