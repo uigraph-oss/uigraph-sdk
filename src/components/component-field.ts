@@ -12,6 +12,7 @@ export function generateComponentFieldInput(
 
   const field = {
     ...options,
+    hidden: true,
     componentFieldId: componentId,
   }
 
