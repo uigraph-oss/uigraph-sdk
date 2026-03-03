@@ -121,8 +121,8 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     clonedNode.data = {
-      ...ctx.style,
       ...clonedNode.data,
+      ...ctx.style,
       componentFields: componentFields,
     }
 
