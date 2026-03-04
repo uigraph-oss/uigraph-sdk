@@ -6,6 +6,7 @@
  */
 
 import { generateUUID } from 'daily-code'
+import { convertNoSQLToAst } from '../nosql-parser'
 import {
   CheckConstraintAST,
   ColumnAST,
@@ -103,11 +104,16 @@ export class SqlToAstParser {
     }
   }
 
-  parse(sqlContent: string): SchemaAST {
+  parse(sqlContent: string, useStrictNoSQL = false): SchemaAST {
     switch (this.dialect) {
       case 'json':
       case 'mongodb':
       case 'dynamodb':
+        if (useStrictNoSQL) {
+          const parsed = JSON.parse(sqlContent)
+          return convertNoSQLToAst(parsed)
+        }
+
         return this.parseNoSQL(sqlContent)
 
       default:
