@@ -91,6 +91,11 @@ export async function convertMermaidToReactFlowWithContext(
 
         componentFields.unshift(textComponentField as RFComponentField)
       }
+
+      if (ctx.type === 'data-source' || ctx.type === 'db-table') {
+        ctx.type = 'databaseTableSQL'
+        clonedNode.type = 'databaseTableSQL'
+      }
     }
 
     if (ctx.name) {
