@@ -120,6 +120,14 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
+    if (ctx.dbConfig) {
+      clonedNode.data.serviceTable = {
+        serviceId: ctx.dbConfig.service,
+        serviceDbId: ctx.dbConfig.database,
+        tableName: ctx.dbConfig.tableName,
+      }
+    }
+
     clonedNode.data = {
       ...clonedNode.data,
       ...ctx.style,
