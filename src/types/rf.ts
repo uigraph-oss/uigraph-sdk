@@ -9,6 +9,12 @@ export type CustomData = {
 
   childNodes?: string[]
   componentFields?: RFComponentField[]
+
+  serviceTable?: {
+    serviceId: string
+    serviceDbId: string
+    tableName: string
+  }
 }
 
 export interface ReactFlowData {
