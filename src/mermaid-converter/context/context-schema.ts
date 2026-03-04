@@ -41,7 +41,11 @@ export const contextSchema = z.object({
           .optional(),
 
         dbConfig: z
-          .object({ name: z.string(), tableName: z.string() })
+          .object({
+            service: z.string(),
+            database: z.string(),
+            tableName: z.string(),
+          })
           .optional(),
       })
     )
