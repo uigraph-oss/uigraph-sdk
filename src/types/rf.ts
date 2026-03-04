@@ -10,6 +10,8 @@ export type CustomData = {
   childNodes?: string[]
   componentFields?: RFComponentField[]
 
+  shape?: string
+
   serviceTable?: {
     serviceId: string
     serviceDbId: string

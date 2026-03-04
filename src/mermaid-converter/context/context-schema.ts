@@ -18,6 +18,34 @@ export const contextSchema = z.object({
         src: z.string().optional(),
         animatedIcon: z.string().optional(),
 
+        shape: z
+          .enum([
+            'rectangle',
+            'rounded-rect',
+            'ellipse',
+            'diamond',
+            'triangle',
+            'parallelogram',
+            'trapezoid',
+            'hexagon',
+            'document',
+            'cylinder',
+            'delay',
+            'off-page-connector',
+            'display',
+            'collate',
+            'sort',
+            'terminator',
+            'or',
+            'database',
+            'multiple-documents',
+            'subroutine',
+            'manual-input',
+            'summing-junction',
+            'internal-storage',
+          ])
+          .optional(),
+
         data: z
           .record(
             z.string(),
