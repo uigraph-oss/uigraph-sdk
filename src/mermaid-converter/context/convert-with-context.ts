@@ -96,6 +96,10 @@ export async function convertMermaidToReactFlowWithContext(
         ctx.type = 'databaseTableSQL'
         clonedNode.type = 'databaseTableSQL'
       }
+
+      if (ctx.type === 'shape' && ctx.shape) {
+        clonedNode.data.shape = ctx.shape
+      }
     }
 
     if (ctx.name) {
