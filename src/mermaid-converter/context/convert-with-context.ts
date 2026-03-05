@@ -159,6 +159,7 @@ export async function convertMermaidToReactFlowWithContext(
     clonedNode.data = {
       ...clonedNode.data,
       ...ctx.style,
+      strokeAnimation: ctx.style?.borderAnimationEnabled ? 'dash' : undefined,
       componentFields: componentFields,
     }
 
