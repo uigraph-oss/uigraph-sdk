@@ -19,6 +19,8 @@ export const contextSchema = z.object({
         src: z.string().optional(),
         animatedIcon: z.string().optional(),
 
+        componentId: z.string().optional(),
+
         shape: z
           .enum([
             'rectangle',

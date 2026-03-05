@@ -4,6 +4,8 @@ import { ComponentInputType } from '../components/component-type'
 export type CustomData = {
   source?: 'mermaid'
 
+  componentId?: string
+
   src?: string
   iconSrc?: string
 
