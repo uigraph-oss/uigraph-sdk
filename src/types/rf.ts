@@ -17,6 +17,10 @@ export type CustomData = {
     serviceDbId: string
     tableName: string
   }
+
+  title?: string
+  columns?: string[]
+  rows?: string[][]
 }
 
 export interface ReactFlowData {

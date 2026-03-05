@@ -76,6 +76,14 @@ export const contextSchema = z.object({
             tableName: z.string(),
           })
           .optional(),
+
+        table: z
+          .object({
+            title: z.string().optional(),
+            columns: z.string().array(),
+            rows: z.array(z.array(z.string())),
+          })
+          .optional(),
       })
     )
     .optional(),
