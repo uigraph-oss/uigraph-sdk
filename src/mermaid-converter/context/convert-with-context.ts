@@ -106,7 +106,7 @@ export async function convertMermaidToReactFlowWithContext(
       }
 
       if (ctx.type === 'table' && ctx.table) {
-        clonedNode.data.title = ctx.table.title
+        clonedNode.data.title = ctx.name
         clonedNode.data.rows = ctx.table.rows ?? []
         clonedNode.data.columns = ctx.table.columns ?? []
       }
