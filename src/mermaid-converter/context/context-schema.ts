@@ -11,7 +11,8 @@ export const contextSchema = z.object({
         type: z.string().optional(),
         name: z.string().optional(),
 
-        text: z.string().optional(),
+        value: z.string().optional(),
+
         cloud: z.string().optional(),
         service: z.string().optional(),
 

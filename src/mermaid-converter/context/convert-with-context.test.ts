@@ -75,7 +75,7 @@ describe('convertMermaidToReactFlowWithContext', () => {
           },
           B: {
             type: 'text',
-            text: 'Hello',
+            value: 'Hello',
           },
         },
         edges: {
