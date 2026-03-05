@@ -83,10 +83,11 @@ export async function convertMermaidToReactFlowWithContext(
 
       if (ctx.type === 'text' && ctx.value) {
         const textComponentField = generateComponentFieldInput({
+          type: ComponentInputType.TextInput,
           componentFieldId: 'text',
           label: 'Text',
-          type: ComponentInputType.TextInput,
           data: ctx.value,
+          isReadonly: true,
         })
 
         componentFields.unshift(textComponentField as RFComponentField)
@@ -94,10 +95,11 @@ export async function convertMermaidToReactFlowWithContext(
 
       if (ctx.type === 'code' && ctx.value) {
         const textComponentField = generateComponentFieldInput({
+          type: ComponentInputType.CodeEditor,
           componentFieldId: 'code',
           label: 'Code',
-          type: ComponentInputType.CodeEditor,
           data: ctx.value,
+          isReadonly: true,
         })
 
         componentFields.unshift(textComponentField as RFComponentField)
