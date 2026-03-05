@@ -21,6 +21,8 @@ export type CustomData = {
   title?: string
   columns?: string[]
   rows?: string[][]
+
+  strokeAnimation?: 'dash'
 }
 
 export interface ReactFlowData {
