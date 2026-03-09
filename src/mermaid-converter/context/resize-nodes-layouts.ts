@@ -8,6 +8,8 @@ const EXPECTED_NODE_SIZE: Record<string, { width: number; height: number }> = {
 const GROUP_BOUND_PADDING = 20
 const GROUP_WIDTH_PADDING = 20
 const GROUP_HEIGHT_PADDING = 50
+const MIN_HORIZONTAL_GAP = 140
+const ROW_ALIGNMENT_TOLERANCE = 80
 
 function resolveDimension(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined
@@ -98,12 +100,70 @@ export function resizeNodesLayouts(nodes: Node[]): Node[] {
     resizedNodes.map((node) => [node.id, node] as const)
   )
 
+  const rowNodes = resizedNodes
+    .filter(
+      (node) =>
+        !Array.isArray(
+          (node.data as { childNodes?: unknown[] } | undefined)?.childNodes
+        )
+    )
+    .sort((a, b) =>
+      a.position.y === b.position.y
+        ? a.position.x - b.position.x
+        : a.position.y - b.position.y
+    )
+
+  const rows: Node[][] = []
+
+  for (const node of rowNodes) {
+    const row = rows.find(
+      (currentRow) =>
+        Math.abs(currentRow[0].position.y - node.position.y) <=
+        ROW_ALIGNMENT_TOLERANCE
+    )
+
+    if (row) {
+      row.push(node)
+      continue
+    }
+
+    rows.push([node])
+  }
+
+  for (const row of rows) {
+    row.sort((a, b) => a.position.x - b.position.x)
+
+    for (let index = 1; index < row.length; index += 1) {
+      const previousNode = row[index - 1]
+      const currentNode = row[index]
+      const previousNodeSize = getNodeSize(previousNode)
+      const minimumX =
+        previousNode.position.x + previousNodeSize.width + MIN_HORIZONTAL_GAP
+
+      if (currentNode.position.x >= minimumX) {
+        continue
+      }
+
+      const shiftedNode = {
+        ...currentNode,
+        position: {
+          x: minimumX,
+          y: currentNode.position.y,
+        },
+      }
+
+      row[index] = shiftedNode
+      resizedNodesById.set(shiftedNode.id, shiftedNode)
+    }
+  }
+
   return resizedNodes.map((node) => {
+    const shiftedNode = resizedNodesById.get(node.id) ?? node
     const childNodeIds = (node.data as { childNodes?: unknown[] } | undefined)
       ?.childNodes
 
     if (!Array.isArray(childNodeIds)) {
-      return node
+      return shiftedNode
     }
 
     const childNodes = childNodeIds
@@ -115,7 +175,7 @@ export function resizeNodesLayouts(nodes: Node[]): Node[] {
       .filter((childNode): childNode is Node => Boolean(childNode))
 
     if (childNodes.length === 0) {
-      return node
+      return shiftedNode
     }
 
     const bounds = childNodes.map((childNode) => {
@@ -135,13 +195,13 @@ export function resizeNodesLayouts(nodes: Node[]): Node[] {
     const maxY = Math.max(...bounds.map((bound) => bound.bottom))
 
     return {
-      ...node,
+      ...shiftedNode,
       position: {
         x: minX - GROUP_BOUND_PADDING,
         y: minY - GROUP_BOUND_PADDING,
       },
       style: {
-        ...node.style,
+        ...shiftedNode.style,
         width: maxX - minX + GROUP_BOUND_PADDING * 2 + GROUP_WIDTH_PADDING,
         height: maxY - minY + GROUP_BOUND_PADDING * 2 + GROUP_HEIGHT_PADDING,
       },
