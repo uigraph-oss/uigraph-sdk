@@ -11,8 +11,11 @@ import { CustomData, ReactFlowData, RFComponentField } from '../../types'
 import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
 import { contextSchema } from './context-schema'
 import { resolveAnimatedNode, resolveCloudIcon } from './helpers'
+import { resizeNodesLayouts } from './resize-nodes-layouts'
 
 type ResolverOptions = {
+  repositionNodes?: boolean
+
   resolveCloudIcon?: (
     cloud: string | undefined,
     service: string
@@ -219,25 +222,28 @@ export async function convertMermaidToReactFlowWithContext(
   })
 
   const resolvedEdges = await Promise.all(rfEdgesPromises)
+  const combinedNodes = [
+    ...groupNodes,
+    ...resolvedNodes.map((node) => {
+      const nodeParent = groupNodes.find((groupNode) =>
+        groupNode.data.childNodes?.includes(node.id)
+      )
+
+      if (nodeParent) {
+        return {
+          ...node,
+          parentId: nodeParent.id,
+        }
+      }
+
+      return node
+    }),
+  ]
 
   return {
     edges: resolvedEdges,
-    nodes: [
-      ...groupNodes,
-      ...resolvedNodes.map((node) => {
-        const nodeParent = groupNodes.find((groupNode) =>
-          groupNode.data.childNodes?.includes(node.id)
-        )
-
-        if (nodeParent) {
-          return {
-            ...node,
-            parentId: nodeParent.id,
-          }
-        }
-
-        return node
-      }),
-    ],
+    nodes: options?.repositionNodes
+      ? resizeNodesLayouts(combinedNodes)
+      : combinedNodes,
   }
 }
