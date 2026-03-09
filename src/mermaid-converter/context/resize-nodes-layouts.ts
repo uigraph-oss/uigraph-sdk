@@ -1,7 +1,7 @@
 import { Node } from '@xyflow/react'
 
 const EXPECTED_NODE_SIZE: Record<string, { width: number; height: number }> = {
-  databaseTableSQL: { width: 200, height: 400 },
+  databaseTableSQL: { width: 500, height: 400 },
   table: { width: 500, height: 400 },
 }
 
