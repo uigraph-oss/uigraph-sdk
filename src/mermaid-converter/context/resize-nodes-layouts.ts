@@ -1,7 +1,7 @@
 import { Node } from '@xyflow/react'
 
 const EXPECTED_NODE_SIZE: Record<string, { width: number; height: number }> = {
-  databaseTableSQL: { width: 500, height: 400 },
+  databaseTableSQL: { width: 200, height: 400 },
   table: { width: 500, height: 400 },
 }
 
@@ -34,65 +34,52 @@ function getNodeSize(node: Node) {
 }
 
 export function resizeNodesLayouts(nodes: Node[]): Node[] {
-  const snapshots = new Map(
-    nodes.map((node) => {
-      const size = getNodeSize(node)
-      const expectedSize = node.type ? EXPECTED_NODE_SIZE[node.type] : undefined
+  const resizeRules = nodes
+    .map((node) => {
+      if (!node.type) {
+        return undefined
+      }
 
-      return [
-        node.id,
-        {
-          node,
-          position: node.position,
-          size,
-          expectedSize,
-          overflowX: Math.max(
-            0,
-            size.width - (expectedSize?.width ?? size.width)
-          ),
-          overflowY: Math.max(
-            0,
-            size.height - (expectedSize?.height ?? size.height)
-          ),
-        },
-      ]
+      const expectedSize = EXPECTED_NODE_SIZE[node.type]
+
+      if (!expectedSize) {
+        return undefined
+      }
+
+      const size = getNodeSize(node)
+
+      return {
+        startX: node.position.x + expectedSize.width,
+        startY: node.position.y + expectedSize.height,
+        deltaX: Math.max(0, size.width - expectedSize.width),
+        deltaY: Math.max(0, size.height - expectedSize.height),
+      }
     })
-  )
+    .filter((rule) => Boolean(rule))
 
   const resizedNodes = nodes.map((node) => {
-    const snapshot = snapshots.get(node.id)
+    const childNodeIds = (node.data as { childNodes?: unknown[] } | undefined)
+      ?.childNodes
 
-    if (!snapshot) {
-      return node
-    }
-
-    if (
-      Array.isArray(
-        (node.data as { childNodes?: unknown[] } | undefined)?.childNodes
-      )
-    ) {
+    if (Array.isArray(childNodeIds)) {
       return { ...node }
     }
 
-    let offsetX = 0
-    let offsetY = 0
-
-    for (const source of snapshots.values()) {
-      if (!source.expectedSize) {
-        continue
+    const offsetX = resizeRules.reduce((total, rule) => {
+      if (!rule || rule.deltaX === 0 || node.position.x < rule.startX) {
+        return total
       }
 
-      const sourceRight = source.position.x + source.expectedSize.width
-      const sourceBottom = source.position.y + source.expectedSize.height
+      return total + rule.deltaX
+    }, 0)
 
-      if (source.overflowX > 0 && snapshot.position.x >= sourceRight) {
-        offsetX += source.overflowX
+    const offsetY = resizeRules.reduce((total, rule) => {
+      if (!rule || rule.deltaY === 0 || node.position.y < rule.startY) {
+        return total
       }
 
-      if (source.overflowY > 0 && snapshot.position.y >= sourceBottom) {
-        offsetY += source.overflowY
-      }
-    }
+      return total + rule.deltaY
+    }, 0)
 
     if (offsetX === 0 && offsetY === 0) {
       return node
@@ -107,7 +94,9 @@ export function resizeNodesLayouts(nodes: Node[]): Node[] {
     }
   })
 
-  const resizedNodesById = new Map(resizedNodes.map((node) => [node.id, node]))
+  const resizedNodesById = new Map(
+    resizedNodes.map((node) => [node.id, node] as const)
+  )
 
   return resizedNodes.map((node) => {
     const childNodeIds = (node.data as { childNodes?: unknown[] } | undefined)
