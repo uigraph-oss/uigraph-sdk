@@ -127,6 +127,16 @@ export async function convertMermaidToReactFlowWithContext(
 
       if (ctx.type === 'shape' && ctx.shape) {
         clonedNode.data.shape = ctx.shape
+        if (ctx.shape === 'or' || ctx.shape === 'summing-junction') {
+          const maxSize = Math.max(
+            clonedNode.width ?? 0,
+            clonedNode.height ?? 0,
+            200
+          )
+
+          clonedNode.width = maxSize
+          clonedNode.height = maxSize
+        }
       }
     }
 
