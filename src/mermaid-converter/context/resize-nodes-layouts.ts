@@ -1,8 +1,9 @@
 import { Node } from '@xyflow/react'
 
 const EXPECTED_NODE_SIZE: Record<string, { width: number; height: number }> = {
-  databaseTableSQL: { width: 200, height: 400 },
-  table: { width: 500, height: 400 },
+  databaseTableSQL: { width: 500, height: 400 },
+  table: { width: 600, height: 400 },
+  code: { width: 300, height: 400 },
 }
 
 const GROUP_BOUND_PADDING = 20
