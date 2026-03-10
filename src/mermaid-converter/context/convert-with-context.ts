@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react'
-import { arrayNonNullable } from 'daily-code'
+import { arrayNonNullable, objectPick } from 'daily-code'
 import z from 'zod'
 import {
   generateComponentFieldInput,
@@ -175,11 +175,27 @@ export async function convertMermaidToReactFlowWithContext(
       }
     }
 
+    if (ctx.style?.height) {
+      clonedNode.height = ctx.style.height
+    }
+
+    if (ctx.style?.width) {
+      clonedNode.width = ctx.style.width
+    }
+
     clonedNode.data = {
       ...clonedNode.data,
-      ...ctx.style,
-      strokeAnimation: ctx.style?.borderAnimationEnabled ? 'dash' : undefined,
+      ...objectPick(ctx.style ?? {}, [
+        'fill',
+        'stroke',
+        'strokeWidth',
+        'strokeStyle',
+        'borderRadius',
+        'borderAnimationEnabled',
+      ]),
+
       componentFields: componentFields,
+      strokeAnimation: ctx.style?.borderAnimationEnabled ? 'dash' : undefined,
     }
 
     return clonedNode
