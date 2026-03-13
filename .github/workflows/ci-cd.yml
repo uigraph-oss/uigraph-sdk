@@ -18,6 +18,7 @@ env:
   AWS_REGION: us-east-1
   AWS_DOMAIN: uigraph
   AWS_DOMAIN_OWNER: 120516861714
+  AWS_DOMAIN_OWNER_PROD: 351352952121
   AWS_REPO: npm-sdk
 
 jobs:
@@ -92,3 +93,53 @@ jobs:
 
       - name: Publish to CodeArtifact (dev)
         run: npm publish --access public --registry https://$AWS_DOMAIN-$AWS_DOMAIN_OWNER.d.codeartifact.$AWS_REGION.amazonaws.com/npm/$AWS_REPO/
+
+  publish_prod:
+    name: Build and Publish to CodeArtifact (prod)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'release' && github.event.action == 'published' && github.event.release.target_commitish == 'main') ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure AWS credentials (prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to CodeArtifact (prod)
+        id: login
+        run: |
+          TOKEN=$(aws codeartifact get-authorization-token \
+            --region $AWS_REGION \
+            --domain $AWS_DOMAIN \
+            --domain-owner $AWS_DOMAIN_OWNER_PROD \
+            --query authorizationToken --output text)
+
+          npm config set @uigraph:registry=https://$AWS_DOMAIN-$AWS_DOMAIN_OWNER_PROD.d.codeartifact.$AWS_REGION.amazonaws.com/npm/$AWS_REPO/
+          npm config set //${AWS_DOMAIN}-${AWS_DOMAIN_OWNER_PROD}.d.codeartifact.${AWS_REGION}.amazonaws.com/npm/$AWS_REPO/:_authToken=$TOKEN
+
+      - name: Build package
+        run: npm run build
+
+      - name: Publish to CodeArtifact (prod)
+        run: npm publish --access public --registry https://$AWS_DOMAIN-$AWS_DOMAIN_OWNER_PROD.d.codeartifact.$AWS_REGION.amazonaws.com/npm/$AWS_REPO/
