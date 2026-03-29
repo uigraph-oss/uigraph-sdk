@@ -24,7 +24,7 @@ export const EditorSupportedDialectSchema = DialectIdSchema.or(
 
 export const BasicDetailsSchema = z.object({
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
 })
 
 export const NestedFieldSchema: z.ZodType<NestedFieldInternal> = z.lazy(() =>
@@ -164,7 +164,7 @@ export const DynamoEditorSchema = BasicDetailsSchema.extend({
   primaryKey: z.object({
     partitionKey: z.string(),
     partitionKeyType: z.string().optional(),
-    sortKey: z.string(),
+    sortKey: z.string().optional(),
     sortKeyType: z.string().optional(),
   }),
   globalSecondaryIndexes: z.array(DynamoGsiSchema),
