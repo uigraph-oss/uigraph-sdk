@@ -1,6 +1,9 @@
-import { MarkerType } from '@xyflow/react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { MarkerType, Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
 import { ComponentInputType } from '../components/component-type'
+import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/context/convert-with-context'
 import { convertUiGraphToMermaid } from './index'
 
 describe('convertUiGraphToMermaid', () => {
@@ -77,7 +80,7 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toBe('flowchart LR\nsingle["Single Node"]')
+    expect(result.mermaid).toBe('flowchart LR\nsingle["single"]')
   })
 
   it('sanitizes node ids and resolves collisions', () => {
@@ -99,8 +102,8 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toContain('A_B["One"]')
-    expect(result.mermaid).toContain('A_B_2["Two"]')
+    expect(result.mermaid).toContain('A_B["A-B"]')
+    expect(result.mermaid).toContain('A_B_2["A_B"]')
     expect(result.context.nodes?.A_B).toBeDefined()
     expect(result.context.nodes?.A_B_2).toBeDefined()
   })
@@ -195,5 +198,55 @@ describe('convertUiGraphToMermaid', () => {
         relationId: 'r-1',
       },
     })
+  })
+
+  it('round-trips cloud node metadata through context', async () => {
+    const inputNode: Node<any> = {
+      id: '3a3b454c-b5d6-4eb1-8de6-a1a7a2066016',
+      type: 'cloud',
+      data: {
+        cloud: 'AWS',
+        iconSrc:
+          '/aws-icons/Resource-Icons_07312025/Res_Application-Integration/Res_Amazon-EventBridge-Event_48.svg',
+        category: 'Application-Integration',
+        componentFields: [
+          {
+            componentFieldId: 'name',
+            type: 'Text Input',
+            label: 'Name',
+            isReadonly: true,
+            data: [
+              {
+                value: 'EventBridge Event',
+              },
+            ],
+          },
+        ],
+        label: 'DEV',
+      },
+      position: { x: 0, y: 0 },
+    }
+
+    const convertedMermaid = convertUiGraphToMermaid({
+      nodes: [inputNode],
+      edges: [],
+    })
+
+    const output = await convertMermaidToReactFlowWithContext(
+      convertedMermaid.mermaid,
+      convertedMermaid.context
+    )
+
+    const outputNode: Node<any> = output.nodes[0]
+
+    expect(outputNode.type).toBe('cloud')
+    expect(outputNode.data.cloud).toBe('AWS')
+    expect(outputNode.data.iconSrc).toBe(
+      '/aws-icons/Resource-Icons_07312025/Res_Application-Integration/Res_Amazon-EventBridge-Event_48.svg'
+    )
+    expect((outputNode.data as Record<string, unknown>).category).toBe(
+      'Application-Integration'
+    )
+    expect(outputNode.data.label).toBe('DEV')
   })
 })

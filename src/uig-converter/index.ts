@@ -230,21 +230,16 @@ function resolveNodeLabel(
   if (fieldName) return fieldName
 
   if (node.type === 'text') {
-    const textValue = getFieldString(fields, 'Text') ?? pickString(data.value)
+    const textValue = getFieldString(fields, 'Text')
     if (textValue) return textValue
   }
 
   if (node.type === 'code') {
-    const codeValue = getFieldString(fields, 'Code') ?? pickString(data.value)
+    const codeValue = getFieldString(fields, 'Code')
     if (codeValue) return codeValue
   }
 
-  return (
-    pickString(data.label) ??
-    pickString(data.name) ??
-    pickString(data.title) ??
-    node.id
-  )
+  return node.id
 }
 
 export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
@@ -294,22 +289,16 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
     const nodeType = pickString(node.type)
     if (nodeType) nodeContext.type = nodeType
 
-    const name =
-      getFieldString(componentFields, 'Name') ??
-      pickString(nodeData.name) ??
-      pickString(nodeData.label) ??
-      pickString(nodeData.title)
+    const name = getFieldString(componentFields, 'Name')
     if (name) nodeContext.name = name
 
     if (nodeType === 'text') {
-      const textValue =
-        getFieldString(componentFields, 'Text') ?? pickString(nodeData.value)
+      const textValue = getFieldString(componentFields, 'Text')
       if (textValue) nodeContext.value = textValue
     }
 
     if (nodeType === 'code') {
-      const codeValue =
-        getFieldString(componentFields, 'Code') ?? pickString(nodeData.value)
+      const codeValue = getFieldString(componentFields, 'Code')
       if (codeValue) nodeContext.value = codeValue
     }
 
@@ -464,6 +453,15 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
       return acc
     }, {})
 
+    const iconSrc = pickString(nodeData.iconSrc)
+    if (iconSrc) internalData.iconSrc = iconSrc
+
+    const label = pickString(nodeData.label)
+    if (label) internalData.label = label
+
+    const internalCloud = pickString(nodeData.cloud)
+    if (internalCloud) internalData.cloud = internalCloud
+
     if (Object.keys(internalData).length > 0) {
       nodeContext.___internal = internalData
     }
@@ -547,11 +545,7 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
           .filter((field) => field !== undefined)
       : []
 
-    const name =
-      getFieldString(componentFields, 'Name') ??
-      pickString(groupData.name) ??
-      pickString(groupData.label) ??
-      pickString(groupData.title)
+    const name = getFieldString(componentFields, 'Name')
 
     if (!name && childNodes.length === 0) continue
 
