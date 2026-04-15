@@ -111,6 +111,11 @@ function getFieldString(
   return pickString(getFieldValue(field.data))
 }
 
+function isEmptyFieldValue(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().length === 0
+  return value === undefined || value === null
+}
+
 function parseStrokeStyle(
   dashArray: unknown
 ): 'solid' | 'dashed' | 'dotted' | undefined {
@@ -223,9 +228,7 @@ function wrapNodeLabel(label: string, node: Node): string {
 function resolveNodeLabel(
   node: Node,
   fields: Record<string, unknown>[]
-): string {
-  const data = toRecord(node.data) ?? {}
-
+): string | undefined {
   const fieldName = getFieldString(fields, 'Name')
   if (fieldName) return fieldName
 
@@ -239,7 +242,7 @@ function resolveNodeLabel(
     if (codeValue) return codeValue
   }
 
-  return node.id
+  return
 }
 
 export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
@@ -264,6 +267,8 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
       : []
 
     const label = resolveNodeLabel(node, componentFields)
+    if (label === undefined) return mappedNodeId
+
     const wrappedLabel = wrapNodeLabel(label, node)
     return `${mappedNodeId}${wrappedLabel}`
   })
@@ -289,16 +294,24 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
     const nodeType = pickString(node.type)
     if (nodeType) nodeContext.type = nodeType
 
-    const name = getFieldString(componentFields, 'Name')
+    const nameField = getFieldByLabel(componentFields, 'Name')
+    const nameRawValue = nameField ? getFieldValue(nameField.data) : undefined
+    const name = pickString(nameRawValue)
     if (name) nodeContext.name = name
 
+    const textField =
+      nodeType === 'text' ? getFieldByLabel(componentFields, 'Text') : undefined
+    const textRawValue = textField ? getFieldValue(textField.data) : undefined
+    const textValue = pickString(textRawValue)
     if (nodeType === 'text') {
-      const textValue = getFieldString(componentFields, 'Text')
       if (textValue) nodeContext.value = textValue
     }
 
+    const codeField =
+      nodeType === 'code' ? getFieldByLabel(componentFields, 'Code') : undefined
+    const codeRawValue = codeField ? getFieldValue(codeField.data) : undefined
+    const codeValue = pickString(codeRawValue)
     if (nodeType === 'code') {
-      const codeValue = getFieldString(componentFields, 'Code')
       if (codeValue) nodeContext.value = codeValue
     }
 
@@ -438,6 +451,54 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
         type: componentType,
         value: getFieldValue(field.data),
         options: options && options.length > 0 ? options : undefined,
+      }
+    }
+
+    if (nameField && !name && isEmptyFieldValue(nameRawValue)) {
+      const nameType = pickString(nameField.type)
+      if (nameType && isComponentInputType(nameType)) {
+        const nameOptions = Array.isArray(nameField.options)
+          ? nameField.options.filter((option) => typeof option === 'string')
+          : undefined
+
+        dynamicData.Name = {
+          type: nameType,
+          value: '',
+          options:
+            nameOptions && nameOptions.length > 0 ? nameOptions : undefined,
+        }
+      }
+    }
+
+    if (textField && !textValue && isEmptyFieldValue(textRawValue)) {
+      const textType = pickString(textField.type)
+      if (textType && isComponentInputType(textType)) {
+        const textOptions = Array.isArray(textField.options)
+          ? textField.options.filter((option) => typeof option === 'string')
+          : undefined
+
+        dynamicData.Text = {
+          type: textType,
+          value: '',
+          options:
+            textOptions && textOptions.length > 0 ? textOptions : undefined,
+        }
+      }
+    }
+
+    if (codeField && !codeValue && isEmptyFieldValue(codeRawValue)) {
+      const codeType = pickString(codeField.type)
+      if (codeType && isComponentInputType(codeType)) {
+        const codeOptions = Array.isArray(codeField.options)
+          ? codeField.options.filter((option) => typeof option === 'string')
+          : undefined
+
+        dynamicData.Code = {
+          type: codeType,
+          value: '',
+          options:
+            codeOptions && codeOptions.length > 0 ? codeOptions : undefined,
+        }
       }
     }
 

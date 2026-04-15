@@ -7,6 +7,9 @@ settings:
 importers:
   .:
     dependencies:
+      '@uigraph/sdk':
+        specifier: ^1.1.21
+        version: 1.1.21(@xyflow/react@12.10.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(quill@2.0.3)(zod@4.3.6)
       '@xyflow/react':
         specifier: ^12
         version: 12.10.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1453,6 +1456,16 @@ packages:
         integrity: sha512-f1WO2Lx8a9t8DARmcWAUPJbu0G20bJlj8L4z72K00TMeJAoyLr/tHhI/pzYBLrR4dXWkcxO1cWYZEOX8DKHTqA==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  '@uigraph/sdk@1.1.21':
+    resolution:
+      {
+        integrity: sha512-CuR5hWEhkFwkVLIZkaO3hlj9zctrs9mfCP7mhbqN87Jj6lmsequlBhIAhYJbeY2QPwo/OZ9vlHTJN1b/WmkKXA==,
+      }
+    peerDependencies:
+      '@xyflow/react': ^12
+      quill: '*'
+      zod: '*'
 
   '@upsetjs/venn.js@2.0.0':
     resolution:
@@ -5276,6 +5289,18 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.58.2
       eslint-visitor-keys: 5.0.1
+
+  '@uigraph/sdk@1.1.21(@xyflow/react@12.10.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(quill@2.0.3)(zod@4.3.6)':
+    dependencies:
+      '@xyflow/react': 12.10.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      dagre: 0.8.5
+      daily-code: 1.1.16
+      markdown-to-quill-delta: 1.0.1
+      mermaid: 11.14.0
+      quill: 2.0.3
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - supports-color
 
   '@upsetjs/venn.js@2.0.0':
     optionalDependencies:

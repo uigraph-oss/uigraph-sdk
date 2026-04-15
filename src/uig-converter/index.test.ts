@@ -80,7 +80,7 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toBe('flowchart LR\nsingle["single"]')
+    expect(result.mermaid).toBe('flowchart LR\nsingle')
   })
 
   it('sanitizes node ids and resolves collisions', () => {
@@ -102,10 +102,33 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toContain('A_B["A-B"]')
-    expect(result.mermaid).toContain('A_B_2["A_B"]')
+    expect(result.mermaid).toBe('flowchart LR\nA_B\nA_B_2')
     expect(result.context.nodes?.A_B).toBeDefined()
     expect(result.context.nodes?.A_B_2).toBeDefined()
+  })
+
+  it('does not promote label into name when Name field is missing', () => {
+    const result = convertUiGraphToMermaid({
+      nodes: [
+        {
+          id: 'cloud-1',
+          type: 'cloud',
+          position: { x: 0, y: 0 },
+          data: {
+            cloud: 'AWS',
+            label: 'DEV',
+            componentFields: [],
+          },
+        },
+      ],
+      edges: [],
+    })
+
+    expect(result.mermaid).toBe('flowchart LR\ncloud_1')
+    expect(result.context.nodes?.cloud_1?.name).toBeUndefined()
+    expect(result.context.nodes?.cloud_1?.___internal).toMatchObject({
+      label: 'DEV',
+    })
   })
 
   it('extracts group context with mapped child ids', () => {
@@ -248,5 +271,57 @@ describe('convertUiGraphToMermaid', () => {
       'Application-Integration'
     )
     expect(outputNode.data.label).toBe('DEV')
+  })
+
+  it('keeps empty Name field empty after roundtrip', async () => {
+    const inputNode: Node<any> = {
+      id: 'cloud-empty-name',
+      type: 'cloud',
+      data: {
+        cloud: 'AWS',
+        label: 'DEV',
+        componentFields: [
+          {
+            componentFieldId: 'name',
+            type: 'Text Input',
+            label: 'Name',
+            isReadonly: true,
+            data: [{ value: '' }],
+          },
+        ],
+      },
+      position: { x: 0, y: 0 },
+    }
+
+    const convertedMermaid = convertUiGraphToMermaid({
+      nodes: [inputNode],
+      edges: [],
+    })
+
+    expect(convertedMermaid.mermaid).toBe('flowchart LR\ncloud_empty_name')
+    expect(
+      convertedMermaid.context.nodes?.cloud_empty_name?.name
+    ).toBeUndefined()
+    expect(
+      convertedMermaid.context.nodes?.cloud_empty_name?.data
+    ).toMatchObject({
+      Name: {
+        type: 'Text Input',
+        value: '',
+      },
+    })
+
+    const output = await convertMermaidToReactFlowWithContext(
+      convertedMermaid.mermaid,
+      convertedMermaid.context
+    )
+
+    const outputNode: Node<any> = output.nodes[0]
+    const outputNameField = outputNode.data.componentFields?.find(
+      (field: any) => field.label === 'Name'
+    )
+
+    expect(outputNode.type).toBe('cloud')
+    expect(outputNameField?.data).toEqual([{ value: '' }])
   })
 })
