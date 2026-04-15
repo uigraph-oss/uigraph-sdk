@@ -514,6 +514,10 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
       return acc
     }, {})
 
+    if (nodeType === 'builder' && Array.isArray(nodeData.componentFields)) {
+      internalData.componentFields = nodeData.componentFields
+    }
+
     const iconSrc = pickString(nodeData.iconSrc)
     if (iconSrc) internalData.iconSrc = iconSrc
 
