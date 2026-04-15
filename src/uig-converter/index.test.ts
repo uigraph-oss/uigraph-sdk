@@ -133,19 +133,228 @@ describe('convertUiGraphToMermaid', () => {
     })
 
     expect(result.mermaid).toBe(
-      'flowchart LR\nnode_1["Auth Service"]\ndb_node["Main DB"]\nnode_1 -->|reads/writes| db_node'
+      'flowchart LR\nA["Auth Service"]\nB["Main DB"]\nA --> B'
     )
 
-    expect(result.context.nodes?.node_1).toMatchObject({
+    expect(result.context.nodes?.A).toMatchObject({
       type: 'text',
       value: 'Auth Service',
     })
-    expect(result.context.nodes?.db_node).toMatchObject({
+    expect(result.context.nodes?.B).toMatchObject({
       type: 'cloud',
       name: 'Main DB',
       cloud: 'aws',
       service: 'Amazon RDS',
     })
+    expect(result.context.edges?.['A-B']).toMatchObject({
+      label: 'reads/writes',
+    })
+  })
+
+  it('inlines only whitelisted labels within 32 chars', () => {
+    const within32 = '12345678901234567890123456789012'
+    const above32 = '123456789012345678901234567890123'
+
+    const result = convertUiGraphToMermaid({
+      nodes: [
+        {
+          id: 'text-32',
+          type: 'text',
+          position: { x: 0, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Text',
+                type: ComponentInputType.TextBox,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'code-32',
+          type: 'code',
+          position: { x: 100, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Code',
+                type: ComponentInputType.CodeEditor,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'shape-32',
+          type: 'shape',
+          position: { x: 200, y: 0 },
+          data: {
+            shape: 'rectangle',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'cloud-32',
+          type: 'cloud',
+          position: { x: 300, y: 0 },
+          data: {
+            cloud: 'aws',
+            service: 'Amazon RDS',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'text-33',
+          type: 'text',
+          position: { x: 400, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Text',
+                type: ComponentInputType.TextBox,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'code-33',
+          type: 'code',
+          position: { x: 500, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Code',
+                type: ComponentInputType.CodeEditor,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'shape-33',
+          type: 'shape',
+          position: { x: 600, y: 0 },
+          data: {
+            shape: 'rectangle',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'cloud-33',
+          type: 'cloud',
+          position: { x: 700, y: 0 },
+          data: {
+            cloud: 'aws',
+            service: 'Amazon RDS',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'table-32',
+          type: 'table',
+          position: { x: 750, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'table-33',
+          type: 'table',
+          position: { x: 775, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'gif-32',
+          type: 'gif',
+          position: { x: 790, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: within32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'gif-33',
+          type: 'gif',
+          position: { x: 795, y: 0 },
+          data: {
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: above32 }],
+              },
+            ],
+          },
+        },
+        {
+          id: 'shape-no-name',
+          type: 'shape',
+          position: { x: 800, y: 0 },
+          data: {
+            shape: 'rectangle',
+            label: 'fallback-not-allowed',
+            componentFields: [],
+          },
+        },
+      ],
+      edges: [],
+    })
+
+    expect(result.mermaid).toBe(
+      'flowchart LR\nA["12345678901234567890123456789012"]\nB["12345678901234567890123456789012"]\nC["12345678901234567890123456789012"]\nD["12345678901234567890123456789012"]\nE\nF\nG\nH\nI["12345678901234567890123456789012"]\nJ\nK["12345678901234567890123456789012"]\nL\nM'
+    )
+    expect(result.context.nodes?.E?.value).toBe(above32)
+    expect(result.context.nodes?.F?.value).toBe(above32)
+    expect(result.context.nodes?.G?.name).toBe(above32)
+    expect(result.context.nodes?.H?.name).toBe(above32)
+    expect(result.context.nodes?.J?.name).toBe(above32)
+    expect(result.context.nodes?.L?.name).toBe(above32)
+    expect(result.context.nodes?.M?.name).toBeUndefined()
   })
 
   it('preserves isolated nodes in mermaid output', () => {
@@ -183,9 +392,9 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toBe('flowchart LR\nA_B\nA_B_2')
-    expect(result.context.nodes?.A_B).toBeDefined()
-    expect(result.context.nodes?.A_B_2).toBeDefined()
+    expect(result.mermaid).toBe('flowchart LR\nA\nB')
+    expect(result.context.nodes?.A).toBeDefined()
+    expect(result.context.nodes?.B).toBeDefined()
   })
 
   it('does not promote label into name when Name field is missing', () => {
@@ -205,9 +414,9 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(result.mermaid).toBe('flowchart LR\ncloud_1')
-    expect(result.context.nodes?.cloud_1?.name).toBeUndefined()
-    expect(result.context.nodes?.cloud_1?.___internal).toMatchObject({
+    expect(result.mermaid).toBe('flowchart LR\nA')
+    expect(result.context.nodes?.A?.name).toBeUndefined()
+    expect(result.context.nodes?.A?.___internal).toMatchObject({
       label: 'DEV',
     })
   })
@@ -248,7 +457,7 @@ describe('convertUiGraphToMermaid', () => {
 
     expect(result.context.groups?.['grp-1']).toEqual({
       name: 'Core Group',
-      nodes: ['n_1', 'n_2'],
+      nodes: ['A', 'B'],
     })
   })
 
@@ -379,13 +588,9 @@ describe('convertUiGraphToMermaid', () => {
       edges: [],
     })
 
-    expect(convertedMermaid.mermaid).toBe('flowchart LR\ncloud_empty_name')
-    expect(
-      convertedMermaid.context.nodes?.cloud_empty_name?.name
-    ).toBeUndefined()
-    expect(
-      convertedMermaid.context.nodes?.cloud_empty_name?.data
-    ).toMatchObject({
+    expect(convertedMermaid.mermaid).toBe('flowchart LR\nA')
+    expect(convertedMermaid.context.nodes?.A?.name).toBeUndefined()
+    expect(convertedMermaid.context.nodes?.A?.data).toMatchObject({
       Name: {
         type: 'Text Input',
         value: '',
@@ -418,7 +623,7 @@ describe('convertUiGraphToMermaid', () => {
         edges: [],
       })
 
-      expect(result.context.nodes?.builder1?.___internal).toMatchObject({
+      expect(result.context.nodes?.A?.___internal).toMatchObject({
         componentFields: builderComponentFields,
       })
     })
@@ -439,7 +644,7 @@ describe('convertUiGraphToMermaid', () => {
         convertedMermaid.context
       )
 
-      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const outputNode = output.nodes.find((node) => node.id === 'A')
 
       expect(outputNode?.type).toBe('builder')
       expect(outputNode?.data.componentFields).toEqual(builderComponentFields)
@@ -455,19 +660,15 @@ describe('convertUiGraphToMermaid', () => {
         edges: [],
       })
 
-      expect(convertedMermaid.mermaid).toContain('\nbuilder_empty')
-      expect(
-        convertedMermaid.context.nodes?.builder_empty?.name
-      ).toBeUndefined()
+      expect(convertedMermaid.mermaid).toContain('\nA')
+      expect(convertedMermaid.context.nodes?.A?.name).toBeUndefined()
 
       const output = await convertMermaidToReactFlowWithContext(
         convertedMermaid.mermaid,
         convertedMermaid.context
       )
 
-      const outputNode = output.nodes.find(
-        (node) => node.id === 'builder_empty'
-      )
+      const outputNode = output.nodes.find((node) => node.id === 'A')
       const outputNameField = outputNode?.data.componentFields?.find(
         (field: any) => field.label === 'Name'
       )
@@ -488,7 +689,7 @@ describe('convertUiGraphToMermaid', () => {
         edges: [],
       })
 
-      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+      expect(convertedMermaid.context.nodes?.A?.data).toMatchObject({
         'Timeout (ms)': { type: 'Number Input', value: null },
         'Retry Attempts': { type: 'Number Input', value: null },
       })
@@ -498,7 +699,7 @@ describe('convertUiGraphToMermaid', () => {
         convertedMermaid.context
       )
 
-      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const outputNode = output.nodes.find((node) => node.id === 'A')
       const timeoutField = outputNode?.data.componentFields?.find(
         (field: any) => field.label === 'Timeout (ms)'
       )
@@ -521,7 +722,7 @@ describe('convertUiGraphToMermaid', () => {
         edges: [],
       })
 
-      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+      expect(convertedMermaid.context.nodes?.A?.data).toMatchObject({
         'API Version': { type: 'Text Input', value: '' },
       })
 
@@ -530,7 +731,7 @@ describe('convertUiGraphToMermaid', () => {
         convertedMermaid.context
       )
 
-      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const outputNode = output.nodes.find((node) => node.id === 'A')
       const apiVersionField = outputNode?.data.componentFields?.find(
         (field: any) => field.label === 'API Version'
       )
@@ -549,7 +750,7 @@ describe('convertUiGraphToMermaid', () => {
         edges: [],
       })
 
-      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+      expect(convertedMermaid.context.nodes?.A?.data).toMatchObject({
         'Service Type': {
           type: 'Dropdown',
           value: 'Internal Service',
@@ -562,7 +763,7 @@ describe('convertUiGraphToMermaid', () => {
         convertedMermaid.context
       )
 
-      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const outputNode = output.nodes.find((node) => node.id === 'A')
       const serviceTypeField = outputNode?.data.componentFields?.find(
         (field: any) => field.label === 'Service Type'
       )
@@ -600,7 +801,7 @@ describe('convertUiGraphToMermaid', () => {
 
       expect(
         (
-          result.context.nodes?.cloud_plain?.___internal as
+          result.context.nodes?.A?.___internal as
             | Record<string, unknown>
             | undefined
         )?.componentFields

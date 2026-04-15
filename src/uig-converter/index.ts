@@ -40,6 +40,7 @@ const CONTEXT_SHAPES = new Set([
 ])
 
 const COMPONENT_INPUT_TYPES = new Set(Object.values(ComponentInputType))
+const INLINE_MERMAID_LABEL_MAX_LENGTH = 32
 
 function isComponentInputType(value: string): value is ComponentInputType {
   return COMPONENT_INPUT_TYPES.has(value as ComponentInputType)
@@ -145,29 +146,50 @@ function normalizeMarker(
   return { type }
 }
 
-function sanitizeMermaidId(
-  sourceId: string,
-  fallbackIndex: number,
-  used: Set<string>
-): string {
-  let baseId = sourceId.replace(/[^A-Za-z0-9_]/g, '_')
-  if (!baseId) baseId = `N${fallbackIndex + 1}`
-  if (/^\d/.test(baseId)) baseId = `N_${baseId}`
+function isAlreadyNormalizedId(sourceId: string): boolean {
+  return /^[A-Za-z]+$/.test(sourceId)
+}
 
-  if (!used.has(baseId)) {
-    used.add(baseId)
-    return baseId
+function indexToAlphabetId(index: number): string {
+  let current = index
+  let result = ''
+
+  while (current >= 0) {
+    result = String.fromCharCode((current % 26) + 65) + result
+    current = Math.floor(current / 26) - 1
   }
 
-  let index = 2
-  let candidate = `${baseId}_${index}`
-  while (used.has(candidate)) {
-    index += 1
-    candidate = `${baseId}_${index}`
-  }
+  return result
+}
 
-  used.add(candidate)
-  return candidate
+function escapeMermaidText(value: string): string {
+  return value.replaceAll('"', '\\"')
+}
+
+function canInlineMermaidLabel(value: string): boolean {
+  if (value.length > INLINE_MERMAID_LABEL_MAX_LENGTH) return false
+  if (value.includes('\n') || value.includes('\r')) return false
+  return true
+}
+
+function resolveMermaidNodeLabel(node: Node): string | undefined {
+  const nodeType = pickString(node.type)
+  const nodeData = toRecord(node.data)
+  const componentFields = Array.isArray(nodeData?.componentFields)
+    ? nodeData.componentFields
+        .map((field) => toRecord(field))
+        .filter((field) => field !== undefined)
+    : []
+
+  const name = getFieldString(componentFields, 'Name')
+
+  if (nodeType === 'text') return getFieldString(componentFields, 'Text')
+  if (nodeType === 'code') return getFieldString(componentFields, 'Code')
+  if (nodeType === 'shape') return name
+  if (nodeType === 'cloud') return name
+  if (nodeType === 'table') return name
+  if (nodeType === 'gif') return name
+  return
 }
 
 function inferDirection(nodes: Node[], edges: Edge[]): 'LR' | 'TB' {
@@ -197,54 +219,6 @@ function inferDirection(nodes: Node[], edges: Edge[]): 'LR' | 'TB' {
   return width >= height ? 'LR' : 'TB'
 }
 
-function escapeMermaidText(value: string): string {
-  return value.replaceAll('"', '\\"').replaceAll('\n', ' ')
-}
-
-function wrapNodeLabel(label: string, node: Node): string {
-  const data = toRecord(node.data) ?? {}
-  const shape = pickString(data.shape)
-  const escaped = escapeMermaidText(label)
-
-  if (node.type === 'shape' && shape === 'rounded-rect') {
-    return `(\"${escaped}\")`
-  }
-
-  if (node.type === 'shape' && shape === 'ellipse') {
-    return `((\"${escaped}\"))`
-  }
-
-  if (node.type === 'shape' && shape === 'diamond') {
-    return `{\"${escaped}\"}`
-  }
-
-  if (node.type === 'shape' && shape === 'terminator') {
-    return `([\"${escaped}\"])`
-  }
-
-  return `[\"${escaped}\"]`
-}
-
-function resolveNodeLabel(
-  node: Node,
-  fields: Record<string, unknown>[]
-): string | undefined {
-  const fieldName = getFieldString(fields, 'Name')
-  if (fieldName) return fieldName
-
-  if (node.type === 'text') {
-    const textValue = getFieldString(fields, 'Text')
-    if (textValue) return textValue
-  }
-
-  if (node.type === 'code') {
-    const codeValue = getFieldString(fields, 'Code')
-    if (codeValue) return codeValue
-  }
-
-  return
-}
-
 export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
   const groupNodes = input.nodes.filter((node) => node.type === 'group')
   const graphNodes = input.nodes.filter((node) => node.type !== 'group')
@@ -252,25 +226,36 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
 
   const usedMermaidIds = new Set<string>()
   const nodeIdMap = new Map<string, string>()
+  let alphabeticIndex = 0
 
-  graphNodes.forEach((node, index) => {
-    nodeIdMap.set(node.id, sanitizeMermaidId(node.id, index, usedMermaidIds))
+  graphNodes.forEach((node) => {
+    if (isAlreadyNormalizedId(node.id) && !usedMermaidIds.has(node.id)) {
+      nodeIdMap.set(node.id, node.id)
+      usedMermaidIds.add(node.id)
+      return
+    }
+
+    let mappedNodeId = indexToAlphabetId(alphabeticIndex)
+    alphabeticIndex += 1
+
+    while (usedMermaidIds.has(mappedNodeId)) {
+      mappedNodeId = indexToAlphabetId(alphabeticIndex)
+      alphabeticIndex += 1
+    }
+
+    nodeIdMap.set(node.id, mappedNodeId)
+    usedMermaidIds.add(mappedNodeId)
   })
 
   const mermaidNodeLines = graphNodes.map((node) => {
     const mappedNodeId = nodeIdMap.get(node.id) ?? node.id
-    const nodeData = toRecord(node.data)
-    const componentFields = Array.isArray(nodeData?.componentFields)
-      ? nodeData.componentFields
-          .map((field) => toRecord(field))
-          .filter((field) => field !== undefined)
-      : []
+    const mermaidLabel = resolveMermaidNodeLabel(node)
 
-    const label = resolveNodeLabel(node, componentFields)
-    if (label === undefined) return mappedNodeId
+    if (!mermaidLabel || !canInlineMermaidLabel(mermaidLabel)) {
+      return mappedNodeId
+    }
 
-    const wrappedLabel = wrapNodeLabel(label, node)
-    return `${mappedNodeId}${wrappedLabel}`
+    return `${mappedNodeId}["${escapeMermaidText(mermaidLabel)}"]`
   })
 
   const contextNodes: NonNullable<z.infer<typeof contextSchema>['nodes']> = {}
@@ -544,17 +529,13 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
     const target = nodeIdMap.get(edge.target)
     if (!source || !target) continue
 
-    const edgeLabel = pickString(edge.label)
-    if (edgeLabel) {
-      const escapedLabel = edgeLabel.replaceAll('|', '/').replaceAll('\n', ' ')
-      mermaidEdgeLines.push(`${source} -->|${escapedLabel}| ${target}`)
-    } else {
-      mermaidEdgeLines.push(`${source} --> ${target}`)
-    }
+    mermaidEdgeLines.push(`${source} --> ${target}`)
 
     const edgeContext: NonNullable<
       z.infer<typeof contextSchema>['edges']
     >[string] = {}
+    const edgeLabel = pickString(edge.label)
+    if (edgeLabel) edgeContext.label = edgeLabel
     const edgeStyleRecord = toRecord(edge.style) ?? {}
     const edgeStyle: NonNullable<typeof edgeContext.style> = {}
 
