@@ -184,6 +184,7 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     clonedNode.data = {
+      ...ctx?.___internal,
       ...clonedNode.data,
       ...objectPick(ctx.style ?? {}, [
         'fill',
@@ -226,10 +227,17 @@ export async function convertMermaidToReactFlowWithContext(
 
     return {
       ...edge,
+
+      data: {
+        ...ctx?.___internal,
+        ...edge.data,
+      },
+
       label: ctx.label ?? edge.label,
       animated: ctx.style?.borderAnimationEnabled ?? edge.animated,
       style: {
         ...edge.style,
+
         stroke: ctx.style?.stroke ?? edge.style?.stroke,
         strokeWidth: ctx.style?.strokeWidth ?? edge.style?.strokeWidth,
         strokeDasharray:

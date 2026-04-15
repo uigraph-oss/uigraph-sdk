@@ -88,6 +88,11 @@ export const contextSchema = z.object({
             rows: z.array(z.array(z.string())),
           })
           .optional(),
+
+        /**
+         * Internal data that can be used to pass any additional information that might be needed during the conversion process.
+         */
+        ___internal: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
@@ -119,6 +124,11 @@ export const contextSchema = z.object({
             color: z.string().optional(),
           })
           .optional(),
+
+        /**
+         * Internal data that can be used to pass any additional information that might be needed during the conversion process.
+         */
+        ___internal: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
