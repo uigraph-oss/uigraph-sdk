@@ -6,6 +6,87 @@ import { ComponentInputType } from '../components/component-type'
 import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/context/convert-with-context'
 import { convertUiGraphToMermaid } from './index'
 
+const builderComponentFields = [
+  {
+    __typename: 'FlowDiagramComponentField',
+    flowDiagramComponentFieldId: 'component_field_es_0001',
+    componentFieldId: 'component_field_es_0001',
+    label: 'Name',
+    type: 'Text Input',
+    required: true,
+    readonly: null,
+    data: [{ value: 'Service' }],
+    options: [],
+    order: 1,
+  },
+  {
+    __typename: 'FlowDiagramComponentField',
+    flowDiagramComponentFieldId: 'component_field_es_0002',
+    componentFieldId: 'component_field_es_0002',
+    label: 'Service Type',
+    type: 'Dropdown',
+    required: false,
+    readonly: null,
+    data: [{ value: 'Internal Service' }],
+    options: ['SaaS', 'Internal Service', 'Third-party API', 'Webhook'],
+    order: 2,
+  },
+  {
+    __typename: 'FlowDiagramComponentField',
+    flowDiagramComponentFieldId: 'component_field_es_0005',
+    componentFieldId: 'component_field_es_0005',
+    label: 'API Version',
+    type: 'Text Input',
+    required: false,
+    readonly: null,
+    data: [{ value: '' }],
+    options: [],
+    order: 5,
+  },
+  {
+    __typename: 'FlowDiagramComponentField',
+    flowDiagramComponentFieldId: 'component_field_es_0006',
+    componentFieldId: 'component_field_es_0006',
+    label: 'Timeout (ms)',
+    type: 'Number Input',
+    required: false,
+    readonly: null,
+    data: [{ value: null }],
+    options: [],
+    order: 6,
+  },
+  {
+    __typename: 'FlowDiagramComponentField',
+    flowDiagramComponentFieldId: 'component_field_es_0007',
+    componentFieldId: 'component_field_es_0007',
+    label: 'Retry Attempts',
+    type: 'Number Input',
+    required: false,
+    readonly: null,
+    data: [{ value: null }],
+    options: [],
+    order: 7,
+  },
+]
+
+function buildBuilderNode(
+  id: string,
+  componentFields: Record<string, unknown>[]
+): Node<any> {
+  return {
+    id,
+    type: 'builder',
+    data: {
+      componentId: 'flow_diagram_component_service',
+      componentName: 'Service',
+      componentFields,
+      label: 'DEV',
+      hide: {},
+    },
+    position: { x: 10, y: 20 },
+  }
+}
+
 describe('convertUiGraphToMermaid', () => {
   it('converts nodes and edges to readable mermaid with context', () => {
     const result = convertUiGraphToMermaid({
@@ -323,5 +404,207 @@ describe('convertUiGraphToMermaid', () => {
 
     expect(outputNode.type).toBe('cloud')
     expect(outputNameField?.data).toEqual([{ value: '' }])
+  })
+
+  describe('builder roundtrip fidelity', () => {
+    it('exports full builder componentFields into ___internal', () => {
+      const inputNode = buildBuilderNode(
+        'builder1',
+        JSON.parse(JSON.stringify(builderComponentFields))
+      )
+
+      const result = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      expect(result.context.nodes?.builder1?.___internal).toMatchObject({
+        componentFields: builderComponentFields,
+      })
+    })
+
+    it('round-trips builder node without stripping componentFields metadata', async () => {
+      const inputNode = buildBuilderNode(
+        'builder1',
+        JSON.parse(JSON.stringify(builderComponentFields))
+      )
+
+      const convertedMermaid = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      const output = await convertMermaidToReactFlowWithContext(
+        convertedMermaid.mermaid,
+        convertedMermaid.context
+      )
+
+      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+
+      expect(outputNode?.type).toBe('builder')
+      expect(outputNode?.data.componentFields).toEqual(builderComponentFields)
+    })
+
+    it('keeps builder empty Name empty and does not inject label or id into Name', async () => {
+      const emptyNameFields = JSON.parse(JSON.stringify(builderComponentFields))
+      emptyNameFields[0].data = [{ value: '' }]
+      const inputNode = buildBuilderNode('builder-empty', emptyNameFields)
+
+      const convertedMermaid = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      expect(convertedMermaid.mermaid).toContain('\nbuilder_empty')
+      expect(
+        convertedMermaid.context.nodes?.builder_empty?.name
+      ).toBeUndefined()
+
+      const output = await convertMermaidToReactFlowWithContext(
+        convertedMermaid.mermaid,
+        convertedMermaid.context
+      )
+
+      const outputNode = output.nodes.find(
+        (node) => node.id === 'builder_empty'
+      )
+      const outputNameField = outputNode?.data.componentFields?.find(
+        (field: any) => field.label === 'Name'
+      )
+
+      expect(outputNameField?.data).toEqual([{ value: '' }])
+      expect(outputNameField?.data).not.toEqual([{ value: 'DEV' }])
+      expect(outputNameField?.data).not.toEqual([{ value: 'builder-empty' }])
+    })
+
+    it('preserves null Number Input values in builder fields', async () => {
+      const inputNode = buildBuilderNode(
+        'builder1',
+        JSON.parse(JSON.stringify(builderComponentFields))
+      )
+
+      const convertedMermaid = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+        'Timeout (ms)': { type: 'Number Input', value: null },
+        'Retry Attempts': { type: 'Number Input', value: null },
+      })
+
+      const output = await convertMermaidToReactFlowWithContext(
+        convertedMermaid.mermaid,
+        convertedMermaid.context
+      )
+
+      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const timeoutField = outputNode?.data.componentFields?.find(
+        (field: any) => field.label === 'Timeout (ms)'
+      )
+      const retryField = outputNode?.data.componentFields?.find(
+        (field: any) => field.label === 'Retry Attempts'
+      )
+
+      expect(timeoutField?.data).toEqual([{ value: null }])
+      expect(retryField?.data).toEqual([{ value: null }])
+    })
+
+    it('preserves empty string values in builder fields', async () => {
+      const inputNode = buildBuilderNode(
+        'builder1',
+        JSON.parse(JSON.stringify(builderComponentFields))
+      )
+
+      const convertedMermaid = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+        'API Version': { type: 'Text Input', value: '' },
+      })
+
+      const output = await convertMermaidToReactFlowWithContext(
+        convertedMermaid.mermaid,
+        convertedMermaid.context
+      )
+
+      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const apiVersionField = outputNode?.data.componentFields?.find(
+        (field: any) => field.label === 'API Version'
+      )
+
+      expect(apiVersionField?.data).toEqual([{ value: '' }])
+    })
+
+    it('preserves dropdown options and selected value for builder fields', async () => {
+      const inputNode = buildBuilderNode(
+        'builder1',
+        JSON.parse(JSON.stringify(builderComponentFields))
+      )
+
+      const convertedMermaid = convertUiGraphToMermaid({
+        nodes: [inputNode],
+        edges: [],
+      })
+
+      expect(convertedMermaid.context.nodes?.builder1?.data).toMatchObject({
+        'Service Type': {
+          type: 'Dropdown',
+          value: 'Internal Service',
+          options: ['SaaS', 'Internal Service', 'Third-party API', 'Webhook'],
+        },
+      })
+
+      const output = await convertMermaidToReactFlowWithContext(
+        convertedMermaid.mermaid,
+        convertedMermaid.context
+      )
+
+      const outputNode = output.nodes.find((node) => node.id === 'builder1')
+      const serviceTypeField = outputNode?.data.componentFields?.find(
+        (field: any) => field.label === 'Service Type'
+      )
+
+      expect(serviceTypeField?.data).toEqual([{ value: 'Internal Service' }])
+      expect((serviceTypeField as any)?.options).toEqual([
+        'SaaS',
+        'Internal Service',
+        'Third-party API',
+        'Webhook',
+      ])
+    })
+
+    it('does not add ___internal.componentFields for non-builder nodes', () => {
+      const result = convertUiGraphToMermaid({
+        nodes: [
+          {
+            id: 'cloud-plain',
+            type: 'cloud',
+            position: { x: 0, y: 0 },
+            data: {
+              cloud: 'AWS',
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: 'Text Input',
+                  data: [{ value: 'Cloud Plain' }],
+                },
+              ],
+            },
+          },
+        ],
+        edges: [],
+      })
+
+      expect(
+        (
+          result.context.nodes?.cloud_plain?.___internal as
+            | Record<string, unknown>
+            | undefined
+        )?.componentFields
+      ).toBeUndefined()
+    })
   })
 })
