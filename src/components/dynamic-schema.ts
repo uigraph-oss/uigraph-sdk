@@ -111,10 +111,10 @@ export function buildDynamicZodSchema(fields: ServerComponentField[]) {
                 const container = document.createElement('div')
                 const quill = new Quill(container)
 
-                quill.setContents(value)
-                const text = quill.getText().trim()
+                quill?.setContents?.(value)
+                const text = quill?.getText?.().trim()
 
-                return text.length > 0
+                return (text?.length ?? 0) > 0
               }
 
               if (Array.isArray(value)) {

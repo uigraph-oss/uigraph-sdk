@@ -93,6 +93,12 @@ export const contextSchema = z.object({
          * Internal data that can be used to pass any additional information that might be needed during the conversion process.
          */
         ___internal: z.record(z.string(), z.unknown()).optional(),
+        ___position: z
+          .object({
+            x: z.number(),
+            y: z.number(),
+          })
+          .optional(),
       })
     )
     .optional(),

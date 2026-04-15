@@ -13,3 +13,4 @@ export { buildMetaData, flattenMetaData } from './components/data-structure'
 
 export { contextSchema } from './mermaid-converter/context/context-schema'
 export { convertMermaidToReactFlowWithContext } from './mermaid-converter/context/convert-with-context'
+export { convertUiGraphToMermaid } from './uig-converter'

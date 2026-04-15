@@ -22,6 +22,13 @@ type ResolverOptions = {
   ) => Promise<string | undefined | null>
 }
 
+function hasValidPosition(
+  position: { x: number; y: number } | undefined
+): position is { x: number; y: number } {
+  if (!position) return false
+  return Number.isFinite(position.x) && Number.isFinite(position.y)
+}
+
 export async function convertMermaidToReactFlowWithContext(
   mermaidCode: string,
   context: z.infer<typeof contextSchema>,
@@ -39,6 +46,13 @@ export async function convertMermaidToReactFlowWithContext(
 
     ctx.data ??= {}
     clonedNode.data ??= {}
+
+    if (hasValidPosition(ctx.___position)) {
+      clonedNode.position = {
+        x: ctx.___position.x,
+        y: ctx.___position.y,
+      }
+    }
 
     if (ctx.type) {
       clonedNode.type = ctx.type
@@ -184,7 +198,6 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     clonedNode.data = {
-      ...ctx?.___internal,
       ...clonedNode.data,
       ...objectPick(ctx.style ?? {}, [
         'fill',
@@ -197,6 +210,8 @@ export async function convertMermaidToReactFlowWithContext(
 
       componentFields: componentFields,
       strokeAnimation: ctx.style?.borderAnimationEnabled ? 'dash' : undefined,
+
+      ...ctx?.___internal,
     }
 
     return clonedNode
@@ -229,8 +244,8 @@ export async function convertMermaidToReactFlowWithContext(
       ...edge,
 
       data: {
-        ...ctx?.___internal,
         ...edge.data,
+        ...ctx?.___internal,
       },
 
       label: ctx.label ?? edge.label,

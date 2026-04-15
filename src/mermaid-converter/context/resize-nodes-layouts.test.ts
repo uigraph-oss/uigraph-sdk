@@ -55,7 +55,7 @@ describe('resizeNodesLayouts', () => {
 
     expect(resizedNodes.find((node) => node.id === 'corner')?.position).toEqual(
       {
-        x: 440,
+        x: 260,
         y: 520,
       }
     )
@@ -92,7 +92,7 @@ describe('resizeNodesLayouts', () => {
 
     expect(resizedNodes.find((node) => node.id === 'target')?.position).toEqual(
       {
-        x: 970,
+        x: 760,
         y: 1060,
       }
     )
@@ -146,12 +146,12 @@ describe('resizeNodesLayouts', () => {
     expect(
       resizedNodes.find((node) => node.id === 'child-b')?.position
     ).toEqual({
-      x: 760,
+      x: 560,
       y: 180,
     })
 
-    expect(groupNode?.position).toEqual({ x: 740, y: 20 })
-    expect(groupNode?.style?.width).toBe(240)
+    expect(groupNode?.position).toEqual({ x: 540, y: 20 })
+    expect(groupNode?.style?.width).toBe(440)
     expect(groupNode?.style?.height).toBe(290)
   })
 
@@ -240,12 +240,12 @@ describe('resizeNodesLayouts', () => {
     const targetNode = resizedNodes.find((node) => node.id === 'target')
 
     expect(databaseNode?.position).toEqual({
-      x: 820,
+      x: 760,
       y: 0,
     })
 
     expect(targetNode?.position).toEqual({
-      x: 1240,
+      x: 1180,
       y: 0,
     })
 
@@ -280,7 +280,7 @@ describe('resizeNodesLayouts', () => {
     expect(
       resizedNodes.find((node) => node.id === 'next-row')?.position
     ).toEqual({
-      x: 720,
+      x: 520,
       y: 220,
     })
   })

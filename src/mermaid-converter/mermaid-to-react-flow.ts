@@ -2169,7 +2169,6 @@ function createReactFlowElements(
       case 'table':
         data = {
           componentFields: [generateComponentFieldNameInput(displayLabel)],
-          title: displayLabel,
           columns: ['Task', 'Owner', 'Status', 'Due'],
           rows: [
             ['Website revamp', 'Amara', 'In progress', 'May 12'],
