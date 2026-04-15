@@ -15,7 +15,6 @@
     "start": "bun run --watch ./src/__lab__/index.ts"
   },
   "dependencies": {
-    "@uigraph/sdk": "^1.1.21",
     "dagre": "^0.8.5",
     "daily-code": "^1.1.16",
     "markdown-to-quill-delta": "^1.0.1",
