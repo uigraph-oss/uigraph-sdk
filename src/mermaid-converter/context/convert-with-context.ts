@@ -184,7 +184,6 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     clonedNode.data = {
-      ...ctx?.___internal,
       ...clonedNode.data,
       ...objectPick(ctx.style ?? {}, [
         'fill',
@@ -197,6 +196,8 @@ export async function convertMermaidToReactFlowWithContext(
 
       componentFields: componentFields,
       strokeAnimation: ctx.style?.borderAnimationEnabled ? 'dash' : undefined,
+
+      ...ctx?.___internal,
     }
 
     return clonedNode
@@ -229,8 +230,8 @@ export async function convertMermaidToReactFlowWithContext(
       ...edge,
 
       data: {
-        ...ctx?.___internal,
         ...edge.data,
+        ...ctx?.___internal,
       },
 
       label: ctx.label ?? edge.label,
