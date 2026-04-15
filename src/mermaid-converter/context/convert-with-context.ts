@@ -22,6 +22,13 @@ type ResolverOptions = {
   ) => Promise<string | undefined | null>
 }
 
+function hasValidPosition(
+  position: { x: number; y: number } | undefined
+): position is { x: number; y: number } {
+  if (!position) return false
+  return Number.isFinite(position.x) && Number.isFinite(position.y)
+}
+
 export async function convertMermaidToReactFlowWithContext(
   mermaidCode: string,
   context: z.infer<typeof contextSchema>,
@@ -39,6 +46,13 @@ export async function convertMermaidToReactFlowWithContext(
 
     ctx.data ??= {}
     clonedNode.data ??= {}
+
+    if (hasValidPosition(ctx.___position)) {
+      clonedNode.position = {
+        x: ctx.___position.x,
+        y: ctx.___position.y,
+      }
+    }
 
     if (ctx.type) {
       clonedNode.type = ctx.type

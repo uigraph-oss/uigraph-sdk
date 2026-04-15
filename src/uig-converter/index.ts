@@ -84,6 +84,19 @@ function pickString(value: unknown): string | undefined {
   return trimmed
 }
 
+function pickPosition(value: unknown): { x: number; y: number } | undefined {
+  const position = toRecord(value)
+  if (!position) return
+
+  if (typeof position.x !== 'number' || !Number.isFinite(position.x)) return
+  if (typeof position.y !== 'number' || !Number.isFinite(position.y)) return
+
+  return {
+    x: position.x,
+    y: position.y,
+  }
+}
+
 function getFieldValue(fieldData: unknown): unknown {
   if (!Array.isArray(fieldData) || fieldData.length !== 1) return fieldData
   const first = toRecord(fieldData[0])
@@ -489,6 +502,11 @@ export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
 
     if (Object.keys(dynamicData).length > 0) {
       nodeContext.data = dynamicData
+    }
+
+    const position = pickPosition(node.position)
+    if (position) {
+      nodeContext.___position = position
     }
 
     const internalData = Object.entries(nodeData).reduce<

@@ -139,16 +139,42 @@ describe('convertUiGraphToMermaid', () => {
     expect(result.context.nodes?.A).toMatchObject({
       type: 'text',
       value: 'Auth Service',
+      ___position: { x: 10, y: 10 },
     })
     expect(result.context.nodes?.B).toMatchObject({
       type: 'cloud',
       name: 'Main DB',
       cloud: 'aws',
       service: 'Amazon RDS',
+      ___position: { x: 280, y: 20 },
     })
     expect(result.context.edges?.['A-B']).toMatchObject({
       label: 'reads/writes',
     })
+  })
+
+  it('only adds ___position when node coordinates are valid numbers', () => {
+    const result = convertUiGraphToMermaid({
+      nodes: [
+        {
+          id: 'node-1',
+          type: 'text',
+          position: { x: Number.NaN, y: 12 },
+          data: {
+            componentFields: [
+              {
+                label: 'Text',
+                type: ComponentInputType.TextBox,
+                data: [{ value: 'Invalid Pos' }],
+              },
+            ],
+          },
+        },
+      ],
+      edges: [],
+    })
+
+    expect(result.context.nodes?.A?.___position).toBeUndefined()
   })
 
   it('inlines only whitelisted labels within 32 chars', () => {

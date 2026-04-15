@@ -60,6 +60,7 @@ describe('convertMermaidToReactFlowWithContext', () => {
             cloud: 'aws',
             service: 'Amazon Athena',
             name: 'Primary',
+            ___position: { x: 120, y: 240 },
             data: {
               CPU: {
                 type: ComponentInputType.NumberInput,
@@ -108,6 +109,7 @@ describe('convertMermaidToReactFlowWithContext', () => {
     expect(nodeA?.style).toBeUndefined()
     expect(nodeA?.height).toBe(150)
     expect(nodeA?.width).toBe(150)
+    expect(nodeA?.position).toEqual({ x: 120, y: 240 })
     expect(nodeA?.parentId).toBe('group1')
     expect(nodeA?.data.iconSrc).toBe('/aws-icons/mock.svg')
     expect((nodeA?.data as Record<string, unknown>).stroke).toBe('#112233')
@@ -121,6 +123,7 @@ describe('convertMermaidToReactFlowWithContext', () => {
 
     const nodeB = result.nodes.find((node) => node.id === 'B')
     expect(nodeB?.type).toBe('text')
+    expect(nodeB?.position).toEqual({ x: 50, y: 40 })
     expect(nodeB?.parentId).toBe('group1')
     const textField = nodeB?.data.componentFields?.[0]
     expect(textField?.label).toBe('Text')
