@@ -4,7 +4,7 @@ import { ComponentInputType } from '../../components/component-type'
 import { convertUiGraphToMermaid } from '../index'
 
 describe('convertUiGraphToMermaid detailed labels', () => {
-  it('adds cloud-specific details and excludes unrelated field noise', () => {
+  it('formats cloud labels with core data and component fields', () => {
     const result = convertUiGraphToMermaid(
       {
         nodes: [
@@ -14,7 +14,7 @@ describe('convertUiGraphToMermaid detailed labels', () => {
             position: { x: 0, y: 0 },
             data: {
               cloud: 'AWS',
-              service: 'Amazon API Gateway',
+              service: 'apigw',
               componentFields: [
                 {
                   label: 'Name',
@@ -22,15 +22,14 @@ describe('convertUiGraphToMermaid detailed labels', () => {
                   data: [{ value: 'API Gateway' }],
                 },
                 {
-                  label: 'Runtime',
-                  type: ComponentInputType.DropdownSelect,
-                  data: [{ value: 'Node.js 20' }],
-                  options: ['Node.js 20', 'Python 3.12', 'Go 1.x', 'Java 21'],
-                },
-                {
                   label: 'Owner',
                   type: ComponentInputType.TextInput,
                   data: [{ value: 'Platform Team' }],
+                },
+                {
+                  label: 'Rate limit (req/s)',
+                  type: ComponentInputType.NumberInput,
+                  data: [{ value: 500 }],
                 },
               ],
             },
@@ -42,12 +41,11 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     )
 
     expect(result.mermaid).toBe(
-      'flowchart LR\nA["API Gateway | cloud:AWS | service:Amazon API Gateway | Runtime:Node.js 20 [Node.js 20/Python 3.12/Go 1.x/Java 21]"]'
+      'flowchart LR\nA["Cloud: API Gateway\nprovider: AWS\nservice: apigw\nOwner: Platform Team\nRate limit (req/s): 500"]'
     )
-    expect(result.mermaid).not.toContain('Owner:')
   })
 
-  it('uses dbConfig fields for data-source labels and excludes unrelated data fields', () => {
+  it('formats data-source labels with db details and component fields', () => {
     const result = convertUiGraphToMermaid(
       {
         nodes: [
@@ -68,6 +66,11 @@ describe('convertUiGraphToMermaid detailed labels', () => {
                   data: [{ value: 'Orders' }],
                 },
                 {
+                  label: 'RPO (minutes)',
+                  type: ComponentInputType.NumberInput,
+                  data: [{ value: 15 }],
+                },
+                {
                   label: 'Owner',
                   type: ComponentInputType.TextInput,
                   data: [{ value: 'Commerce Team' }],
@@ -82,31 +85,30 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     )
 
     expect(result.mermaid).toBe(
-      'flowchart LR\norders["Orders | db:ecommerce.orders | service:UIGraph Adapter"]'
+      'flowchart LR\norders["DataSource: Orders\ndb: ecommerce.orders\nservice: UIGraph Adapter\nRPO (minutes): 15\nOwner: Commerce Team"]'
     )
-    expect(result.mermaid).not.toContain('Owner:')
   })
 
-  it('adds table dimensions for table nodes in detailed labels', () => {
+  it('formats code labels with first line and metadata fields', () => {
     const result = convertUiGraphToMermaid(
       {
         nodes: [
           {
-            id: 'T',
-            type: 'table',
+            id: 'code-1',
+            type: 'code',
             position: { x: 0, y: 0 },
             data: {
               componentFields: [
                 {
-                  label: 'Name',
-                  type: ComponentInputType.TextInput,
-                  data: [{ value: 'Orders Table' }],
+                  label: 'Code',
+                  type: ComponentInputType.CodeEditor,
+                  data: [{ value: 'const x = 1\nconsole.log(x)' }],
                 },
-              ],
-              columns: ['ID', 'Name', 'Status'],
-              rows: [
-                ['1', 'A', 'Done'],
-                ['2', 'B', 'Pending'],
+                {
+                  label: 'Language',
+                  type: ComponentInputType.DropdownSelect,
+                  data: [{ value: 'TypeScript' }],
+                },
               ],
             },
           },
@@ -116,7 +118,190 @@ describe('convertUiGraphToMermaid detailed labels', () => {
       { detailedContext: true }
     )
 
-    expect(result.mermaid).toBe('flowchart LR\nT["Orders Table | table:3c/2r"]')
+    expect(result.mermaid).toBe(
+      'flowchart LR\nA["Code: const x = 1\nLanguage: TypeScript"]'
+    )
+  })
+
+  it('formats text labels and keeps line breaks for detailed lines', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 'txt-1',
+            type: 'text',
+            position: { x: 0, y: 0 },
+            data: {
+              componentFields: [
+                {
+                  label: 'Text',
+                  type: ComponentInputType.TextBox,
+                  data: [{ value: 'User submits login form' }],
+                },
+                {
+                  label: 'Region',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'US' }],
+                },
+              ],
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toBe(
+      'flowchart LR\nA["Text: User submits login form\nRegion: US"]'
+    )
+  })
+
+  it('formats shape, table, image and gif labels with typed headers', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 's',
+            type: 'shape',
+            position: { x: 0, y: 0 },
+            data: {
+              shape: 'diamond',
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'Validate Credentials' }],
+                },
+              ],
+            },
+          },
+          {
+            id: 't',
+            type: 'table',
+            position: { x: 150, y: 0 },
+            data: {
+              columns: ['id', 'name'],
+              rows: [['1', 'A']],
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'Session Metrics' }],
+                },
+              ],
+            },
+          },
+          {
+            id: 'img',
+            type: 'image',
+            position: { x: 300, y: 0 },
+            data: {
+              src: 'https://cdn.example.com/arch.png',
+            },
+          },
+          {
+            id: 'gif',
+            type: 'gif',
+            position: { x: 450, y: 0 },
+            data: {
+              src: 'https://cdn.example.com/loading.gif',
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toContain('Shape: Validate Credentials')
+    expect(result.mermaid).toContain('shape: diamond')
+    expect(result.mermaid).toContain('Table: Session Metrics')
+    expect(result.mermaid).toContain('columns: 2')
+    expect(result.mermaid).toContain('rows: 1')
+    expect(result.mermaid).toContain('Image: https://cdn.example.com/arch.png')
+    expect(result.mermaid).toContain('Gif: https://cdn.example.com/loading.gif')
+  })
+
+  it('formats sequence and comment labels with typed headers', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 'seq',
+            type: 'sequenceParticipant',
+            position: { x: 0, y: 0 },
+            data: {
+              label: 'Payment Service',
+              rowCount: 8,
+              color: '#f59e0b',
+              componentFields: [
+                {
+                  label: 'Owner',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'Payments Team' }],
+                },
+              ],
+            },
+          },
+          {
+            id: 'cmt',
+            type: 'comment',
+            position: { x: 120, y: 0 },
+            data: {
+              isResolved: false,
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toContain('SequenceParticipant: Payment Service')
+    expect(result.mermaid).toContain('rows: 8')
+    expect(result.mermaid).toContain('color: #f59e0b')
+    expect(result.mermaid).toContain('Owner: Payments Team')
+    expect(result.mermaid).toContain('Comment: Open')
+  })
+
+  it('formats builder labels and includes componentId with fields', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 'builder-1',
+            type: 'builder',
+            position: { x: 0, y: 0 },
+            data: {
+              componentId: 'flow_diagram_component_service',
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: ComponentInputType.TextInput,
+                  componentFieldId: 'name',
+                  data: [{ value: 'Auth Service' }],
+                },
+                {
+                  label: 'Runtime',
+                  type: ComponentInputType.DropdownSelect,
+                  componentFieldId: 'runtime',
+                  data: [{ value: 'Node.js 20' }],
+                },
+              ],
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toContain('Builder: Auth Service')
+    expect(result.mermaid).toContain(
+      'componentId: flow_diagram_component_service'
+    )
+    expect(result.mermaid).toContain('Runtime: Node.js 20')
   })
 
   it('adds compact edge details to labels when detailedContext is true', () => {
@@ -154,139 +339,7 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     )
 
     expect(result.mermaid).toBe(
-      'flowchart LR\nA["shape:rectangle"]\nB["shape:rectangle"]\nA -->|invoke / dashed / animated / end:arrow@#1976D2| B'
-    )
-  })
-
-  it('keeps full text node labels in detailed mode', () => {
-    const result = convertUiGraphToMermaid(
-      {
-        nodes: [
-          {
-            id: 'A',
-            type: 'text',
-            position: { x: 0, y: 0 },
-            data: {
-              componentFields: [
-                {
-                  label: 'Text',
-                  type: ComponentInputType.TextBox,
-                  data: [
-                    {
-                      value:
-                        'abcdefghijklmnopqrstuvwxyz0123456789LONG and extra text',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        ],
-        edges: [],
-      },
-      { detailedContext: true }
-    )
-
-    expect(result.mermaid).toBe(
-      'flowchart LR\nA["abcdefghijklmnopqrstuvwxyz0123456789LONG and extra text"]'
-    )
-  })
-
-  it('uses dbConfig fallback in data-source labels', () => {
-    const result = convertUiGraphToMermaid(
-      {
-        nodes: [
-          {
-            id: 'orders-db',
-            type: 'data-source',
-            position: { x: 0, y: 0 },
-            data: {
-              name: 'Orders',
-              dbConfig: {
-                service: 'UIGraph Adapter',
-                database: 'ecommerce',
-                tableName: 'orders',
-              },
-            },
-          },
-        ],
-        edges: [],
-      },
-      { detailedContext: true }
-    )
-
-    expect(result.mermaid).toBe(
-      'flowchart LR\nA["Orders | db:ecommerce.orders | service:UIGraph Adapter"]'
-    )
-  })
-
-  it('includes operational cloud fields in labels', () => {
-    const result = convertUiGraphToMermaid(
-      {
-        nodes: [
-          {
-            id: 'cloud-a',
-            type: 'cloud',
-            position: { x: 0, y: 0 },
-            data: {
-              cloud: 'AWS',
-              service: 'Amazon Lambda',
-              componentFields: [
-                {
-                  label: 'Name',
-                  type: ComponentInputType.TextInput,
-                  data: [{ value: 'Lambda' }],
-                },
-                {
-                  label: 'Tier',
-                  type: ComponentInputType.TextInput,
-                  data: [{ value: 'Basic' }],
-                },
-                {
-                  label: 'Region',
-                  type: ComponentInputType.TextInput,
-                  data: [{ value: 'us-east-1' }],
-                },
-              ],
-            },
-          },
-        ],
-        edges: [],
-      },
-      { detailedContext: true }
-    )
-
-    expect(result.mermaid).toBe(
-      'flowchart LR\nA["Lambda | cloud:AWS | service:Amazon Lambda | Tier:Basic | Region:us-east-1"]'
-    )
-  })
-
-  it('normalizes multiline labels into a single mermaid-safe line', () => {
-    const result = convertUiGraphToMermaid(
-      {
-        nodes: [
-          {
-            id: 'text-1',
-            type: 'text',
-            position: { x: 0, y: 0 },
-            data: {
-              componentFields: [
-                {
-                  label: 'Text',
-                  type: ComponentInputType.TextBox,
-                  data: [{ value: 'Line one\nLine two\r\nLine three' }],
-                },
-              ],
-            },
-          },
-        ],
-        edges: [],
-      },
-      { detailedContext: true }
-    )
-
-    expect(result.mermaid).toBe(
-      'flowchart LR\nA["Line one Line two Line three"]'
+      'flowchart LR\nA["Shape: rectangle\nshape: rectangle"]\nB["Shape: rectangle\nshape: rectangle"]\nA -->|invoke / dashed / animated / end:arrow@#1976D2| B'
     )
   })
 })
