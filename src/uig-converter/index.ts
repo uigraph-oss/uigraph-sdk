@@ -15,19 +15,18 @@ export function convertUiGraphToMermaid(
 ): UigOutput {
   const groupNodes = input.nodes.filter((node) => node.type === 'group')
   const graphNodes = input.nodes.filter((node) => node.type !== 'group')
-  const detailedContext = options?.detailedContext === true
   const direction = inferDirection(graphNodes, input.edges)
 
   const nodeIdMap = buildNodeIdMap(graphNodes)
   const mermaidNodeLines = buildMermaidNodeLines(
     graphNodes,
     nodeIdMap,
-    detailedContext
+    options?.detailedContext === true
   )
   const mermaidEdgeLines = buildMermaidEdgeLines(
     input.edges,
     nodeIdMap,
-    detailedContext
+    options?.detailedContext === true
   )
 
   const context = buildValidatedContext(
