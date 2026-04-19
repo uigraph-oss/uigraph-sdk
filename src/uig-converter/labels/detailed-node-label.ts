@@ -1,8 +1,8 @@
 import { Node } from '@xyflow/react'
 import {
-  getFieldByLabel,
   getFieldString,
   getFieldValue,
+  isComponentInputType,
   pickString,
   toComponentFields,
   toRecord,
@@ -44,30 +44,53 @@ function formatDetailValue(value: unknown): string | undefined {
   }
 }
 
-function getFieldDetailPart(
-  fields: Record<string, unknown>[],
-  label: string
-): string | undefined {
-  const field = getFieldByLabel(fields, label)
-  if (!field) return
-
-  const value = formatDetailValue(getFieldValue(field.data))
-  const options = Array.isArray(field.options)
-    ? field.options.filter((option) => typeof option === 'string')
-    : []
-
-  if (!value && options.length === 0) return
-  if (value && options.length > 0)
-    return `${label}:${value} [${options.join('/')}]`
-  if (value) return `${label}:${value}`
-  return `${label}:[${options.join('/')}]`
-}
-
 function getNodeName(
   nodeData: Record<string, unknown> | undefined,
   componentFields: Record<string, unknown>[]
 ): string | undefined {
   return getFieldString(componentFields, 'Name') ?? pickString(nodeData?.name)
+}
+
+function buildFieldLines(
+  componentFields: Record<string, unknown>[],
+  excludedLabels: Set<string>
+): string[] {
+  const lines: string[] = []
+
+  for (const field of componentFields) {
+    if (field.hidden === true) continue
+
+    const label = pickString(field.label)
+    const type = pickString(field.type)
+    if (!label || !type || !isComponentInputType(type)) continue
+    if (excludedLabels.has(label.toLowerCase())) continue
+
+    const value = formatDetailValue(getFieldValue(field.data))
+    const options = Array.isArray(field.options)
+      ? field.options.filter((option) => typeof option === 'string')
+      : []
+
+    if (!value && options.length === 0) continue
+    if (value && options.length > 0) {
+      lines.push(`${label}: ${value} [${options.join('/')}]`)
+      continue
+    }
+    if (value) {
+      lines.push(`${label}: ${value}`)
+      continue
+    }
+    lines.push(`${label}: [${options.join('/')}]`)
+  }
+
+  return lines
+}
+
+function buildDetailedLabel(lines: string[]): string | undefined {
+  const compact = lines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+  if (compact.length === 0) return
+  return compact.join('\n')
 }
 
 export function resolveMermaidDetailedNodeLabel(
@@ -79,20 +102,28 @@ export function resolveMermaidDetailedNodeLabel(
   const name = getNodeName(nodeData, componentFields)
 
   if (nodeType === 'text') {
-    return getFieldString(componentFields, 'Text')
+    const text =
+      getFieldString(componentFields, 'Text') ?? pickString(nodeData?.value)
+    const lines = [
+      text ? `Text: ${text}` : 'Text',
+      ...buildFieldLines(componentFields, new Set(['name', 'text'])),
+    ]
+    return buildDetailedLabel(lines)
   }
 
   if (nodeType === 'code') {
-    const code = getFieldString(componentFields, 'Code')
-    if (!code) return
-    const firstLine = code.split(/\r?\n/)[0]?.trim()
-    if (!firstLine) return
-    return firstLine
+    const code =
+      getFieldString(componentFields, 'Code') ?? pickString(nodeData?.value)
+    const firstLine = code?.split(/\r?\n/)[0]?.trim()
+    const lines = [
+      firstLine ? `Code: ${firstLine}` : 'Code',
+      ...buildFieldLines(componentFields, new Set(['name', 'code'])),
+    ]
+    return buildDetailedLabel(lines)
   }
 
-  if (nodeType === 'data-source') {
-    const parts: string[] = []
-    if (name) parts.push(name)
+  if (nodeType === 'data-source' || nodeType === 'databaseTableSQL') {
+    const lines: string[] = []
 
     const serviceTable = toRecord(nodeData?.serviceTable)
     const dbConfig = toRecord(nodeData?.dbConfig)
@@ -103,99 +134,162 @@ export function resolveMermaidDetailedNodeLabel(
     const dbService =
       pickString(serviceTable?.serviceId) ?? pickString(dbConfig?.service)
 
+    const dataSourceName = name ?? tableName
+    lines.push(dataSourceName ? `DataSource: ${dataSourceName}` : 'DataSource')
+
     if (database && tableName) {
-      parts.push(`db:${database}.${tableName}`)
+      lines.push(`db: ${database}.${tableName}`)
     }
 
     if (dbService) {
-      parts.push(`service:${dbService}`)
+      lines.push(`service: ${dbService}`)
     }
 
-    if (parts.length === 0) return
-    return parts.join(' | ')
+    lines.push(...buildFieldLines(componentFields, new Set(['name'])))
+    return buildDetailedLabel(lines)
   }
 
   if (nodeType === 'cloud') {
-    const parts: string[] = []
-    if (name) parts.push(name)
+    const lines: string[] = []
+    lines.push(name ? `Cloud: ${name}` : 'Cloud')
 
     const cloud = pickString(nodeData?.cloud)
-    if (cloud) parts.push(`cloud:${cloud}`)
+    if (cloud) lines.push(`provider: ${cloud}`)
 
     const service = pickString(nodeData?.service)
-    if (service) parts.push(`service:${service}`)
+    if (service) lines.push(`service: ${service}`)
 
-    const operationalFieldLabels = ['Runtime', 'Tier', 'Region']
-    for (const label of operationalFieldLabels) {
-      const detail = getFieldDetailPart(componentFields, label)
-      if (detail) parts.push(detail)
-    }
-
-    if (parts.length === 0) return
-    return parts.join(' | ')
+    lines.push(...buildFieldLines(componentFields, new Set(['name'])))
+    return buildDetailedLabel(lines)
   }
 
-  if (nodeType === 'table') {
-    const parts: string[] = []
-    if (name) parts.push(name)
+  if (nodeType === 'table' || nodeType === 'dataTableInterface') {
+    const lines: string[] = []
+
+    const table = toRecord(nodeData?.table)
+    const tableName = pickString(table?.name) ?? name
+    lines.push(tableName ? `Table: ${tableName}` : 'Table')
 
     const columns = Array.isArray(nodeData?.columns)
       ? nodeData.columns.filter((value) => typeof value === 'string').length
-      : 0
+      : Array.isArray(table?.columns)
+        ? table.columns.length
+        : 0
     const rows = Array.isArray(nodeData?.rows)
       ? nodeData.rows.filter((value) => Array.isArray(value)).length
-      : 0
-    if (columns > 0 || rows > 0) {
-      parts.push(`table:${columns}c/${rows}r`)
-    }
+      : Array.isArray(table?.rows)
+        ? table.rows.length
+        : 0
 
-    if (parts.length === 0) return
-    return parts.join(' | ')
+    lines.push(`columns: ${columns}`)
+    lines.push(`rows: ${rows}`)
+
+    lines.push(...buildFieldLines(componentFields, new Set(['name'])))
+    return buildDetailedLabel(lines)
   }
 
   if (nodeType === 'shape') {
-    const parts: string[] = []
-    if (name) parts.push(name)
+    const lines: string[] = []
 
     const shape = pickString(nodeData?.shape)
-    if (shape) parts.push(`shape:${shape}`)
+    lines.push(name ? `Shape: ${name}` : shape ? `Shape: ${shape}` : 'Shape')
+    if (shape) lines.push(`shape: ${shape}`)
 
-    if (parts.length === 0) return
-    return parts.join(' | ')
+    lines.push(...buildFieldLines(componentFields, new Set(['name'])))
+    return buildDetailedLabel(lines)
   }
 
   if (nodeType === 'gif') {
-    return name
+    const src = pickString(nodeData?.src)
+    const lines = [
+      name ? `Gif: ${name}` : src ? `Gif: ${src}` : 'Gif',
+      ...(src ? [`src: ${src}`] : []),
+      ...buildFieldLines(componentFields, new Set(['name'])),
+    ]
+    return buildDetailedLabel(lines)
+  }
+
+  if (nodeType === 'image') {
+    const src = pickString(nodeData?.src)
+    const lines = [
+      name ? `Image: ${name}` : src ? `Image: ${src}` : 'Image',
+      ...(src ? [`src: ${src}`] : []),
+      ...buildFieldLines(componentFields, new Set(['name'])),
+    ]
+    return buildDetailedLabel(lines)
+  }
+
+  if (nodeType === 'group') {
+    const childCount = Array.isArray(nodeData?.childNodes)
+      ? nodeData.childNodes.length
+      : 0
+    const lines = [
+      name ? `Group: ${name}` : 'Group',
+      `children: ${childCount}`,
+      ...buildFieldLines(componentFields, new Set(['name'])),
+    ]
+    return buildDetailedLabel(lines)
+  }
+
+  if (nodeType === 'sequenceParticipant') {
+    const label =
+      getFieldString(componentFields, 'Label') ?? pickString(nodeData?.label)
+    const participantName = name ?? label
+    const rowCount =
+      typeof nodeData?.rowCount === 'number' ? nodeData.rowCount : undefined
+    const color =
+      getFieldString(componentFields, 'Color') ?? pickString(nodeData?.color)
+    const lines = [
+      participantName
+        ? `SequenceParticipant: ${participantName}`
+        : 'SequenceParticipant',
+      ...(typeof rowCount === 'number' ? [`rows: ${rowCount}`] : []),
+      ...(color ? [`color: ${color}`] : []),
+      ...buildFieldLines(componentFields, new Set(['name', 'label', 'color'])),
+    ]
+    return buildDetailedLabel(lines)
+  }
+
+  if (nodeType === 'comment') {
+    const isResolved =
+      typeof nodeData?.isResolved === 'boolean'
+        ? nodeData.isResolved
+        : undefined
+    const lines = [
+      `Comment: ${isResolved ? 'Resolved' : 'Open'}`,
+      ...buildFieldLines(componentFields, new Set(['name'])),
+    ]
+    return buildDetailedLabel(lines)
   }
 
   if (nodeType === 'builder') {
-    const parts: string[] = []
-    if (name) parts.push(name)
-
-    const builderFieldLabels = [
-      'Service Type',
-      'API Version',
-      'Runtime',
-      'Timeout (ms)',
-      'Retry Attempts',
-      'Region',
-      'Tier',
-      'Environment',
+    const componentId = pickString(nodeData?.componentId)
+    const lines = [
+      name ? `Builder: ${name}` : 'Builder',
+      ...(componentId ? [`componentId: ${componentId}`] : []),
+      ...buildFieldLines(componentFields, new Set(['name'])),
     ]
-
-    for (const label of builderFieldLabels) {
-      const detail = getFieldDetailPart(componentFields, label)
-      if (detail) parts.push(detail)
-    }
-
-    if (parts.length === 0) return
-    return parts.join(' | ')
+    return buildDetailedLabel(lines)
   }
 
   const baseLabel = resolveMermaidNodeLabel(node)
-  if (baseLabel) return baseLabel
+  if (baseLabel) {
+    const nodeTypeLabel = nodeType
+      ? nodeType.charAt(0).toUpperCase() + nodeType.slice(1)
+      : 'Node'
+    const lines = [`${nodeTypeLabel}: ${baseLabel}`]
+    lines.push(
+      ...buildFieldLines(componentFields, new Set(['name', 'text', 'code']))
+    )
+    return buildDetailedLabel(lines)
+  }
 
   const fallbackLabel = pickString(nodeData?.label)
-  if (fallbackLabel) return fallbackLabel
+  if (fallbackLabel) {
+    const nodeTypeLabel = nodeType
+      ? nodeType.charAt(0).toUpperCase() + nodeType.slice(1)
+      : 'Node'
+    return `${nodeTypeLabel}: ${fallbackLabel}`
+  }
   return
 }

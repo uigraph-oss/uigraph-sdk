@@ -111,9 +111,10 @@ export function canInlineMermaidLabel(value: string): boolean {
 
 export function normalizeDetailedMermaidLabel(value: string): string {
   return value
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter((line) => line.length > 0)
+    .join('\n')
 }
 
 export function toComponentFields(value: unknown): Record<string, unknown>[] {
