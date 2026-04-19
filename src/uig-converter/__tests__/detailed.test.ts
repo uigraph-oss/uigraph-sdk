@@ -303,7 +303,7 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     expect(result.mermaid).toContain('Runtime: Node.js 20')
   })
 
-  it('adds compact edge details to labels when detailedContext is true', () => {
+  it('uses only edge label text when detailedContext is true', () => {
     const result = convertUiGraphToMermaid(
       {
         nodes: [
@@ -337,8 +337,6 @@ describe('convertUiGraphToMermaid detailed labels', () => {
       { detailedContext: true }
     )
 
-    expect(result.mermaid).toBe(
-      'flowchart LR\nA\nB\nA -->|invoke / dashed / animated / end:arrow@#1976D2| B'
-    )
+    expect(result.mermaid).toBe('flowchart LR\nA\nB\nA -->|invoke| B')
   })
 })
