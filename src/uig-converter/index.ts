@@ -8,6 +8,10 @@ type UiGraphInput = {
   edges: Edge[]
 }
 
+type UiGraphOptions = {
+  detailedContext?: boolean
+}
+
 type UigOutput = {
   mermaid: string
   context: z.infer<typeof contextSchema>
@@ -232,7 +236,10 @@ function inferDirection(nodes: Node[], edges: Edge[]): 'LR' | 'TB' {
   return width >= height ? 'LR' : 'TB'
 }
 
-export function convertUiGraphToMermaid(input: UiGraphInput): UigOutput {
+export function convertUiGraphToMermaid(
+  input: UiGraphInput,
+  options?: UiGraphOptions
+): UigOutput {
   const groupNodes = input.nodes.filter((node) => node.type === 'group')
   const graphNodes = input.nodes.filter((node) => node.type !== 'group')
   const direction = inferDirection(graphNodes, input.edges)
