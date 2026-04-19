@@ -1,4 +1,5 @@
 import { Node } from '@xyflow/react'
+import { ComponentInputType } from '../../components/component-type'
 import {
   getFieldString,
   getFieldValue,
@@ -8,6 +9,108 @@ import {
   toRecord,
 } from '../utils'
 import { resolveMermaidNodeLabel } from './basic-node-label'
+
+function formatInlineRichTextSegment(
+  text: string,
+  attributes: Record<string, unknown> | undefined
+): string {
+  const trimmed = text.trim()
+  if (!trimmed) return ''
+
+  let output = trimmed
+
+  const link = pickString(attributes?.link)
+  if (attributes?.code === true) {
+    output = `\`${output}\``
+  }
+  if (attributes?.bold === true) {
+    output = `**${output}**`
+  }
+  if (link) {
+    output = `[${output}](${link})`
+  }
+
+  return output
+}
+
+function collectQuillOps(value: unknown): Record<string, unknown>[] {
+  const ops: Record<string, unknown>[] = []
+
+  function visit(input: unknown): void {
+    if (!input) return
+
+    if (Array.isArray(input)) {
+      for (const item of input) visit(item)
+      return
+    }
+
+    const record = toRecord(input)
+    if (!record) return
+
+    if (Array.isArray(record.ops)) {
+      visit(record.ops)
+      return
+    }
+
+    if ('insert' in record) {
+      ops.push(record)
+      return
+    }
+
+    if ('value' in record) {
+      visit(record.value)
+    }
+  }
+
+  visit(value)
+  return ops
+}
+
+function formatQuillRichTextAsMarkdown(value: unknown): string | undefined {
+  const ops = collectQuillOps(value)
+  if (ops.length === 0) return
+
+  const lines: string[] = []
+  let currentLine = ''
+
+  for (const op of ops) {
+    const insert = op.insert
+    if (typeof insert !== 'string') continue
+
+    const attributes = toRecord(op.attributes)
+    const parts = insert.split('\n')
+
+    for (let index = 0; index < parts.length; index += 1) {
+      const part = parts[index]
+      if (part) {
+        const formattedPart = formatInlineRichTextSegment(part, attributes)
+        if (formattedPart) {
+          if (currentLine) currentLine += ' '
+          currentLine += formattedPart
+        }
+      }
+
+      const endsLine = index < parts.length - 1
+      if (!endsLine) continue
+
+      const normalizedLine = currentLine.replace(/\s+/g, ' ').trim()
+      if (normalizedLine) {
+        if (attributes?.list === 'bullet' || attributes?.list === 'ordered') {
+          lines.push(`- ${normalizedLine}`)
+        } else {
+          lines.push(normalizedLine)
+        }
+      }
+      currentLine = ''
+    }
+  }
+
+  const trailingLine = currentLine.replace(/\s+/g, ' ').trim()
+  if (trailingLine) lines.push(trailingLine)
+
+  if (lines.length === 0) return
+  return lines.join('\n')
+}
 
 function formatDetailValue(value: unknown): string | undefined {
   if (typeof value === 'string') {
@@ -58,14 +161,16 @@ function buildFieldLines(
   const lines: string[] = []
 
   for (const field of componentFields) {
-    if (field.hidden === true) continue
-
     const label = pickString(field.label)
     const type = pickString(field.type)
     if (!label || !type || !isComponentInputType(type)) continue
     if (excludedLabels.has(label.toLowerCase())) continue
 
-    const value = formatDetailValue(getFieldValue(field.data))
+    const rawValue = getFieldValue(field.data)
+    const value =
+      type === ComponentInputType.RichTextEditor
+        ? formatQuillRichTextAsMarkdown(rawValue)
+        : formatDetailValue(rawValue)
     const options = Array.isArray(field.options)
       ? field.options.filter((option) => typeof option === 'string')
       : []

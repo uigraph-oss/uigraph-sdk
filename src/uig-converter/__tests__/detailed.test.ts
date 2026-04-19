@@ -222,6 +222,111 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     expect(result.mermaid).toContain('Gif: https://cdn.example.com/loading.gif')
   })
 
+  it('includes hidden component fields in detailed labels', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 'B',
+            type: 'shape',
+            position: { x: 0, y: 0 },
+            data: {
+              shape: 'rectangle',
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'Create Payment Intent request to backend' }],
+                  hidden: true,
+                },
+                {
+                  label: 'Endpoint',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'POST /api/payments/create-intent' }],
+                  hidden: true,
+                },
+                {
+                  label: 'Auth',
+                  type: ComponentInputType.DropdownSelect,
+                  data: [{ value: 'Bearer token' }],
+                  hidden: true,
+                },
+                {
+                  label: 'Idempotency',
+                  type: ComponentInputType.BooleanToggle,
+                  data: [{ value: true }],
+                  hidden: true,
+                },
+              ],
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toContain(
+      'Name: Create Payment Intent request to backend'
+    )
+    expect(result.mermaid).toContain(
+      'Endpoint: POST /api/payments/create-intent'
+    )
+    expect(result.mermaid).toContain('Auth: Bearer token')
+    expect(result.mermaid).toContain('Idempotency: true')
+  })
+
+  it('renders rich text editor fields as readable markdown-like text', () => {
+    const result = convertUiGraphToMermaid(
+      {
+        nodes: [
+          {
+            id: 'AA',
+            type: 'shape',
+            position: { x: 0, y: 0 },
+            data: {
+              shape: 'rectangle',
+              componentFields: [
+                {
+                  label: 'Name',
+                  type: ComponentInputType.TextInput,
+                  data: [{ value: 'Handle dispute' }],
+                  hidden: true,
+                },
+                {
+                  label: 'Notes',
+                  type: ComponentInputType.RichTextEditor,
+                  hidden: true,
+                  data: [
+                    [
+                      { insert: 'Critical:', attributes: { bold: true } },
+                      {
+                        insert:
+                          ' Disputes must be responded to within the deadline.\n',
+                      },
+                      { insert: 'Delivery confirmation' },
+                      { insert: '\n', attributes: { list: 'bullet' } },
+                    ],
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+        edges: [],
+      },
+      { detailedContext: true }
+    )
+
+    expect(result.mermaid).toContain('Name: Handle dispute')
+    expect(result.mermaid).toContain(
+      'Notes: **Critical:** Disputes must be responded to within the deadline.'
+    )
+    expect(result.mermaid).toContain('- Delivery confirmation')
+    expect(result.mermaid).not.toContain('insert:')
+    expect(result.mermaid).not.toContain('attributes:')
+  })
+
   it('formats sequence and comment labels with typed headers', () => {
     const result = convertUiGraphToMermaid(
       {
