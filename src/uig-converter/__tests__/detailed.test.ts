@@ -214,8 +214,7 @@ describe('convertUiGraphToMermaid detailed labels', () => {
       { detailedContext: true }
     )
 
-    expect(result.mermaid).toContain('Shape: Validate Credentials')
-    expect(result.mermaid).toContain('shape: diamond')
+    expect(result.mermaid).toContain('Name: Validate Credentials')
     expect(result.mermaid).toContain('Table: Session Metrics')
     expect(result.mermaid).toContain('columns: 2')
     expect(result.mermaid).toContain('rows: 1')
@@ -339,7 +338,7 @@ describe('convertUiGraphToMermaid detailed labels', () => {
     )
 
     expect(result.mermaid).toBe(
-      'flowchart LR\nA["Shape: rectangle\nshape: rectangle"]\nB["Shape: rectangle\nshape: rectangle"]\nA -->|invoke / dashed / animated / end:arrow@#1976D2| B'
+      'flowchart LR\nA\nB\nA -->|invoke / dashed / animated / end:arrow@#1976D2| B'
     )
   })
 })

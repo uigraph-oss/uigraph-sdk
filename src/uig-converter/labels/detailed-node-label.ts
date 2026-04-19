@@ -189,14 +189,10 @@ export function resolveMermaidDetailedNodeLabel(
   }
 
   if (nodeType === 'shape') {
-    const lines: string[] = []
-
-    const shape = pickString(nodeData?.shape)
-    lines.push(name ? `Shape: ${name}` : shape ? `Shape: ${shape}` : 'Shape')
-    if (shape) lines.push(`shape: ${shape}`)
-
-    lines.push(...buildFieldLines(componentFields, new Set(['name'])))
-    return buildDetailedLabel(lines)
+    const fieldLines = buildFieldLines(componentFields, new Set())
+    if (fieldLines.length > 0) return buildDetailedLabel(fieldLines)
+    if (name) return `Name: ${name}`
+    return
   }
 
   if (nodeType === 'gif') {
