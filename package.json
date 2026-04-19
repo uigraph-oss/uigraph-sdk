@@ -1,11 +1,11 @@
 {
   "name": "@uigraph/sdk",
-  "version": "1.1.28",
+  "version": "1.1.29",
   "type": "module",
   "scripts": {
     "prepare": "husky",
     "test": "vitest --run",
-    "lint": "eslint .",
+    "lint": "tsc --noEmit && eslint .",
     "fix": "eslint . --fix",
     "tsc": "tsc --noEmit",
     "tc": "tsc --noEmit --watch",
