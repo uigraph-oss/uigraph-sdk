@@ -191,6 +191,15 @@ describe('parseMermaidCode', () => {
     expect(result.edges[0].type).toBeDefined()
   })
 
+  it('parses reverse arrow <- with correct source and target', () => {
+    const code = 'flowchart LR\n  A <- B'
+    const result = parseMermaidCode(code)
+    expect(result.edges).toHaveLength(1)
+    expect(result.edges[0].source).toBe('B')
+    expect(result.edges[0].target).toBe('A')
+    expect(result.edges[0].type).toBe('->')
+  })
+
   it('parses state diagram transition labels with colon syntax', () => {
     const code = `stateDiagram-v2
   A --> B : submit_credentials

@@ -22,6 +22,16 @@ export function buildContextEdges(
     const edgeContext: NonNullable<
       z.infer<typeof contextSchema>['edges']
     >[string] = {}
+
+    const edgeType = pickString(edge.type)
+    if (edgeType) edgeContext.type = edgeType
+
+    const sourceHandle = pickString(edge.sourceHandle)
+    if (sourceHandle) edgeContext.sourceHandle = sourceHandle
+
+    const targetHandle = pickString(edge.targetHandle)
+    if (targetHandle) edgeContext.targetHandle = targetHandle
+
     const edgeLabel = pickString(edge.label)
     if (edgeLabel) edgeContext.label = edgeLabel
     const edgeStyleRecord = toRecord(edge.style) ?? {}

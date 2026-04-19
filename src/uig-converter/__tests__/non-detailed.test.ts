@@ -508,6 +508,9 @@ describe('convertUiGraphToMermaid', () => {
           id: 'edge-A-B',
           source: 'A',
           target: 'B',
+          type: 'smoothstep',
+          sourceHandle: 'source-right',
+          targetHandle: 'target-left',
           style: {
             stroke: '#112233',
             strokeWidth: 3,
@@ -525,6 +528,9 @@ describe('convertUiGraphToMermaid', () => {
 
     expect(result.mermaid).toContain('A --> B')
     expect(result.context.edges?.['A-B']).toEqual({
+      type: 'smoothstep',
+      sourceHandle: 'source-right',
+      targetHandle: 'target-left',
       style: {
         stroke: '#112233',
         strokeWidth: 3,

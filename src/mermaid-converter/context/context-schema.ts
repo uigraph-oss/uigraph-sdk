@@ -107,6 +107,9 @@ export const contextSchema = z.object({
     .record(
       z.string(),
       z.object({
+        type: z.string().optional(),
+        sourceHandle: z.string().optional(),
+        targetHandle: z.string().optional(),
         label: z.string().optional(),
         style: z
           .object({

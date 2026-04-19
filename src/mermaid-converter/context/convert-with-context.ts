@@ -1,4 +1,4 @@
-import { Node } from '@xyflow/react'
+import { EdgeMarkerType, MarkerType, Node } from '@xyflow/react'
 import { arrayNonNullable, objectPick } from 'daily-code'
 import z from 'zod'
 import {
@@ -27,6 +27,36 @@ function hasValidPosition(
 ): position is { x: number; y: number } {
   if (!position) return false
   return Number.isFinite(position.x) && Number.isFinite(position.y)
+}
+
+function normalizeContextMarker(
+  marker: { type: string; color?: string } | undefined
+): EdgeMarkerType | undefined {
+  if (!marker) return
+
+  const markerType = marker.type.trim().toLowerCase()
+
+  let type: MarkerType | undefined
+  if (markerType === 'arrow') {
+    type = MarkerType.Arrow
+  } else if (
+    markerType === 'arrowclosed' ||
+    markerType === 'arrow-closed' ||
+    markerType === 'arrow_closed'
+  ) {
+    type = MarkerType.ArrowClosed
+  }
+
+  if (!type) return
+
+  if (marker.color) {
+    return {
+      type,
+      color: marker.color,
+    }
+  }
+
+  return { type }
 }
 
 export async function convertMermaidToReactFlowWithContext(
@@ -242,6 +272,11 @@ export async function convertMermaidToReactFlowWithContext(
 
     return {
       ...edge,
+      type: ctx.type ?? edge.type,
+      sourceHandle: ctx.sourceHandle ?? edge.sourceHandle,
+      targetHandle: ctx.targetHandle ?? edge.targetHandle,
+      markerStart: normalizeContextMarker(ctx.markerStart) ?? edge.markerStart,
+      markerEnd: normalizeContextMarker(ctx.markerEnd) ?? edge.markerEnd,
 
       data: {
         ...edge.data,
@@ -263,9 +298,6 @@ export async function convertMermaidToReactFlowWithContext(
               : ctx.style?.strokeStyle === 'solid'
                 ? undefined
                 : edge.style?.strokeDasharray,
-
-        markerStart: ctx.markerStart ?? edge.markerStart,
-        markerEnd: ctx.markerEnd ?? edge.markerEnd,
       },
     }
   })
