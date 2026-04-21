@@ -81,6 +81,9 @@ describe('convertMermaidToReactFlowWithContext', () => {
         },
         edges: {
           'A-B': {
+            type: 'smoothstep',
+            sourceHandle: 'source-right',
+            targetHandle: 'target-left',
             label: 'links',
             style: {
               stroke: '#111111',
@@ -135,8 +138,11 @@ describe('convertMermaidToReactFlowWithContext', () => {
     expect(edge.style?.stroke).toBe('#111111')
     expect(edge.style?.strokeWidth).toBe(3)
     expect(edge.style?.strokeDasharray).toBe('1 2')
-    expect(edge.style?.markerStart).toEqual({ type: 'arrow' })
-    expect(edge.style?.markerEnd).toEqual({ type: 'arrow' })
+    expect(edge.type).toBe('smoothstep')
+    expect(edge.sourceHandle).toBe('source-right')
+    expect(edge.targetHandle).toBe('target-left')
+    expect(edge.markerStart).toEqual({ type: 'arrow' })
+    expect(edge.markerEnd).toEqual({ type: 'arrow' })
   })
 
   it('throws on invalid context payload', async () => {

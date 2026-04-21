@@ -2,9 +2,9 @@
 
 import { MarkerType, Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
-import { ComponentInputType } from '../components/component-type'
-import { convertMermaidToReactFlowWithContext } from '../mermaid-converter/context/convert-with-context'
-import { convertUiGraphToMermaid } from './index'
+import { ComponentInputType } from '../../components/component-type'
+import { convertMermaidToReactFlowWithContext } from '../../mermaid-converter/context/convert-with-context'
+import { convertUiGraphToMermaid } from '../index'
 
 const builderComponentFields = [
   {
@@ -508,6 +508,9 @@ describe('convertUiGraphToMermaid', () => {
           id: 'edge-A-B',
           source: 'A',
           target: 'B',
+          type: 'smoothstep',
+          sourceHandle: 'source-right',
+          targetHandle: 'target-left',
           style: {
             stroke: '#112233',
             strokeWidth: 3,
@@ -525,6 +528,9 @@ describe('convertUiGraphToMermaid', () => {
 
     expect(result.mermaid).toContain('A --> B')
     expect(result.context.edges?.['A-B']).toEqual({
+      type: 'smoothstep',
+      sourceHandle: 'source-right',
+      targetHandle: 'target-left',
       style: {
         stroke: '#112233',
         strokeWidth: 3,
@@ -537,6 +543,128 @@ describe('convertUiGraphToMermaid', () => {
         relationId: 'r-1',
       },
     })
+  })
+
+  it('keeps mermaid output unchanged when detailedContext is omitted or false', () => {
+    const input = {
+      nodes: [
+        {
+          id: 'node-1',
+          type: 'text',
+          position: { x: 10, y: 10 },
+          data: {
+            componentFields: [
+              {
+                label: 'Text',
+                type: ComponentInputType.TextBox,
+                data: [{ value: 'Auth Service' }],
+              },
+              {
+                label: 'Runtime',
+                type: ComponentInputType.DropdownSelect,
+                data: [{ value: 'Node.js 20' }],
+                options: ['Node.js 20', 'Python 3.12'],
+              },
+            ],
+          },
+        },
+        {
+          id: 'db node',
+          type: 'cloud',
+          position: { x: 280, y: 20 },
+          data: {
+            cloud: 'aws',
+            service: 'Amazon RDS',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: 'Main DB' }],
+              },
+            ],
+          },
+        },
+      ],
+      edges: [
+        {
+          id: 'e1',
+          source: 'node-1',
+          target: 'db node',
+          label: 'reads/writes',
+        },
+      ],
+    }
+
+    const omitted = convertUiGraphToMermaid(input)
+    const explicitFalse = convertUiGraphToMermaid(input, {
+      detailedContext: false,
+    })
+
+    expect(omitted.mermaid).toBe(
+      'flowchart LR\nA["Auth Service"]\nB["Main DB"]\nA --> B'
+    )
+    expect(explicitFalse.mermaid).toBe(omitted.mermaid)
+  })
+
+  it('keeps node and edge output compact even when rich metadata exists', () => {
+    const result = convertUiGraphToMermaid({
+      nodes: [
+        {
+          id: 'api-node',
+          type: 'cloud',
+          position: { x: 0, y: 0 },
+          data: {
+            cloud: 'AWS',
+            service: 'Amazon API Gateway',
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: 'API Gateway' }],
+              },
+              {
+                label: 'Runtime',
+                type: ComponentInputType.DropdownSelect,
+                data: [{ value: 'Node.js 20' }],
+                options: ['Node.js 20', 'Python 3.12'],
+              },
+            ],
+          },
+        },
+        {
+          id: 'db-node',
+          type: 'data-source',
+          position: { x: 150, y: 0 },
+          data: {
+            serviceTable: {
+              serviceId: 'UIGraph Adapter',
+              serviceDbId: 'ecommerce',
+              tableName: 'orders',
+            },
+            componentFields: [
+              {
+                label: 'Name',
+                type: ComponentInputType.TextInput,
+                data: [{ value: 'Orders' }],
+              },
+            ],
+          },
+        },
+      ],
+      edges: [
+        {
+          id: 'e1',
+          source: 'api-node',
+          target: 'db-node',
+          label: 'invoke',
+          style: { strokeDasharray: '4 2' },
+          markerEnd: { type: MarkerType.ArrowClosed },
+          animated: true,
+        },
+      ],
+    })
+
+    expect(result.mermaid).toBe('flowchart LR\nA["API Gateway"]\nB\nA --> B')
   })
 
   it('round-trips cloud node metadata through context', async () => {

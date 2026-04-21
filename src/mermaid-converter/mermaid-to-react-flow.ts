@@ -797,12 +797,14 @@ export function parseMermaidCode(code: string): {
           }
         }
 
+        const isReverseArrow = op === '<-'
+
         return {
-          sourceId: src.id,
-          sourceFull: src.full,
-          targetId: tgt.id,
-          targetFull: tgt.full,
-          edgeType: op!,
+          sourceId: isReverseArrow ? tgt.id : src.id,
+          sourceFull: isReverseArrow ? tgt.full : src.full,
+          targetId: isReverseArrow ? src.id : tgt.id,
+          targetFull: isReverseArrow ? src.full : tgt.full,
+          edgeType: isReverseArrow ? '->' : op!,
           edgeLabel,
         }
       } catch {
