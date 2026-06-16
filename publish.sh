@@ -3,4 +3,4 @@
 pnpm run build &&
 	pnpm tsc &&
 	pnpm test &&
-	pnpm publish --no-git-checks
+	pnpm publish --no-git-checks --access public
