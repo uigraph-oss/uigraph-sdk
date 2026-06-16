@@ -18,7 +18,7 @@ export default defineConfig({
   format: ['cjs', 'es'] satisfies InternalModuleFormat[],
 
   dts: true,
-  sourcemap: true,
+  sourcemap: false,
 
   target: 'ES6',
   minify: 'dce-only',
