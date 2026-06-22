@@ -128,12 +128,12 @@ export async function convertMermaidToReactFlowWithContext(
         }
       }
 
-      if (ctx.type === 'text' && ctx.value) {
+      if (ctx.type === 'text' && (ctx.value || ctx.name)) {
         const textComponentField = generateComponentFieldInput({
           type: ComponentInputType.TextInput,
           componentFieldId: 'text',
           label: 'Text',
-          data: ctx.value,
+          data: ctx.value || ctx.name,
           isReadonly: true,
         })
 
