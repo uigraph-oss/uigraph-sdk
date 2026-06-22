@@ -19,6 +19,7 @@ export function createGroupNode(options: GroupNodeOptions): Node {
 
     data: {
       childNodes: options.nodes,
+      autoLayout: true,
       componentFields: [
         generateComponentFieldNameInput(options.name ?? 'Group'),
       ],

@@ -10,6 +10,7 @@ export type CustomData = {
   iconSrc?: string
 
   childNodes?: string[]
+  autoLayout?: boolean
   componentFields?: RFComponentField[]
 
   shape?: string

@@ -2013,6 +2013,7 @@ function createReactFlowElements(
           backgroundColor: colors.bg,
           borderColor: colors.border,
           childNodes: subgraph.nodes,
+          autoLayout: true,
           componentFields: [generateComponentFieldNameInput(subgraph.title)],
         },
         style: {
