@@ -145,6 +145,71 @@ describe('convertMermaidToReactFlowWithContext', () => {
     expect(edge.markerEnd).toEqual({ type: 'arrow' })
   })
 
+  it('resolves dbConfig names to ids via resolveDbConfig', async () => {
+    const mockConvert = vi.mocked(convertMermaidToReactFlow)
+    mockConvert.mockResolvedValue(baseData)
+
+    const result = await convertMermaidToReactFlowWithContext(
+      'flowchart LR\nA --> B',
+      {
+        nodes: {
+          A: {
+            type: 'db-table',
+            dbConfig: {
+              service: 'UIGraph Adapter',
+              database: 'ecommerce',
+              tableName: 'orders',
+            },
+          },
+        },
+      },
+      {
+        resolveDbConfig: async () => ({
+          serviceId: 'svc-uuid',
+          serviceDbId: 'db-uuid',
+        }),
+      }
+    )
+
+    const nodeA = result.nodes.find((node) => node.id === 'A')
+    expect(nodeA?.data.serviceTable).toEqual({
+      serviceId: 'svc-uuid',
+      serviceDbId: 'db-uuid',
+      tableName: 'orders',
+    })
+  })
+
+  it('falls back to dbConfig names when resolution misses', async () => {
+    const mockConvert = vi.mocked(convertMermaidToReactFlow)
+    mockConvert.mockResolvedValue(baseData)
+
+    const result = await convertMermaidToReactFlowWithContext(
+      'flowchart LR\nA --> B',
+      {
+        nodes: {
+          A: {
+            type: 'db-table',
+            dbConfig: {
+              service: 'UIGraph Adapter',
+              database: 'ecommerce',
+              tableName: 'orders',
+            },
+          },
+        },
+      },
+      {
+        resolveDbConfig: async () => undefined,
+      }
+    )
+
+    const nodeA = result.nodes.find((node) => node.id === 'A')
+    expect(nodeA?.data.serviceTable).toEqual({
+      serviceId: 'UIGraph Adapter',
+      serviceDbId: 'ecommerce',
+      tableName: 'orders',
+    })
+  })
+
   it('throws on invalid context payload', async () => {
     const mockConvert = vi.mocked(convertMermaidToReactFlow)
     mockConvert.mockResolvedValue(baseData)

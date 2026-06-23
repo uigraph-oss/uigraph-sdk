@@ -20,6 +20,11 @@ type ResolverOptions = {
     cloud: string | undefined,
     service: string
   ) => Promise<string | undefined | null>
+
+  resolveDbConfig?: (
+    service: string,
+    database: string
+  ) => Promise<{ serviceId?: string; serviceDbId?: string } | undefined>
 }
 
 function hasValidPosition(
@@ -212,9 +217,16 @@ export async function convertMermaidToReactFlowWithContext(
     }
 
     if (ctx.dbConfig) {
+      const resolved = options?.resolveDbConfig
+        ? await options.resolveDbConfig(
+            ctx.dbConfig.service,
+            ctx.dbConfig.database
+          )
+        : undefined
+
       clonedNode.data.serviceTable = {
-        serviceId: ctx.dbConfig.service,
-        serviceDbId: ctx.dbConfig.database,
+        serviceId: resolved?.serviceId ?? ctx.dbConfig.service,
+        serviceDbId: resolved?.serviceDbId ?? ctx.dbConfig.database,
         tableName: ctx.dbConfig.tableName,
       }
     }
