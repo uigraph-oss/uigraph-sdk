@@ -33,12 +33,12 @@ export class AstToUiConverter {
     nodes,
     edges,
     schema,
-    sourceId,
+    sourceName,
     oldDataSources,
   }: {
     nodes: Node[]
     edges: Edge[]
-    sourceId: string
+    sourceName: string
     schema: SchemaAST
     oldDataSources: DataSource[]
   }): {
@@ -49,20 +49,20 @@ export class AstToUiConverter {
       nodes,
       edges,
       schema,
-      sourceId,
+      sourceName,
       oldDataSources,
     })
 
-    const oldSource = oldDataSources.find((s) => s.id === sourceId)
-    const sourceNodePrefix = `${sourceId}-table-`
+    const oldSource = oldDataSources.find((s) => s.name === sourceName)
+    const sourceNodePrefix = `${sourceName}-table-`
     const positions = this.calculateSmartLayout(schema)
     const nodeTableMap = new Map(
       nodes.map((node) => [
         oldSource?.schemaAst.tables.find(
           (t) =>
-            t.id ===
+            t.name ===
             (node.data as unknown as DatabaseTableSQLNodeData).localTable
-              ?.tableId
+              ?.tableName
         )?.name,
         node,
       ])
@@ -83,7 +83,7 @@ export class AstToUiConverter {
         }
 
       const baseNode = this.tableAstToNode(
-        sourceId,
+        sourceName,
         table,
         position,
         tableNames
@@ -122,14 +122,15 @@ export class AstToUiConverter {
       nodeTableMap.has(
         schema.tables.find(
           (t) =>
-            t.id === (node.data as DatabaseTableSQLNodeData).localTable?.tableId
+            t.name ===
+            (node.data as DatabaseTableSQLNodeData).localTable?.tableName
         )?.name
       )
     )
 
     const validNodeIds = new Set(sourceNodes.map((node) => node.id))
     const sourceEdges = schema.tables.flatMap((table) =>
-      this.createEdgesFromTable(sourceId, table, schema.tables).filter(
+      this.createEdgesFromTable(sourceName, table, schema.tables).filter(
         (edge) => validNodeIds.has(edge.source) && validNodeIds.has(edge.target)
       )
     )
@@ -149,7 +150,7 @@ export class AstToUiConverter {
 
   static toReactFlow(
     schema: SchemaAST,
-    sourceId: string
+    sourceName: string
   ): {
     nodes: Node<DatabaseTableSQLNodeData>[]
     edges: Edge[]
@@ -168,12 +169,12 @@ export class AstToUiConverter {
           y: 100 + index * 210,
         }
 
-      const node = this.tableAstToNode(sourceId, table, position, tableNames)
+      const node = this.tableAstToNode(sourceName, table, position, tableNames)
       nodes.push(node)
 
       // Create edges from foreign keys
       const tableEdges = this.createEdgesFromTable(
-        sourceId,
+        sourceName,
         table,
         schema.tables
       )
@@ -354,7 +355,7 @@ export class AstToUiConverter {
    * Convert table AST to ReactFlow node
    */
   private static tableAstToNode(
-    sourceId: string,
+    sourceName: string,
     table: TableAST,
     position: { x: number; y: number },
     _validTableNames: Set<string>
@@ -374,14 +375,14 @@ export class AstToUiConverter {
     })) */
 
     return {
-      id: generateTableNodeId(sourceId, table.id),
+      id: generateTableNodeId(sourceName, table.name),
       type: 'databaseTableSQL',
       width: DEFAULT_NODE_WIDTH,
       position,
       data: {
         localTable: {
-          baseId: sourceId,
-          tableId: table.id,
+          databaseName: sourceName,
+          tableName: table.name,
         },
       },
     }
@@ -440,7 +441,7 @@ export class AstToUiConverter {
    * Create edges from foreign key relationships
    */
   private static createEdgesFromTable(
-    baseId: string,
+    sourceName: string,
     sourceTable: TableAST,
     validTables: TableAST[]
   ): Edge[] {
@@ -453,8 +454,8 @@ export class AstToUiConverter {
       )
       if (!targetTable) return
 
-      const sourceNodeId = generateTableNodeId(baseId, sourceTable.id)
-      const targetNodeId = generateTableNodeId(baseId, targetTable.id)
+      const sourceNodeId = generateTableNodeId(sourceName, sourceTable.name)
+      const targetNodeId = generateTableNodeId(sourceName, targetTable.name)
       const edgeId = `${sourceNodeId}-fk-${index}`
 
       const fkCols = fk.columns

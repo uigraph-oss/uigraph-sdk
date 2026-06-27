@@ -6,8 +6,8 @@ export interface DatabaseTableSQLNodeData extends Record<string, unknown> {
   isForcedOpen?: boolean
 
   localTable?: {
-    baseId: string
-    tableId: string
+    databaseName: string
+    tableName: string
   }
 
   serviceTable?: {
