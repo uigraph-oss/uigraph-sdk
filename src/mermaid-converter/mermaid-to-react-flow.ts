@@ -2218,15 +2218,10 @@ function createReactFlowElements(
 
   // Create edges with consistent styling
   const reactFlowEdges: Edge[] = edges.map((edge, index) => {
-    const edgeColors = ['#1976D2', '#388E3C', '#F57C00', '#7B1FA2', '#C2185B']
-    const edgeColor = edgeColors[index % edgeColors.length]
-
     const edgeStyle: {
-      stroke: string
       strokeWidth: number
       strokeDasharray?: string
     } = {
-      stroke: edgeColor,
       strokeWidth: 2.5,
     }
 
@@ -2276,17 +2271,13 @@ function createReactFlowElements(
       labelStyle: {
         fontSize: '12px',
         fontWeight: '500',
-        color: edgeColor,
         backgroundColor: 'white',
         padding: '2px 6px',
-        borderRadius: '4px',
-        border: `1px solid ${edgeColor}`,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 20,
         height: 20,
-        color: edgeColor,
       },
       sourceHandle:
         direction === 'LR' || direction === 'RL'
