@@ -55,8 +55,8 @@ describe('convertUiGraphToMermaid detailed labels', () => {
             position: { x: 0, y: 0 },
             data: {
               serviceTable: {
-                serviceId: 'UIGraph Adapter',
-                serviceDbId: 'ecommerce',
+                serviceName: 'UIGraph Adapter',
+                databaseName: 'ecommerce',
                 tableName: 'orders',
               },
               componentFields: [

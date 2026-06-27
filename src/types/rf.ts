@@ -16,8 +16,8 @@ export type CustomData = {
   shape?: string
 
   serviceTable?: {
-    serviceId: string
-    serviceDbId: string
+    serviceName: string
+    databaseName: string
     tableName: string
   }
 

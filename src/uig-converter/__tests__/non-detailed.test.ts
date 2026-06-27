@@ -637,8 +637,8 @@ describe('convertUiGraphToMermaid', () => {
           position: { x: 150, y: 0 },
           data: {
             serviceTable: {
-              serviceId: 'UIGraph Adapter',
-              serviceDbId: 'ecommerce',
+              serviceName: 'UIGraph Adapter',
+              databaseName: 'ecommerce',
               tableName: 'orders',
             },
             componentFields: [

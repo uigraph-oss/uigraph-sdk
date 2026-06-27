@@ -233,11 +233,12 @@ export function resolveMermaidDetailedNodeLabel(
     const serviceTable = toRecord(nodeData?.serviceTable)
     const dbConfig = toRecord(nodeData?.dbConfig)
     const database =
-      pickString(serviceTable?.serviceDbId) ?? pickString(dbConfig?.database)
+      pickString(serviceTable?.databaseName) ??
+      pickString(dbConfig?.databaseName)
     const tableName =
       pickString(serviceTable?.tableName) ?? pickString(dbConfig?.tableName)
     const dbService =
-      pickString(serviceTable?.serviceId) ?? pickString(dbConfig?.service)
+      pickString(serviceTable?.serviceName) ?? pickString(dbConfig?.serviceName)
 
     const dataSourceName = name ?? tableName
     lines.push(dataSourceName ? `DataSource: ${dataSourceName}` : 'DataSource')

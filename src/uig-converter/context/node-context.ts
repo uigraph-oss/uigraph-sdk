@@ -164,13 +164,13 @@ export function buildContextNodes(
     }
 
     const serviceTable = toRecord(nodeData.serviceTable)
-    const serviceId = pickString(serviceTable?.serviceId)
-    const serviceDbId = pickString(serviceTable?.serviceDbId)
+    const serviceName = pickString(serviceTable?.serviceName)
+    const databaseName = pickString(serviceTable?.databaseName)
     const tableName = pickString(serviceTable?.tableName)
-    if (serviceId && serviceDbId && tableName) {
+    if (serviceName && databaseName && tableName) {
       nodeContext.dbConfig = {
-        service: serviceId,
-        database: serviceDbId,
+        serviceName,
+        databaseName,
         tableName,
       }
     }

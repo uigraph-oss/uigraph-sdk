@@ -11,8 +11,8 @@ export interface DatabaseTableSQLNodeData extends Record<string, unknown> {
   }
 
   serviceTable?: {
-    serviceId: string
-    serviceDbId: string
+    serviceName: string
+    databaseName: string
     tableName: string
   }
 }

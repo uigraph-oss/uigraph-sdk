@@ -78,8 +78,8 @@ describe('convertUiGraphToMermaid detailed labels e2e', () => {
           type: 'data-source',
           name: 'Orders',
           dbConfig: {
-            service: 'UIGraph Adapter',
-            database: 'ecommerce',
+            serviceName: 'UIGraph Adapter',
+            databaseName: 'ecommerce',
             tableName: 'orders',
           },
           data: {
@@ -91,8 +91,8 @@ describe('convertUiGraphToMermaid detailed labels e2e', () => {
           type: 'data-source',
           name: 'Products',
           dbConfig: {
-            service: 'UIGraph Adapter',
-            database: 'ecommerce',
+            serviceName: 'UIGraph Adapter',
+            databaseName: 'ecommerce',
             tableName: 'products',
           },
         },
