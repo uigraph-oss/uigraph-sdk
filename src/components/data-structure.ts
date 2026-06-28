@@ -1,4 +1,8 @@
-import { ServerComponentField, ServerComponentFieldInput } from '../types'
+import {
+  LinkOrFileValue,
+  ServerComponentField,
+  ServerComponentFieldInput,
+} from '../types'
 import { ComponentInputType } from './component-type'
 
 export function flattenMetaData(
@@ -41,7 +45,7 @@ export function flattenMetaData(
 
       case ComponentInputType.FileUpload:
       case ComponentInputType.LinkOrFileUpload:
-        output[id] = data?.[0]?.value ?? ''
+        output[id] = (data?.[0]?.value as LinkOrFileValue | undefined) ?? null
         break
 
       case ComponentInputType.RichTextEditor:
@@ -98,9 +102,11 @@ export function buildMetaData(
         break
 
       case ComponentInputType.FileUpload:
-      case ComponentInputType.LinkOrFileUpload:
-        localData = [{ value: value ?? '' }]
+      case ComponentInputType.LinkOrFileUpload: {
+        const v = value as LinkOrFileValue | null
+        localData = [{ value: { fileId: v?.fileId, url: v?.url } }]
         break
+      }
 
       case ComponentInputType.RichTextEditor:
         localData = [value]

@@ -44,6 +44,26 @@ describe('buildMetaData', () => {
     const result = buildMetaData(fields, { rt: { ops: [] } })
     expect(result[0].data).toEqual([{ ops: [] }])
   })
+
+  it('builds file data with fileId and drops the transient file', () => {
+    const fields = [field('img', ComponentInputType.LinkOrFileUpload, 'Image')]
+    const result = buildMetaData(fields, {
+      img: { fileId: 'file_a1', file: new File([], 'x') },
+    })
+    expect(result[0].data).toEqual([
+      { value: { fileId: 'file_a1', url: undefined } },
+    ])
+  })
+
+  it('builds link data with url', () => {
+    const fields = [field('img', ComponentInputType.LinkOrFileUpload, 'Image')]
+    const result = buildMetaData(fields, {
+      img: { url: 'https://cdn/x.png' },
+    })
+    expect(result[0].data).toEqual([
+      { value: { fileId: undefined, url: 'https://cdn/x.png' } },
+    ])
+  })
 })
 
 describe('flattenMetaData', () => {
@@ -79,5 +99,21 @@ describe('flattenMetaData', () => {
     const fields = [field('rt', ComponentInputType.RichTextEditor, 'Rich')]
     const input = buildMetaData(fields, { rt: { ops: [] } })
     expect(flattenMetaData(fields, input)).toEqual({ rt: { ops: [] } })
+  })
+
+  it('flattens a file value to the fileId object shape', () => {
+    const fields = [field('img', ComponentInputType.LinkOrFileUpload, 'Image')]
+    const input = buildMetaData(fields, { img: { fileId: 'file_a1' } })
+    expect(flattenMetaData(fields, input)).toEqual({
+      img: { fileId: 'file_a1', url: undefined },
+    })
+  })
+
+  it('flattens a link value to the url object shape', () => {
+    const fields = [field('img', ComponentInputType.LinkOrFileUpload, 'Image')]
+    const input = buildMetaData(fields, { img: { url: 'https://cdn/x.png' } })
+    expect(flattenMetaData(fields, input)).toEqual({
+      img: { fileId: undefined, url: 'https://cdn/x.png' },
+    })
   })
 })

@@ -27,22 +27,24 @@ export function buildDynamicZodSchema(fields: ServerComponentField[]) {
       }
 
       case ComponentInputType.FileUpload:
-      case ComponentInputType.LinkOrFileUpload:
-        const stringSchema = z.string()
-        const fileSchema = z.instanceof(File)
+      case ComponentInputType.LinkOrFileUpload: {
+        const objectSchema = z.object({
+          fileId: z.string().optional(),
+          url: z.string().optional(),
+          file: z.instanceof(File).optional(),
+        })
 
-        const unionSchema = z.union([
-          field.required ? fileSchema : fileSchema.optional(),
-
-          field.required
-            ? stringSchema.min(1, {
-                message: `${field.label ?? 'Field'} is required`,
-              })
-            : stringSchema.optional(),
-        ])
-
-        zodType = field.required ? unionSchema : unionSchema.optional()
+        zodType = field.required
+          ? objectSchema.refine(
+              (value) =>
+                (value.url?.length ?? 0) > 0 ||
+                (value.fileId?.length ?? 0) > 0 ||
+                value.file instanceof File,
+              { message: `${field.label ?? 'Field'} is required` }
+            )
+          : objectSchema.optional()
         break
+      }
 
       case ComponentInputType.URLInput: {
         const urlSchema = z.string({ message: 'Invalid URL' })

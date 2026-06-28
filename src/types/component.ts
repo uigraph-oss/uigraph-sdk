@@ -1,3 +1,9 @@
+export type LinkOrFileValue = {
+  fileId?: string
+  url?: string
+  file?: File
+}
+
 export type ServerComponentField = {
   componentFieldId?: string | null
   isReadonly?: boolean | null
