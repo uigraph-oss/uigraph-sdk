@@ -41,7 +41,7 @@ export function getFieldValue(fieldData: unknown): unknown {
   if (!Array.isArray(fieldData) || fieldData.length !== 1) return fieldData
   const first = toRecord(fieldData[0])
   if (!first) return fieldData
-  if (!('value' in first)) return fieldData
+  if (!('value' in first)) return first
   return first.value
 }
 
