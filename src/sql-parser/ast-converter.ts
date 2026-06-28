@@ -45,54 +45,32 @@ export class AstToUiConverter {
     nodes: Node[]
     edges: Edge[]
   } {
-    console.log('UPDATE:', {
-      nodes,
-      edges,
-      schema,
-      sourceName,
-      oldDataSources,
-    })
-
     const oldSource = oldDataSources.find((s) => s.name === sourceName)
     const sourceNodePrefix = `${sourceName}-table-`
     const positions = this.calculateSmartLayout(schema)
-    const nodeTableMap = new Map(
-      nodes.map((node) => [
-        oldSource?.schemaAst.tables.find(
-          (t) =>
-            t.name ===
-            (node.data as unknown as DatabaseTableSQLNodeData).localTable
-              ?.tableName
-        )?.name,
-        node,
-      ])
-    )
-
-    console.log('Old node table map:', nodeTableMap)
-
     const tableNames = new Set(schema.tables.map((table) => table.name))
 
-    const sourceNodesUnfiltered = schema.tables.map((table, index) => {
-      const prevNode = nodeTableMap.get(table.name)
+    const sourceNodePool = nodes.filter((node) =>
+      node.id.startsWith(sourceNodePrefix)
+    )
 
-      const position = prevNode?.position ??
-        table.position ??
-        positions[table.name] ?? {
-          x: 100,
-          y: 100 + index * 210,
-        }
-
-      const baseNode = this.tableAstToNode(
-        sourceName,
-        table,
-        position,
-        tableNames
-      )
-
-      if (!prevNode) {
-        return baseNode
+    const oldNodeByName = new Map<string, Node>()
+    for (const node of sourceNodePool) {
+      const tableName = (node.data as unknown as DatabaseTableSQLNodeData)
+        .localTable?.tableName
+      if (tableName) {
+        oldNodeByName.set(tableName, node)
       }
+    }
 
+    const oldTableByName = new Map<string, TableAST>()
+    for (const table of oldSource?.schemaAst.tables ?? []) {
+      oldTableByName.set(table.name, table)
+    }
+
+    const consumedNodeIds = new Set<string>()
+
+    function mergeWithPrev(baseNode: Node, prevNode: Node): Node {
       const mergedNode: Node = {
         ...prevNode,
         ...baseNode,
@@ -116,17 +94,46 @@ export class AstToUiConverter {
       }
 
       return mergedNode
-    })
+    }
 
-    const sourceNodes = sourceNodesUnfiltered.filter((node) =>
-      nodeTableMap.has(
-        schema.tables.find(
-          (t) =>
-            t.name ===
-            (node.data as DatabaseTableSQLNodeData).localTable?.tableName
-        )?.name
+    const sourceNodes = schema.tables.map((table, index) => {
+      let prevNode = oldNodeByName.get(table.name)
+
+      if (!prevNode || consumedNodeIds.has(prevNode.id)) {
+        prevNode = undefined
+        const newSignature = this.tableSignature(table)
+        for (const [oldName, oldTable] of oldTableByName) {
+          if (tableNames.has(oldName)) continue
+          const candidate = oldNodeByName.get(oldName)
+          if (!candidate || consumedNodeIds.has(candidate.id)) continue
+          if (this.tableSignature(oldTable) === newSignature) {
+            prevNode = candidate
+            break
+          }
+        }
+      }
+
+      const position = prevNode?.position ??
+        table.position ??
+        positions[table.name] ?? {
+          x: 100,
+          y: 100 + index * 210,
+        }
+
+      const baseNode = this.tableAstToNode(
+        sourceName,
+        table,
+        position,
+        tableNames
       )
-    )
+
+      if (!prevNode) {
+        return baseNode
+      }
+
+      consumedNodeIds.add(prevNode.id)
+      return mergeWithPrev(baseNode, prevNode)
+    })
 
     const validNodeIds = new Set(sourceNodes.map((node) => node.id))
     const sourceEdges = schema.tables.flatMap((table) =>
@@ -386,6 +393,29 @@ export class AstToUiConverter {
         },
       },
     }
+  }
+
+  private static tableSignature(table: TableAST): string {
+    const columns = [...table.columns]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((col) => {
+        const params = col.dataType.parameters?.join(',') ?? ''
+        return [
+          col.name,
+          col.dataType.name,
+          params,
+          col.dataType.unsigned ? 'u' : '',
+          col.dataType.timezone ? 'tz' : '',
+          col.nullable ? 'null' : 'notnull',
+          col.autoIncrement ? 'ai' : '',
+        ].join(':')
+      })
+
+    const constraints = table.constraints.map((c) => JSON.stringify(c)).sort()
+
+    const indexes = [...table.indexes].map((idx) => JSON.stringify(idx)).sort()
+
+    return JSON.stringify({ columns, constraints, indexes })
   }
 
   /**
