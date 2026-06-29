@@ -1,53 +1,15 @@
 name: UIGraph SDK
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   release:
     types:
       - published
 
 jobs:
-  ci:
-    name: CI
-    runs-on: ubuntu-latest
-    if: github.event_name != 'release'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build
-        run: pnpm run build
-
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event.action == 'published'
     permissions:
       contents: read
       id-token: write
@@ -58,17 +20,16 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
           registry-url: https://registry.npmjs.org
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -89,7 +50,8 @@ jobs:
           pnpm tsc
           pnpm test
 
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks --access public
