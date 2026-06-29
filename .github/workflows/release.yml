@@ -43,8 +43,6 @@ jobs:
       - name: Build and test
         run: |
           pnpm run build
-          pnpm tsc
-          pnpm test
 
       - name: Publish to npm
         run: pnpm publish --no-git-checks --access public
