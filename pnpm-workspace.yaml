@@ -1,4 +1,6 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - jsonc-patch@0.0.4
 onlyBuiltDependencies:
   - esbuild
