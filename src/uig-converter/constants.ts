@@ -1,0 +1,56 @@
+import { ComponentInputType } from '../components/component-type'
+
+export const CONTEXT_SHAPES = new Set([
+  'rectangle',
+  'rounded-rect',
+  'ellipse',
+  'diamond',
+  'triangle',
+  'parallelogram',
+  'trapezoid',
+  'hexagon',
+  'document',
+  'cylinder',
+  'delay',
+  'off-page-connector',
+  'display',
+  'collate',
+  'sort',
+  'terminator',
+  'or',
+  'database',
+  'multiple-documents',
+  'subroutine',
+  'manual-input',
+  'summing-junction',
+  'internal-storage',
+])
+
+export const COMPONENT_INPUT_TYPES = new Set(Object.values(ComponentInputType))
+export const INLINE_MERMAID_LABEL_MAX_LENGTH = 32
+
+export const KNOWN_NODE_DATA_KEYS = new Set([
+  'componentFields',
+  'shape',
+  'fill',
+  'stroke',
+  'strokeWidth',
+  'strokeStyle',
+  'borderRadius',
+  'borderAnimationEnabled',
+  'strokeAnimation',
+  'src',
+  'animatedIcon',
+  'iconSrc',
+  'componentId',
+  'serviceTable',
+  'title',
+  'columns',
+  'rows',
+  'name',
+  'label',
+  'value',
+  'cloud',
+  'service',
+  'childNodes',
+])

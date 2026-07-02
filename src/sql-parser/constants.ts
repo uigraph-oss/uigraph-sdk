@@ -1,0 +1,9 @@
+export const DEFAULT_NODE_WIDTH = 350
+
+export const DEFAULT_NODE_X_OFFSET = 0
+export const DEFAULT_NODE_X_OFFSET_LAYER = 100
+export const DEFAULT_NODE_X_SPACING = 450
+
+export const DEFAULT_NODE_Y_OFFSET = 100
+export const DEFAULT_NODE_Y_OFFSET_LAYER = 100
+export const DEFAULT_NODE_Y_SPACING = 600

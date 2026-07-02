@@ -1,0 +1,124 @@
+{
+  "name": "@uigraph/sdk",
+  "version": "1.1.43",
+  "type": "module",
+  "license": "BUSL-1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uigraph-oss/uigraph-sdk.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "test": "vitest --run",
+    "lint": "tsc --noEmit && eslint .",
+    "fix": "eslint . --fix",
+    "tsc": "tsc --noEmit",
+    "tc": "tsc --noEmit --watch",
+    "exports": "tsx ./write-exports.ts",
+    "build": "tsdown --config ./tsdown.config.ts",
+    "dev": "concurrently --names \"R,T,V\" --prefix-colors \"blue.dim,magenta.dim,green.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\" \"vitest dev\"",
+    "start": "bun run --watch ./src/__lab__/index.ts"
+  },
+  "dependencies": {
+    "dagre": "^0.8.5",
+    "daily-code": "^1.1.16",
+    "markdown-to-quill-delta": "^1.0.1",
+    "mermaid": "^11.14.0"
+  },
+  "peerDependencies": {
+    "@xyflow/react": "^12",
+    "quill": "*",
+    "zod": "*"
+  },
+  "devDependencies": {
+    "@eslint/compat": "^1.4.1",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4",
+    "@types/dagre": "^0.7.54",
+    "@types/node": "^24.12.2",
+    "@typescript-eslint/eslint-plugin": "^8.58.2",
+    "@typescript-eslint/parser": "^8.58.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-check-file": "^3.3.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "jsonc-patch": "^0.0.4",
+    "prettier": "^3.8.3",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "rolldown": "1.0.0-rc.2",
+    "tsdown": "^0.15.12",
+    "tslib": "^2.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.2",
+    "vitest": "^4.1.4"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./headless": {
+      "import": "./dist/headless.mjs",
+      "require": "./dist/headless.cjs"
+    },
+    "./browser": {
+      "import": "./dist/browser.mjs",
+      "require": "./dist/browser.cjs"
+    },
+    "./aws-icons": {
+      "import": "./dist/aws-icons.mjs",
+      "require": "./dist/aws-icons.cjs"
+    },
+    "./azure-icons": {
+      "import": "./dist/azure-icons.mjs",
+      "require": "./dist/azure-icons.cjs"
+    },
+    "./animated-nodes": {
+      "import": "./dist/animated-nodes.mjs",
+      "require": "./dist/animated-nodes.cjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.mts",
+        "./dist/index.d.cts"
+      ],
+      "headless": [
+        "./dist/headless.d.mts",
+        "./dist/headless.d.cts"
+      ],
+      "browser": [
+        "./dist/browser.d.mts",
+        "./dist/browser.d.cts"
+      ],
+      "aws-icons": [
+        "./dist/aws-icons.d.mts",
+        "./dist/aws-icons.d.cts"
+      ],
+      "azure-icons": [
+        "./dist/azure-icons.d.mts",
+        "./dist/azure-icons.d.cts"
+      ],
+      "animated-nodes": [
+        "./dist/animated-nodes.d.mts",
+        "./dist/animated-nodes.d.cts"
+      ]
+    }
+  }
+}
