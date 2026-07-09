@@ -25,7 +25,7 @@
     "tc": "tsc --noEmit --watch",
     "exports": "tsx ./write-exports.ts",
     "build": "tsdown --config ./tsdown.config.ts",
-    "dev": "concurrently --names \"R,T,V\" --prefix-colors \"blue.dim,magenta.dim,green.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\" \"vitest dev\"",
+    "dev": "concurrently --names \"R,T\" --prefix-colors \"blue.dim,magenta.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\"",
     "start": "bun run --watch ./src/__lab__/index.ts"
   },
   "dependencies": {

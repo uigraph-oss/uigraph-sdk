@@ -22,7 +22,7 @@ import { parseLabelTag, resolvePortalNodeType } from './helpers'
 
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'default',
+  theme: 'dark',
   flowchart: {
     htmlLabels: false,
     curve: 'linear',
@@ -1951,14 +1951,14 @@ function createReactFlowElements(
   // Color schemes
   function getNodeColors(shape: string) {
     const colorSchemes = {
-      rect: ['#E3F2FD', '#1976D2'], // Blue
-      diamond: ['#FFF3E0', '#F57C00'], // Orange
-      circle: ['#E8F5E8', '#388E3C'], // Green
-      stadium: ['#F3E5F5', '#7B1FA2'], // Purple
-      round: ['#FCE4EC', '#C2185B'], // Pink
+      rect: ['#1C2336', '#3D5EA8'],
+      diamond: ['#1C2336', '#3D5EA8'],
+      circle: ['#1C2336', '#3D5EA8'],
+      stadium: ['#1C2336', '#3D5EA8'],
+      round: ['#1C2336', '#3D5EA8'],
     }
 
-    const defaultColors = ['#F0F4F8', '#2D3748']
+    const defaultColors = ['#1C2336', '#3D5EA8']
     const colors =
       colorSchemes[shape as keyof typeof colorSchemes] || defaultColors
 
@@ -1970,11 +1970,11 @@ function createReactFlowElements(
 
   function getSubgraphColors(index: number) {
     const subgraphColors = [
-      { bg: 'rgba(227, 242, 253, 0.4)', border: '#1976D2' }, // Blue
-      { bg: 'rgba(232, 245, 233, 0.4)', border: '#388E3C' }, // Green
-      { bg: 'rgba(243, 229, 245, 0.4)', border: '#7B1FA2' }, // Purple
-      { bg: 'rgba(255, 243, 224, 0.4)', border: '#F57C00' }, // Orange
-      { bg: 'rgba(252, 228, 236, 0.4)', border: '#C2185B' }, // Pink
+      { bg: 'rgba(100, 181, 246, 0.08)', border: '#64B5F6' }, // Blue
+      { bg: 'rgba(129, 199, 132, 0.08)', border: '#81C784' }, // Green
+      { bg: 'rgba(186, 104, 200, 0.08)', border: '#BA68C8' }, // Purple
+      { bg: 'rgba(255, 183, 77, 0.08)', border: '#FFB74D' }, // Orange
+      { bg: 'rgba(240, 98, 146, 0.08)', border: '#F06292' }, // Pink
     ]
     return subgraphColors[index % subgraphColors.length]
   }
@@ -2271,7 +2271,8 @@ function createReactFlowElements(
       labelStyle: {
         fontSize: '12px',
         fontWeight: '500',
-        backgroundColor: 'white',
+        color: '#E2E8F0',
+        backgroundColor: '#1E293B',
         padding: '2px 6px',
       },
       markerEnd: {
@@ -2452,7 +2453,7 @@ async function convertSequenceDiagramToReactFlow(
           generateComponentFieldInput({
             componentFieldId: 'color',
             label: 'Color',
-            data: '#000000',
+            data: '#E2E8F0',
             type: ComponentInputType.ColorPicker,
           }),
         ],
@@ -2486,8 +2487,8 @@ async function convertSequenceDiagramToReactFlow(
       data: {
         source: 'mermaid',
         shape: 'rectangle',
-        fill: '#f8fafc',
-        stroke: '#CCCCCC',
+        fill: '#1E293B',
+        stroke: '#475569',
         strokeWidth: 1,
         componentFields: [generateComponentFieldNameInput(m.label)],
       },
