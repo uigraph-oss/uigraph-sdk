@@ -60,6 +60,22 @@ export function estimateSequenceMessageBoxSize(label: string): {
     return { width: MESSAGE_NODE_WIDTH, height: MESSAGE_NODE_HEIGHT }
   }
 
+  // `<br/>` in the source became a real newline at parse time; each segment
+  // wraps independently and they stack, so measure them as separate blocks.
+  if (text.includes('\n')) {
+    const segments = text
+      .split('\n')
+      .map((segment) => estimateSequenceMessageBoxSize(segment))
+    return {
+      width: Math.max(...segments.map((segment) => segment.width)),
+      height: segments.reduce(
+        (total, segment) =>
+          total + segment.height - Number(MESSAGE_VERTICAL_PADDING),
+        Number(MESSAGE_VERTICAL_PADDING)
+      ),
+    }
+  }
+
   const words = text.split(/\s+/).filter(Boolean)
   const longestWord = Math.max(1, ...words.map((w) => w.length))
 

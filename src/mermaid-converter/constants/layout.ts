@@ -33,6 +33,9 @@ export type LayoutRanker = (typeof LAYOUT_RANKERS)[keyof typeof LAYOUT_RANKERS]
 
 export const DEFAULT_LAYOUT_RANKER: LayoutRanker = LAYOUT_RANKERS.TIGHT_TREE
 
+/** Default lifeline/indicator color, shared with the canvas's own participants. */
+export const SEQUENCE_PARTICIPANT_COLOR = '#E2E8F0'
+
 export const SEQUENCE_LAYOUT = {
   COLUMN_WIDTH: 360,
   ROW_HEIGHT: 60,
@@ -49,4 +52,13 @@ export const SEQUENCE_LAYOUT = {
   MESSAGE_HORIZONTAL_PADDING: 24,
   MESSAGE_VERTICAL_PADDING: 8,
   ROW_VERTICAL_PADDING: 16,
+
+  NOTE_OFFSET: 24,
+  BLOCK_TOP_PADDING: 36,
+  BLOCK_BOTTOM_PADDING: 16,
+  BLOCK_SIDE_PADDING: 44,
+  BLOCK_SECTION_PADDING: 22,
+  BLOCK_CONTENT_INSET: 12,
+  BOX_TOP_INSET: 26,
+  BOX_BOTTOM_PADDING: 24,
 } as const
