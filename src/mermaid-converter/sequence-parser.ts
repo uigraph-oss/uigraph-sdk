@@ -94,6 +94,37 @@ const ARROW_TOKENS: ArrowToken[] = [
   { token: '->', lineStyle: 'solid', arrowType: 'none' },
 ]
 
+/**
+ * The arrow token that parses back to exactly this arrow. Used by the
+ * react-flow -> mermaid direction so both directions share one table: an exact
+ * match on `half`/`reversed` wins, otherwise the plain form of the head.
+ */
+export function findArrowTokenFor(options: {
+  lineStyle: 'solid' | 'dashed'
+  arrowType: SequenceArrowHead
+  half?: 'top' | 'bottom'
+  reversed?: boolean
+}): string {
+  const exact = ARROW_TOKENS.find(
+    (candidate) =>
+      candidate.lineStyle === options.lineStyle &&
+      candidate.arrowType === options.arrowType &&
+      candidate.half === options.half &&
+      Boolean(candidate.reversed) === Boolean(options.reversed)
+  )
+  if (exact) return exact.token
+
+  const byHead = ARROW_TOKENS.find(
+    (candidate) =>
+      candidate.lineStyle === options.lineStyle &&
+      candidate.arrowType === options.arrowType
+  )
+  if (byHead) return byHead.token
+
+  if (options.lineStyle === 'dashed') return '-->>'
+  return '->>'
+}
+
 const BLOCK_OPENERS: SequenceBlockType[] = [
   'loop',
   'alt',

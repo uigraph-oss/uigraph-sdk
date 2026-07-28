@@ -11,6 +11,10 @@ export {
 } from './mermaid-converter/constants/layout'
 export { sanitizeMermaidLabels } from './mermaid-converter/mermaid-sanitizer'
 export { convertMermaidToReactFlow } from './mermaid-converter/mermaid-to-react-flow'
+export {
+  convertReactFlowToSequenceMermaid,
+  isSequenceDiagram,
+} from './mermaid-converter/react-flow-to-sequence'
 export { estimateSequenceMessageBoxSize } from './mermaid-converter/sequence-layout'
 
 export { ComponentInputType } from './components/component-type'
