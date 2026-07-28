@@ -503,7 +503,7 @@ export function convertReactFlowToSequenceMermaid(
       openBlocks.push(block)
     }
 
-    for (const block of openBlocks) {
+    for (const [depth, block] of openBlocks.entries()) {
       for (const section of block.sections.slice(1)) {
         if (section.startRow !== currentRow) continue
         const keyword =
@@ -513,7 +513,7 @@ export function convertReactFlowToSequenceMermaid(
               ? 'option'
               : 'else'
         lines.push(
-          `${indent()}${keyword} ${encodeLabel(section.label)}`.trimEnd()
+          `${'  '.repeat(depth + 1)}${keyword} ${encodeLabel(section.label)}`.trimEnd()
         )
       }
     }
@@ -563,7 +563,7 @@ export function convertReactFlowToSequenceMermaid(
           .filter((id): id is string => id !== undefined)
         if (names.length > 0) {
           lines.push(
-            `${indent()}Note ${item.placement} ${names.join(', ')}: ${encodeLabel(item.text)}`
+            `${indent()}Note ${item.placement} ${names.join(',')}: ${encodeLabel(item.text)}`
           )
         }
       }
