@@ -19,6 +19,7 @@ import {
 } from '../types'
 import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from './constants/layout'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
+import { estimateSequenceMessageBoxSize } from './sequence-layout'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -2407,9 +2408,9 @@ function getParticipantX(index: number): number {
   return index * COLUMN_WIDTH + COLUMN_WIDTH / 2
 }
 
-function getRowY(rowIndex: number): number {
-  const { HEADER_HEIGHT, ROW_HEIGHT } = SEQUENCE_LAYOUT
-  return HEADER_HEIGHT + rowIndex * ROW_HEIGHT + ROW_HEIGHT / 2
+function getRowY(rowIndex: number, rowHeight: number): number {
+  const { HEADER_HEIGHT } = SEQUENCE_LAYOUT
+  return HEADER_HEIGHT + rowIndex * rowHeight + rowHeight / 2
 }
 
 function rowHandleId(
@@ -2426,13 +2427,33 @@ async function convertSequenceDiagramToReactFlow(
   const { participants, messages } = parseSequenceDiagram(mermaidCode)
   const {
     PARTICIPANT_NODE_WIDTH,
-    MESSAGE_NODE_WIDTH,
-    MESSAGE_NODE_HEIGHT,
+    ROW_HEIGHT,
+    ROW_VERTICAL_PADDING,
     SELF_LOOP_OFFSET,
   } = SEQUENCE_LAYOUT
 
-  const hasSelfLoop = messages.some((m) => m.from === m.to)
-  const rowCount = messages.length + (hasSelfLoop ? 1 : 0)
+  const sizeByRowIndex = new Map(
+    messages.map((m) => [m.rowIndex, estimateSequenceMessageBoxSize(m.label)])
+  )
+
+  const rowHeight = Math.max(
+    ROW_HEIGHT,
+    ...messages.map(
+      (m) => sizeByRowIndex.get(m.rowIndex)!.height + ROW_VERTICAL_PADDING
+    )
+  )
+
+  // A self-message occupies TWO rows: it leaves its lifeline at row n and
+  // returns to it at row n + 1. Numbering messages 0..n-1 would let the message
+  // after a self-loop claim the row that loop returns into.
+  const layoutRowByRowIndex = new Map<number, number>()
+  let nextRow = 0
+  for (const m of messages) {
+    layoutRowByRowIndex.set(m.rowIndex, nextRow)
+    nextRow += m.from === m.to ? 2 : 1
+  }
+  const rowCount = nextRow + 1
+
   const nodes: Node[] = []
   const edges: Edge[] = []
 
@@ -2448,6 +2469,7 @@ async function convertSequenceDiagramToReactFlow(
         source: 'mermaid',
         label: p.name,
         rowCount,
+        rowHeight,
         componentFields: [
           generateComponentFieldNameInput(p.name),
           generateComponentFieldInput({
@@ -2470,10 +2492,16 @@ async function convertSequenceDiagramToReactFlow(
     const toIndex = toParticipant.index
     const isSelf = fromIndex === toIndex
     const goesRight = fromIndex < toIndex
+    const size = sizeByRowIndex.get(m.rowIndex)!
+    const layoutRow = layoutRowByRowIndex.get(m.rowIndex)!
 
-    const centerX = isSelf
+    // Self-message boxes hang to the right of their own lifeline rather than
+    // straddling it — a centered box wide enough to cover the lifeline forces
+    // its own edges to wrap around the outside to reach the top/bottom handles.
+    const x = isSelf
       ? getParticipantX(fromIndex) + SELF_LOOP_OFFSET
-      : (getParticipantX(fromIndex) + getParticipantX(toIndex)) / 2
+      : (getParticipantX(fromIndex) + getParticipantX(toIndex)) / 2 -
+        size.width / 2
 
     const messageId = `message-${m.rowIndex}`
 
@@ -2481,8 +2509,8 @@ async function convertSequenceDiagramToReactFlow(
       id: messageId,
       type: 'shape',
       position: {
-        x: centerX - MESSAGE_NODE_WIDTH / 2,
-        y: getRowY(m.rowIndex) - MESSAGE_NODE_HEIGHT / 2,
+        x,
+        y: getRowY(layoutRow, rowHeight) - size.height / 2,
       },
       data: {
         source: 'mermaid',
@@ -2492,9 +2520,11 @@ async function convertSequenceDiagramToReactFlow(
         strokeWidth: 1,
         componentFields: [generateComponentFieldNameInput(m.label)],
       },
+      width: size.width,
+      height: size.height,
       style: {
-        width: MESSAGE_NODE_WIDTH,
-        height: MESSAGE_NODE_HEIGHT,
+        width: size.width,
+        height: size.height,
       },
     })
 
@@ -2524,7 +2554,7 @@ async function convertSequenceDiagramToReactFlow(
       id: `edge-${m.rowIndex}-a`,
       source: `participant-${m.from}`,
       target: messageId,
-      sourceHandle: rowHandleId(m.rowIndex, sourceSide, 'source'),
+      sourceHandle: rowHandleId(layoutRow, sourceSide, 'source'),
       targetHandle: isSelf
         ? 'target-top'
         : sourceSide === 'right'
@@ -2545,7 +2575,7 @@ async function convertSequenceDiagramToReactFlow(
           ? 'source-right'
           : 'source-left',
       targetHandle: rowHandleId(
-        m.rowIndex + (isSelf ? 1 : 0),
+        layoutRow + (isSelf ? 1 : 0),
         targetSide,
         'target'
       ),
