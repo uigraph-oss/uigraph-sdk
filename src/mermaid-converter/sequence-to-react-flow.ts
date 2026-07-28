@@ -609,7 +609,15 @@ export function convertSequenceDiagramToReactFlow(
       },
       data: {
         source: 'mermaid',
-        componentFields: [generateComponentFieldNameInput(data.title)],
+        componentFields: [
+          generateComponentFieldInput({
+            componentFieldId: 'text',
+            label: 'Text',
+            type: ComponentInputType.TextBox,
+            data: data.title,
+            isReadonly: true,
+          }),
+        ],
       },
     })
   }
