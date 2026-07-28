@@ -1,6 +1,7 @@
 import { Edge, Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
 import { generateComponentFieldNameInput } from '../components/component-field'
+import { STRIPE_CHECKOUT_DIAGRAM_CONTENT } from './fixtures/stripe-checkout-diagram-content'
 import { convertMermaidToReactFlow } from './mermaid-to-react-flow'
 import {
   convertReactFlowToSequenceMermaid,
@@ -335,6 +336,61 @@ describe('isSequenceDiagram', () => {
     expect(convertReactFlowToSequenceMermaid(nodes, edges)).toContain(
       'participant Alice'
     )
+  })
+
+  it('recognises a saved diagramContent payload from the portal', () => {
+    const { nodes } = JSON.parse(STRIPE_CHECKOUT_DIAGRAM_CONTENT)
+
+    expect(isSequenceDiagram(nodes)).toBe(true)
+  })
+})
+
+describe('saved diagramContent payload', () => {
+  const { nodes, edges } = JSON.parse(STRIPE_CHECKOUT_DIAGRAM_CONTENT)
+
+  it('carries the participants and messages the portal saved', () => {
+    expect(
+      nodes
+        .filter((node: Node) => node.type === 'sequenceParticipant')
+        .map((node: Node) => node.id)
+    ).toEqual([
+      'participant-Client',
+      'participant-Server',
+      'participant-StripeAPI',
+      'participant-StripeCheckout',
+    ])
+    expect(nodes.filter((node: Node) => node.type === 'shape')).toHaveLength(8)
+    expect(edges).toHaveLength(16)
+  })
+
+  it('exports as the mermaid sequence diagram it came from', () => {
+    expect(convertReactFlowToSequenceMermaid(nodes, edges)).toBe(
+      [
+        'sequenceDiagram',
+        '  participant Client',
+        '  participant Server',
+        '  participant StripeAPI as Stripe API',
+        '  participant StripeCheckout as Stripe Checkout',
+        '  Client->>Server: Send order information',
+        '  Server->>StripeAPI: Create Checkout Session',
+        '  StripeAPI-->>Server: Return Checkout Session',
+        '  Server-->>Client: Return Checkout Session client secret',
+        '  Client->>StripeCheckout: Mount Checkout on your website',
+        '  StripeCheckout->>StripeCheckout: Customer completes payment',
+        '  StripeCheckout-->>Client: Customer returns to your website',
+        '  StripeAPI-->>Server: Handle fulfillment',
+      ].join('\n')
+    )
+  })
+
+  it('survives a re-import of its own export', async () => {
+    const exported = convertReactFlowToSequenceMermaid(nodes, edges)
+    const reimported = await convertMermaidToReactFlow(exported)
+
+    expect(isSequenceDiagram(reimported.nodes)).toBe(true)
+    expect(
+      convertReactFlowToSequenceMermaid(reimported.nodes, reimported.edges)
+    ).toBe(exported)
   })
 })
 
