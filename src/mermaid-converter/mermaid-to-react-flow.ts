@@ -11,14 +11,14 @@ import {
   MermaidEdge,
   MermaidNode,
   ReactFlowData,
-  SequenceDiagramData,
-  SequenceMessage,
-  SequenceParticipant,
   SubgraphInfo,
   SubgraphLayout,
 } from '../types'
-import { LAYOUT_SPACING, SEQUENCE_LAYOUT } from './constants/layout'
+import { LAYOUT_SPACING } from './constants/layout'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
+import { convertSequenceDiagramToReactFlow } from './sequence-to-react-flow'
+
+export { parseSequenceDiagram } from './sequence-parser'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -41,70 +41,6 @@ function detectDiagramType(code: string): DiagramType {
     }
   }
   return 'flowchart'
-}
-
-export function parseSequenceDiagram(code: string): SequenceDiagramData {
-  const participants: SequenceParticipant[] = []
-  const messages: SequenceMessage[] = []
-  const participantMap = new Map<string, number>()
-
-  const lines = code.split('\n')
-  let messageRow = 0
-
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.toLowerCase() === 'sequencediagram') continue
-
-    const participantMatch = trimmed.match(
-      /^(?:participant|actor)\s+(\S+)(?:\s+as\s+(.+))?$/i
-    )
-    if (participantMatch) {
-      const id = participantMatch[1]
-      const alias = participantMatch[2]?.trim()
-      if (!participantMap.has(id)) {
-        const index = participants.length
-        participantMap.set(id, index)
-        participants.push({ id, name: alias ?? id, alias, index })
-      }
-      continue
-    }
-
-    const messageMatch = trimmed.match(
-      /^([A-Za-z0-9_]+)\s*(-->>|-->|--\)|->>|->|-\))\s*([A-Za-z0-9_]+)\s*:\s*(.*)$/
-    )
-    if (messageMatch) {
-      const [, from, arrow, to, label] = messageMatch
-
-      if (!participantMap.has(from)) {
-        const index = participants.length
-        participantMap.set(from, index)
-        participants.push({ id: from, name: from, index })
-      }
-      if (!participantMap.has(to)) {
-        const index = participants.length
-        participantMap.set(to, index)
-        participants.push({ id: to, name: to, index })
-      }
-
-      const lineStyle = arrow.startsWith('--') ? 'dashed' : 'solid'
-      const arrowType = arrow.includes('>>')
-        ? 'filled'
-        : arrow.includes(')')
-          ? 'open'
-          : 'none'
-
-      messages.push({
-        from,
-        to,
-        label: label.trim(),
-        lineStyle,
-        arrowType,
-        rowIndex: messageRow++,
-      })
-    }
-  }
-
-  return { participants, messages }
 }
 
 const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
@@ -2400,166 +2336,6 @@ export async function debugConvertMermaid(mermaidCode: string): Promise<any> {
     standalonePositions: standalonePositionsPlain,
     reactFlowData,
   }
-}
-
-function getParticipantX(index: number): number {
-  const { COLUMN_WIDTH } = SEQUENCE_LAYOUT
-  return index * COLUMN_WIDTH + COLUMN_WIDTH / 2
-}
-
-function getRowY(rowIndex: number): number {
-  const { HEADER_HEIGHT, ROW_HEIGHT } = SEQUENCE_LAYOUT
-  return HEADER_HEIGHT + rowIndex * ROW_HEIGHT + ROW_HEIGHT / 2
-}
-
-function rowHandleId(
-  rowIndex: number,
-  side: 'left' | 'right',
-  handleType: 'source' | 'target'
-): string {
-  return `row-${rowIndex}-${side}-${handleType}`
-}
-
-async function convertSequenceDiagramToReactFlow(
-  mermaidCode: string
-): Promise<ReactFlowData> {
-  const { participants, messages } = parseSequenceDiagram(mermaidCode)
-  const {
-    PARTICIPANT_NODE_WIDTH,
-    MESSAGE_NODE_WIDTH,
-    MESSAGE_NODE_HEIGHT,
-    SELF_LOOP_OFFSET,
-  } = SEQUENCE_LAYOUT
-
-  const hasSelfLoop = messages.some((m) => m.from === m.to)
-  const rowCount = messages.length + (hasSelfLoop ? 1 : 0)
-  const nodes: Node[] = []
-  const edges: Edge[] = []
-
-  for (const p of participants) {
-    nodes.push({
-      id: `participant-${p.id}`,
-      type: 'sequenceParticipant',
-      position: {
-        x: getParticipantX(p.index) - PARTICIPANT_NODE_WIDTH / 2,
-        y: 0,
-      },
-      data: {
-        source: 'mermaid',
-        label: p.name,
-        rowCount,
-        componentFields: [
-          generateComponentFieldNameInput(p.name),
-          generateComponentFieldInput({
-            componentFieldId: 'color',
-            label: 'Color',
-            data: '#E2E8F0',
-            type: ComponentInputType.ColorPicker,
-          }),
-        ],
-      },
-    })
-  }
-
-  for (const m of messages) {
-    const fromParticipant = participants.find((p) => p.id === m.from)
-    const toParticipant = participants.find((p) => p.id === m.to)
-    if (!fromParticipant || !toParticipant) continue
-
-    const fromIndex = fromParticipant.index
-    const toIndex = toParticipant.index
-    const isSelf = fromIndex === toIndex
-    const goesRight = fromIndex < toIndex
-
-    const centerX = isSelf
-      ? getParticipantX(fromIndex) + SELF_LOOP_OFFSET
-      : (getParticipantX(fromIndex) + getParticipantX(toIndex)) / 2
-
-    const messageId = `message-${m.rowIndex}`
-
-    nodes.push({
-      id: messageId,
-      type: 'shape',
-      position: {
-        x: centerX - MESSAGE_NODE_WIDTH / 2,
-        y: getRowY(m.rowIndex) - MESSAGE_NODE_HEIGHT / 2,
-      },
-      data: {
-        source: 'mermaid',
-        shape: 'rectangle',
-        fill: '#1E293B',
-        stroke: '#475569',
-        strokeWidth: 1,
-        componentFields: [generateComponentFieldNameInput(m.label)],
-      },
-      style: {
-        width: MESSAGE_NODE_WIDTH,
-        height: MESSAGE_NODE_HEIGHT,
-      },
-    })
-
-    const edgeStyle = {
-      stroke: '#94a3b8',
-      strokeWidth: 2,
-      ...(m.lineStyle === 'dashed' ? { strokeDasharray: '4 4' as const } : {}),
-    }
-
-    const markerEnd =
-      m.arrowType !== 'none'
-        ? {
-            type:
-              m.arrowType === 'filled'
-                ? MarkerType.ArrowClosed
-                : MarkerType.Arrow,
-            width: 16,
-            height: 16,
-            color: '#94a3b8',
-          }
-        : undefined
-
-    const sourceSide = goesRight || isSelf ? 'right' : 'left'
-    const targetSide = isSelf ? 'right' : goesRight ? 'left' : 'right'
-
-    edges.push({
-      id: `edge-${m.rowIndex}-a`,
-      source: `participant-${m.from}`,
-      target: messageId,
-      sourceHandle: rowHandleId(m.rowIndex, sourceSide, 'source'),
-      targetHandle: isSelf
-        ? 'target-top'
-        : sourceSide === 'right'
-          ? 'target-left'
-          : 'target-right',
-      type: 'smoothstep',
-      style: edgeStyle,
-      data: { source: 'mermaid' },
-    })
-
-    edges.push({
-      id: `edge-${m.rowIndex}-b`,
-      source: messageId,
-      target: `participant-${m.to}`,
-      sourceHandle: isSelf
-        ? 'source-bottom'
-        : goesRight
-          ? 'source-right'
-          : 'source-left',
-      targetHandle: rowHandleId(
-        m.rowIndex + (isSelf ? 1 : 0),
-        targetSide,
-        'target'
-      ),
-      type: 'smoothstep',
-      style:
-        m.lineStyle === 'dashed'
-          ? edgeStyle
-          : { stroke: '#94a3b8', strokeWidth: 2 },
-      ...(markerEnd ? { markerEnd } : {}),
-      data: { source: 'mermaid' },
-    })
-  }
-
-  return { nodes, edges }
 }
 
 async function convertFlowchartToReactFlow(

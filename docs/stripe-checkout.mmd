@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant Client
+    participant Server
+    participant StripeAPI as Stripe API
+    participant StripeCheckout as Stripe Checkout
+
+    Client->>Server: Send order information
+    Server->>StripeAPI: Create Checkout Session
+    StripeAPI-->>Server: Return Checkout Session
+    Server-->>Client: Return Checkout Session client secret
+
+    Client->>StripeCheckout: Mount Checkout on your website
+    StripeCheckout->>StripeCheckout: Customer completes payment
+    StripeCheckout-->>Client: Customer returns to your website
+
+    StripeAPI-->>Server: Handle fulfillment

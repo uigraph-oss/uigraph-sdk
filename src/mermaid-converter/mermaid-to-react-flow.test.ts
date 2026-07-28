@@ -421,6 +421,50 @@ describe('convertMermaidToReactFlow - sequence diagrams', () => {
     expect(result.edges).toHaveLength(2)
   })
 
+  it('sizes message boxes from their label instead of a fixed width', async () => {
+    const code = `sequenceDiagram
+    participant A
+    participant B
+    A->>B: Hi
+    B-->>A: Return Checkout Session client secret`
+    const result = await convertMermaidToReactFlow(code)
+    const [short, long] = result.nodes.filter((n) => n.type === 'shape')
+
+    expect(long.width).toBeGreaterThan(short.width!)
+    expect(long.height).toBeGreaterThan(short.height!)
+  })
+
+  it('gives every message a row tall enough for the tallest box', async () => {
+    const code = `sequenceDiagram
+    participant A
+    participant B
+    A->>B: Return Checkout Session client secret
+    B-->>A: Ok`
+    const result = await convertMermaidToReactFlow(code)
+    const [first, second] = result.nodes
+      .filter((n) => n.type === 'shape')
+      .sort((a, b) => a.position.y - b.position.y)
+
+    expect(second.position.y).toBeGreaterThanOrEqual(
+      first.position.y + first.height!
+    )
+  })
+
+  it('gives a self-message two rows so the next message clears its return', async () => {
+    const code = `sequenceDiagram
+    participant A
+    participant B
+    A->>A: Think
+    A->>B: Go`
+    const result = await convertMermaidToReactFlow(code)
+
+    const selfReturn = result.edges.find((e) => e.id === 'edge-0-b')
+    const next = result.edges.find((e) => e.id === 'edge-1-a')
+
+    expect(selfReturn?.targetHandle).toBe('row-1-right-target')
+    expect(next?.sourceHandle).toBe('row-2-right-source')
+  })
+
   it('still converts flowcharts correctly', async () => {
     const code = 'flowchart LR\n  A --> B'
     const result = await convertMermaidToReactFlow(code)
