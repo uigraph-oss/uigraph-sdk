@@ -9,10 +9,8 @@ sequenceDiagram
     StripeAPI-->>Server: Return Checkout Session
     Server-->>Client: Return Checkout Session client secret
 
-    Note over Client: Mount Checkout on your website
-
-    Client->>StripeCheckout: Open Checkout
+    Client->>StripeCheckout: Mount Checkout on your website
     StripeCheckout->>StripeCheckout: Customer completes payment
     StripeCheckout-->>Client: Customer returns to your website
 
-    StripeAPI-->>Server: Handle fulfillment (webhook)
+    StripeAPI-->>Server: Handle fulfillment
