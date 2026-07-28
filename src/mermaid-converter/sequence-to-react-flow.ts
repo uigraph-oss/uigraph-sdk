@@ -55,8 +55,12 @@ type Item =
  */
 function buildGrid(data: SequenceDiagramData) {
   const { ROW_HEIGHT, ROW_VERTICAL_PADDING, HEADER_HEIGHT } = SEQUENCE_LAYOUT
-  const { BLOCK_TOP_PADDING, BLOCK_BOTTOM_PADDING, BLOCK_SECTION_PADDING } =
-    SEQUENCE_LAYOUT
+  const {
+    BLOCK_TOP_PADDING,
+    BLOCK_BOTTOM_PADDING,
+    BLOCK_SECTION_PADDING,
+    BLOCK_FRAME_GAP,
+  } = SEQUENCE_LAYOUT
 
   const items: Item[] = [
     ...data.messages.map(
@@ -114,7 +118,11 @@ function buildGrid(data: SequenceDiagramData) {
 
   for (const block of data.blocks) {
     if (block.endRow < block.startRow) continue
-    padBefore[toLayoutRow(block.startRow)] += BLOCK_TOP_PADDING
+    // The frame itself only claims BLOCK_TOP_PADDING of this, so the extra gap
+    // is space no frame draws over — without it a block ending on one row and
+    // the next block starting on the following row share an edge.
+    padBefore[toLayoutRow(block.startRow)] +=
+      BLOCK_TOP_PADDING + BLOCK_FRAME_GAP
     padAfter[toLastLayoutRow(block.endRow)] += BLOCK_BOTTOM_PADDING
     for (const section of block.sections.slice(1)) {
       if (section.endRow < section.startRow) continue
@@ -216,6 +224,19 @@ function blockFrameNode(
   const lefts: number[] = []
   const rights: number[] = []
 
+  // Every frame between this one and the box gets its own inset, or a parent
+  // lands on the exact edge of the child that wraps the same box.
+  function boxInset(parserRow: number): number {
+    const between = data.blocks.filter(
+      (other) =>
+        other.depth > block.depth &&
+        other.endRow >= other.startRow &&
+        other.startRow <= parserRow &&
+        other.endRow >= parserRow
+    ).length
+    return BLOCK_CONTENT_INSET * (between + 1)
+  }
+
   for (const message of data.messages) {
     if (message.rowIndex < block.startRow || message.rowIndex > block.endRow) {
       continue
@@ -227,8 +248,9 @@ function blockFrameNode(
     if (from === undefined || to === undefined) continue
     const width = grid.sizes.get(message.rowIndex)!.width
     const x = messageBoxX(from, to, width)
-    lefts.push(x)
-    rights.push(x + width)
+    const inset = boxInset(message.rowIndex)
+    lefts.push(x - inset)
+    rights.push(x + width + inset)
   }
   for (const note of data.notes) {
     if (note.rowIndex < block.startRow || note.rowIndex > block.endRow) continue
@@ -238,8 +260,9 @@ function blockFrameNode(
     })
     const box = noteBox(note, grid, indexById)
     if (box === undefined) continue
-    lefts.push(box.x)
-    rights.push(box.x + box.width)
+    const inset = boxInset(note.rowIndex)
+    lefts.push(box.x - inset)
+    rights.push(box.x + box.width + inset)
   }
   if (involved.size === 0) {
     data.participants.forEach((p) => involved.add(p.index))
@@ -271,14 +294,8 @@ function blockFrameNode(
       grid.toLastLayoutRow(other.endRow) === endRow
   ).length
 
-  const x = Math.min(
-    participantX(minIndex) - sidePadding,
-    ...lefts.map((left) => left - BLOCK_CONTENT_INSET)
-  )
-  const right = Math.max(
-    participantX(maxIndex) + sidePadding,
-    ...rights.map((edge) => edge + BLOCK_CONTENT_INSET)
-  )
+  const x = Math.min(participantX(minIndex) - sidePadding, ...lefts)
+  const right = Math.max(participantX(maxIndex) + sidePadding, ...rights)
   const width = right - x
   const top = grid.rowTops[startRow] - BLOCK_TOP_PADDING * (deeperAtTop + 1)
   const height =
