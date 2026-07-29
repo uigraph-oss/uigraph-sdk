@@ -33,9 +33,6 @@ export type LayoutRanker = (typeof LAYOUT_RANKERS)[keyof typeof LAYOUT_RANKERS]
 
 export const DEFAULT_LAYOUT_RANKER: LayoutRanker = LAYOUT_RANKERS.TIGHT_TREE
 
-/** Default lifeline/indicator color, shared with the canvas's own participants. */
-export const SEQUENCE_PARTICIPANT_COLOR = '#E2E8F0'
-
 export const SEQUENCE_LAYOUT = {
   COLUMN_WIDTH: 360,
   ROW_HEIGHT: 60,

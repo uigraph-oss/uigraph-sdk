@@ -9,6 +9,7 @@ import { ComponentInputType } from '../../components/component-type'
 import { generateGroupNodeFromNodes } from '../../react-flow/group'
 import { CustomData, ReactFlowData, RFComponentField } from '../../types'
 import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
+import { isSequenceDiagram } from '../react-flow-to-sequence'
 import { contextSchema } from './context-schema'
 import { resolveAnimatedNode, resolveCloudIcon } from './helpers'
 import { resizeNodesLayouts } from './resize-nodes-layouts'
@@ -230,6 +231,7 @@ export async function convertMermaidToReactFlowWithContext(
     clonedNode.data = {
       ...clonedNode.data,
       ...objectPick(ctx.style ?? {}, [
+        'color',
         'fill',
         'stroke',
         'strokeWidth',
@@ -320,6 +322,10 @@ export async function convertMermaidToReactFlowWithContext(
       return node
     }),
   ]
+
+  if (isSequenceDiagram(combinedNodes)) {
+    return { edges: resolvedEdges, nodes: combinedNodes }
+  }
 
   return {
     edges: resolvedEdges,

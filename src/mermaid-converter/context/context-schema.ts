@@ -65,6 +65,7 @@ export const contextSchema = z.object({
             width: z.number().optional(),
             height: z.number().optional(),
 
+            color: z.string().optional(),
             fill: z.string().optional(),
             stroke: z.string().optional(),
             strokeWidth: z.number().optional(),

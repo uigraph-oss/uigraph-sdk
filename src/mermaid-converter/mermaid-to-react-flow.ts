@@ -14,6 +14,7 @@ import {
   SubgraphInfo,
   SubgraphLayout,
 } from '../types'
+import { convertC4MermaidToReactFlow } from './c4-to-react-flow'
 import { LAYOUT_SPACING } from './constants/layout'
 import { parseLabelTag, resolvePortalNodeType } from './helpers'
 import { convertSequenceDiagramToReactFlow } from './sequence-to-react-flow'
@@ -29,13 +30,14 @@ mermaid.initialize({
   },
 })
 
-type DiagramType = 'sequence' | 'flowchart'
+type DiagramType = 'sequence' | 'flowchart' | 'c4'
 
 function detectDiagramType(code: string): DiagramType {
   const lines = code.split('\n')
   for (const line of lines) {
     const trimmed = line.trim().toLowerCase()
     if (trimmed.startsWith('sequencediagram')) return 'sequence'
+    if (trimmed.startsWith('c4')) return 'c4'
     if (trimmed.startsWith('flowchart') || trimmed.startsWith('graph')) {
       return 'flowchart'
     }
@@ -2162,14 +2164,11 @@ function createReactFlowElements(
     }
 
     const edgeType = 'default'
-    const animated = true // Default to animated for all edges
 
-    // Style edges based on type, but keep animation consistent
     switch (edge.type) {
       case '-->':
 
       case '->':
-        // Already has default animation and width
         break
 
       case '---':
@@ -2202,7 +2201,6 @@ function createReactFlowElements(
       target: targetId,
       label: edge.label,
       type: edgeType,
-      animated, // Apply animation to ALL edges
       style: edgeStyle,
       labelStyle: {
         fontSize: '12px',
@@ -2376,6 +2374,10 @@ export async function convertMermaidToReactFlow(
 
     if (diagramType === 'sequence') {
       return convertSequenceDiagramToReactFlow(mermaidCode)
+    }
+
+    if (diagramType === 'c4') {
+      return convertC4MermaidToReactFlow(mermaidCode)
     }
 
     return convertFlowchartToReactFlow(mermaidCode)

@@ -339,15 +339,14 @@ export function resolveMermaidDetailedNodeLabel(
     const participantName = name ?? label
     const rowCount =
       typeof nodeData?.rowCount === 'number' ? nodeData.rowCount : undefined
-    const color =
-      getFieldString(componentFields, 'Color') ?? pickString(nodeData?.color)
+    const color = pickString(nodeData?.color)
     const lines = [
       participantName
         ? `SequenceParticipant: ${participantName}`
         : 'SequenceParticipant',
       ...(typeof rowCount === 'number' ? [`rows: ${rowCount}`] : []),
       ...(color ? [`color: ${color}`] : []),
-      ...buildFieldLines(componentFields, new Set(['name', 'label', 'color'])),
+      ...buildFieldLines(componentFields, new Set(['name', 'label'])),
     ]
     return buildDetailedLabel(lines)
   }

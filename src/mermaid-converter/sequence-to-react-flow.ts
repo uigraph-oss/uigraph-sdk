@@ -11,7 +11,7 @@ import {
   SequenceMessage,
   SequenceNote,
 } from '../types'
-import { SEQUENCE_LAYOUT, SEQUENCE_PARTICIPANT_COLOR } from './constants/layout'
+import { SEQUENCE_LAYOUT } from './constants/layout'
 import { estimateSequenceMessageBoxSize } from './sequence-layout'
 import { parseSequenceDiagram } from './sequence-parser'
 
@@ -491,15 +491,7 @@ export function convertSequenceDiagramToReactFlow(
           : {
               lifelineEndRow: grid.toLastLayoutRow(participant.destroyedAtRow),
             }),
-        componentFields: [
-          generateComponentFieldNameInput(participant.name),
-          generateComponentFieldInput({
-            componentFieldId: 'color',
-            label: 'Color',
-            data: SEQUENCE_PARTICIPANT_COLOR,
-            type: ComponentInputType.ColorPicker,
-          }),
-        ],
+        componentFields: [generateComponentFieldNameInput(participant.name)],
       },
     })
   }
