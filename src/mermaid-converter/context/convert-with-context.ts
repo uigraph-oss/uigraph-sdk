@@ -230,6 +230,7 @@ export async function convertMermaidToReactFlowWithContext(
     clonedNode.data = {
       ...clonedNode.data,
       ...objectPick(ctx.style ?? {}, [
+        'color',
         'fill',
         'stroke',
         'strokeWidth',

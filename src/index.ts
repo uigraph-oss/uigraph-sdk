@@ -13,10 +13,7 @@ export {
   convertC4ToReactFlow,
   getC4ElementColors,
 } from './mermaid-converter/c4-to-react-flow'
-export {
-  SEQUENCE_LAYOUT,
-  SEQUENCE_PARTICIPANT_COLOR,
-} from './mermaid-converter/constants/layout'
+export { SEQUENCE_LAYOUT } from './mermaid-converter/constants/layout'
 export { sanitizeMermaidLabels } from './mermaid-converter/mermaid-sanitizer'
 export { convertMermaidToReactFlow } from './mermaid-converter/mermaid-to-react-flow'
 export {

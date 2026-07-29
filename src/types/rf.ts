@@ -37,6 +37,7 @@ export type CustomData = {
   technology?: string
   description?: string
   link?: string
+  color?: string
   fill?: string
   stroke?: string
   fontColor?: string
