@@ -2164,14 +2164,11 @@ function createReactFlowElements(
     }
 
     const edgeType = 'default'
-    const animated = true // Default to animated for all edges
 
-    // Style edges based on type, but keep animation consistent
     switch (edge.type) {
       case '-->':
 
       case '->':
-        // Already has default animation and width
         break
 
       case '---':
@@ -2204,7 +2201,6 @@ function createReactFlowElements(
       target: targetId,
       label: edge.label,
       type: edgeType,
-      animated, // Apply animation to ALL edges
       style: edgeStyle,
       labelStyle: {
         fontSize: '12px',

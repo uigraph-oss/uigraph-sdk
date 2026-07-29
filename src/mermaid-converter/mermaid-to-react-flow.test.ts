@@ -256,6 +256,7 @@ describe('convertMermaidToReactFlow', () => {
     expect(result.nodes[0]).toHaveProperty('data')
     expect(result.edges[0]).toHaveProperty('source')
     expect(result.edges[0]).toHaveProperty('target')
+    expect(result.edges[0]).not.toHaveProperty('animated')
   })
 
   it('returns empty nodes and edges for diagram with no nodes', async () => {
