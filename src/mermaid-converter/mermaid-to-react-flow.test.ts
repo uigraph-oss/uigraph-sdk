@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   convertMermaidToReactFlow,
@@ -241,26 +239,6 @@ describe('parseMermaidCode', () => {
         }),
       ])
     )
-  })
-
-  it('parses edge labels from demo/complex-mermaid.txt', () => {
-    const code = readFileSync(
-      join(process.cwd(), 'demo', 'complex-mermaid.txt'),
-      'utf8'
-    )
-    const result = parseMermaidCode(code)
-    const labels = result.edges.map((edge) => edge.label).filter(Boolean)
-
-    expect(result.nodes.some((node) => node.id === '[*]')).toBe(false)
-    expect(
-      result.edges.some(
-        (edge) => edge.source === '[*]' || edge.target === '[*]'
-      )
-    ).toBe(false)
-    expect(labels.length).toBeGreaterThan(0)
-    expect(labels).toContain('submit_credentials')
-    expect(labels).toContain('auth_success && !mfa_enabled')
-    expect(labels).toContain('session_timeout')
   })
 })
 

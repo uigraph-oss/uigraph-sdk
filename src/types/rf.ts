@@ -1,5 +1,6 @@
 import { Edge, Node } from '@xyflow/react'
 import { ComponentInputType } from '../components/component-type'
+import { C4BoundaryKind, C4ElementKind, C4ElementShape, C4NodeType } from './c4'
 
 export type CustomData = {
   source?: 'mermaid'
@@ -26,6 +27,29 @@ export type CustomData = {
   rows?: string[][]
 
   strokeAnimation?: 'dash'
+
+  c4Kind?: C4ElementKind
+  c4Shape?: C4ElementShape
+  c4BoundaryKind?: C4BoundaryKind
+  c4NodeType?: C4NodeType
+  boundaryType?: string
+  isExternal?: boolean
+  technology?: string
+  description?: string
+  link?: string
+  fill?: string
+  stroke?: string
+  fontColor?: string
+  backgroundColor?: string
+  borderColor?: string
+  labelColor?: string
+  labelOffsetX?: number
+  labelOffsetY?: number
+
+  /** Diagram this node drills down into, opened in a new tab. */
+  diagramId?: string
+  diagramName?: string
+  thumbnailUrl?: string
 }
 
 export interface ReactFlowData {
