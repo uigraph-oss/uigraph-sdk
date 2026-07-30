@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { ComponentInputType } from '../components/component-type'
-import { contextSchema } from './context/context-schema'
-import { convertMermaidToReactFlowWithContext } from './context/convert-with-context'
-import { convertMermaidToReactFlow } from './mermaid-to-react-flow'
-import { isSequenceDiagram } from './react-flow-to-sequence'
+import { ComponentInputType } from '../../../components/component-type'
+import { contextSchema } from '../../context/context-schema'
+import { convertMermaidToReactFlowWithContext } from '../../context/convert-with-context'
+import { convertMermaidToReactFlow } from '../../index'
+import { isSequenceDiagram } from '../from-react-flow'
 
 describe('generated node ids', () => {
   test('a participant node is keyed by its mermaid identifier', async () => {

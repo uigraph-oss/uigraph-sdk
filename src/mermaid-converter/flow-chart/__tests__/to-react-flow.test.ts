@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import {
-  convertMermaidToReactFlow,
-  debugConvertMermaid,
-  parseMermaidCode,
-  parseSequenceDiagram,
-} from './mermaid-to-react-flow'
+import { convertMermaidToReactFlow } from '../../index'
+import { parseSequenceDiagram } from '../../sequence-diagram/parser'
+import { parseMermaidCode } from '../parser'
+import { debugConvertMermaid } from '../to-react-flow'
 
 describe('parseMermaidCode', () => {
   it('parses simple flowchart with two nodes and one edge', () => {

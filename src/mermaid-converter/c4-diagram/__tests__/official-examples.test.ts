@@ -1,8 +1,7 @@
 import { Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
-import { CustomData } from '../../types/rf'
-import { isC4Diagram, parseC4Diagram } from '../c4-parser'
-import { C4_LAYOUT, convertC4MermaidToReactFlow } from '../c4-to-react-flow'
+import { CustomData } from '../../../types/rf'
+import { convertMermaidToReactFlow } from '../../index'
 import {
   C4_COMPONENT_EXAMPLE,
   C4_CONTAINER_EXAMPLE,
@@ -10,8 +9,9 @@ import {
   C4_DEPLOYMENT_EXAMPLE,
   C4_DYNAMIC_EXAMPLE,
   C4_OFFICIAL_EXAMPLES,
-} from '../fixtures/c4-official-diagrams'
-import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
+} from '../fixtures/official-diagrams'
+import { isC4Diagram, parseC4Diagram } from '../parser'
+import { C4_LAYOUT, convertC4MermaidToReactFlow } from '../to-react-flow'
 
 describe.each(C4_OFFICIAL_EXAMPLES)('$name example', ({ name, code }) => {
   it('is detected as a C4 diagram', () => {

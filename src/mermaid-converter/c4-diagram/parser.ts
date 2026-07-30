@@ -13,7 +13,7 @@ import {
   C4Relationship,
   C4RelDirection,
   C4RelStyle,
-} from '../types/c4'
+} from '../../types/c4'
 
 /** Mermaid's own `c4` config defaults. */
 export const DEFAULT_C4_LAYOUT: C4LayoutConfig = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isC4Diagram, parseC4Diagram } from '../c4-parser'
+import { isC4Diagram, parseC4Diagram } from '../parser'
 
 describe('isC4Diagram', () => {
   const C4_TYPES = [

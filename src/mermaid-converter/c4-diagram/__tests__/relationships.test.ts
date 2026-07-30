@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseC4Diagram } from '../c4-parser'
+import { parseC4Diagram } from '../parser'
 
 const SHAPES = 'Person(a, "A")\nPerson(b, "B")'
 

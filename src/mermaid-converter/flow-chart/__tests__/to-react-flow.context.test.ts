@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { convertMermaidToReactFlow } from './mermaid-to-react-flow'
+import { convertMermaidToReactFlow } from '../../index'
 
 describe('convertMermaidToReactFlow', () => {
   it('parses pipe label from dashed arrow', async () => {

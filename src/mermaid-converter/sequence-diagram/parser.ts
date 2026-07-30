@@ -9,7 +9,7 @@ import {
   SequenceNote,
   SequenceParticipant,
   SequenceParticipantType,
-} from '../types'
+} from '../../types'
 
 /**
  * Full parser for https://mermaid.js.org/syntax/sequenceDiagram.html.

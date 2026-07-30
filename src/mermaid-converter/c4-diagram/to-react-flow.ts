@@ -1,13 +1,13 @@
 import { Edge, MarkerType, Node } from '@xyflow/react'
-import { generateComponentFieldNameInput } from '../components/component-field'
+import { generateComponentFieldNameInput } from '../../components/component-field'
 import {
   C4DiagramData,
   C4Element,
   C4ElementStyle,
   C4RelDirection,
-} from '../types/c4'
-import { ReactFlowData } from '../types/rf'
-import { parseC4Diagram } from './c4-parser'
+} from '../../types/c4'
+import { ReactFlowData } from '../../types/rf'
+import { parseC4Diagram } from './parser'
 
 /** Mirrors mermaid's `c4` config block so imports land at a familiar scale. */
 export const C4_LAYOUT = {

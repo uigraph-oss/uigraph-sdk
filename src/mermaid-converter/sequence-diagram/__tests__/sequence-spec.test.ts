@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { SEQUENCE_LAYOUT } from './constants/layout'
-import { parseSequenceDiagram } from './sequence-parser'
-import { convertSequenceDiagramToReactFlow } from './sequence-to-react-flow'
+import { SEQUENCE_LAYOUT } from '../../constants/layout'
+import { parseSequenceDiagram } from '../parser'
+import { convertSequenceDiagramToReactFlow } from '../to-react-flow'
 
 type NodeData = {
   componentFields?: Array<{ data?: Array<{ value?: string }> }>

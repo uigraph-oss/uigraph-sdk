@@ -1,4 +1,4 @@
-import { SEQUENCE_LAYOUT } from './constants/layout'
+import { SEQUENCE_LAYOUT } from '../constants/layout'
 
 /**
  * Simulates greedy word-boundary wrapping (like CSS `overflow-wrap: break-word`)

@@ -4,8 +4,8 @@ import {
   SequenceBlockType,
   SequenceNote,
   SequenceParticipantType,
-} from '../types'
-import { findArrowTokenFor } from './sequence-parser'
+} from '../../types'
+import { findArrowTokenFor } from './parser'
 
 /**
  * Turns a sequence diagram on the canvas back into mermaid

@@ -2,18 +2,18 @@ import { Edge, MarkerType, Node } from '@xyflow/react'
 import {
   generateComponentFieldInput,
   generateComponentFieldNameInput,
-} from '../components/component-field'
-import { ComponentInputType } from '../components/component-type'
+} from '../../components/component-field'
+import { ComponentInputType } from '../../components/component-type'
 import {
   ReactFlowData,
   SequenceBlock,
   SequenceDiagramData,
   SequenceMessage,
   SequenceNote,
-} from '../types'
-import { SEQUENCE_LAYOUT } from './constants/layout'
-import { estimateSequenceMessageBoxSize } from './sequence-layout'
-import { parseSequenceDiagram } from './sequence-parser'
+} from '../../types'
+import { SEQUENCE_LAYOUT } from '../constants/layout'
+import { estimateSequenceMessageBoxSize } from './layout'
+import { parseSequenceDiagram } from './parser'
 
 const BLOCK_STYLES: Record<string, { border: string; background: string }> = {
   loop: { border: '#64748B', background: 'rgba(100, 116, 139, 0.06)' },

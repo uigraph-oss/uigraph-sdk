@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseC4Diagram } from '../c4-parser'
+import { parseC4Diagram } from '../parser'
 
 function firstBoundary(code: string) {
   return parseC4Diagram(`C4Context\n${code}`).boundaries[0]

@@ -1,4 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const LABEL_TYPE_PREFIX = /^\s*type:(\w+)\s*[:|-]\s*/i
+
+const DEBUG =
+  typeof process !== 'undefined' &&
+  typeof process.env !== 'undefined' &&
+  process.env.DEBUG_MERMAID === 'true'
+
+export function debugLog(...args: any[]) {
+  if (DEBUG) {
+    console.log('[MermaidConverter]', ...args)
+  }
+}
 
 type PortalNodeType =
   | 'shape'

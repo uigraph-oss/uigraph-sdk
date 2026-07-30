@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_C4_LAYOUT, parseC4Diagram } from '../c4-parser'
-import { convertC4MermaidToReactFlow } from '../c4-to-react-flow'
+import { DEFAULT_C4_LAYOUT, parseC4Diagram } from '../parser'
+import { convertC4MermaidToReactFlow } from '../to-react-flow'
 
 const SHAPES = 'Person(a, "A")\nSystem(b, "B")'
 

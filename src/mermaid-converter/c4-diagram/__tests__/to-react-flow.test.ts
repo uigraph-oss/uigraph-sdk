@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { parseC4Diagram } from '../c4-parser'
+import { parseC4Diagram } from '../parser'
 import {
   C4_LAYOUT,
   convertC4MermaidToReactFlow,
   convertC4ToReactFlow,
   getC4ElementColors,
-} from '../c4-to-react-flow'
+} from '../to-react-flow'
 
 const CONTEXT_DIAGRAM = `
 C4Context

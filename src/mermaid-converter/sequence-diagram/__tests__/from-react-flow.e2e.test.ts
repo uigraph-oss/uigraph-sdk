@@ -1,12 +1,12 @@
 import { Edge, Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
-import { generateComponentFieldNameInput } from '../components/component-field'
+import { generateComponentFieldNameInput } from '../../../components/component-field'
 import {
   convertReactFlowToSequenceMermaid,
   isSequenceDiagram,
-} from './react-flow-to-sequence'
-import { parseSequenceDiagram } from './sequence-parser'
-import { convertSequenceDiagramToReactFlow } from './sequence-to-react-flow'
+} from '../from-react-flow'
+import { parseSequenceDiagram } from '../parser'
+import { convertSequenceDiagramToReactFlow } from '../to-react-flow'
 
 /**
  * End-to-end coverage of the export button: mermaid source -> canvas nodes and

@@ -1,12 +1,12 @@
 import { Edge, Node } from '@xyflow/react'
 import { describe, expect, it } from 'vitest'
-import { generateComponentFieldNameInput } from '../components/component-field'
-import { STRIPE_CHECKOUT_DIAGRAM_CONTENT } from './fixtures/stripe-checkout-diagram-content'
-import { convertMermaidToReactFlow } from './mermaid-to-react-flow'
+import { generateComponentFieldNameInput } from '../../../components/component-field'
+import { convertMermaidToReactFlow } from '../../index'
+import { STRIPE_CHECKOUT_DIAGRAM_CONTENT } from '../fixtures/stripe-checkout-diagram-content'
 import {
   convertReactFlowToSequenceMermaid,
   isSequenceDiagram,
-} from './react-flow-to-sequence'
+} from '../from-react-flow'
 
 /**
  * Unit-level coverage of the individual rules the exporter applies — how it

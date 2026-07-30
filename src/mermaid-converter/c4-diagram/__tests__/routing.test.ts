@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { convertMermaidToReactFlow } from '../../index'
 import {
   C4_CONTEXT_EXAMPLE,
   C4_DEPLOYMENT_EXAMPLE,
-} from '../fixtures/c4-official-diagrams'
-import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
+} from '../fixtures/official-diagrams'
 
 describe('convertMermaidToReactFlow routing', () => {
   it('routes C4 code to the C4 converter', async () => {
