@@ -19,7 +19,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['./*.{js,mjs,ts,mts}', '**/node_modules', '**/dist'],
+    ignores: ['./*.{js,mjs,ts,mts}', '**/node_modules', '**/dist', "**/scripts"],
   },
 
   ...configs.recommended,
