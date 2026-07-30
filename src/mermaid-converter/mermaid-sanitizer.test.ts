@@ -69,6 +69,16 @@ describe('extractMermaidFromFences', () => {
     const content = '  just some text  '
     expect(extractMermaidFromFences(content)).toBe('just some text')
   })
+
+  it('reads a fenced block whose diagram starts on the fence line itself', () => {
+    const content = '```flowchart LR\nA --> B```'
+    expect(extractMermaidFromFences(content)).toBe('flowchart LR\nA --> B')
+  })
+
+  it('keeps the fences when a fenced block holds no diagram at all', () => {
+    const content = '```just some notes```'
+    expect(extractMermaidFromFences(content)).toBe('```just some notes```')
+  })
 })
 
 describe('sanitizeMermaidLabels', () => {
@@ -133,4 +143,17 @@ describe('sanitizeMermaidLabels', () => {
     const src = 'flowchart LR\n  A[Simple] --> B[Label]'
     expect(sanitizeMermaidLabels(src)).toBe(src)
   })
+
+  it('escapes a backslash inside a label it has to quote', () => {
+    const src = 'A[path C:\\temp]'
+    expect(sanitizeMermaidLabels(src)).toBe('A["path C:\\\\temp"]')
+  })
+
+  it.fails(
+    'keeps the whole diagram when a node label happens to contain a diagram keyword',
+    () => {
+      const src = 'flowchart LR\n  A[graph of results] --> B'
+      expect(sanitizeMermaidLabels(src)).toContain('--> B')
+    }
+  )
 })

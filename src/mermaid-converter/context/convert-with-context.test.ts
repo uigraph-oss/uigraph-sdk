@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { ComponentInputType } from '../../components/component-type'
 import type { ReactFlowData, RFComponentField } from '../../types'
-import { convertMermaidToReactFlow } from '../mermaid-to-react-flow'
+import { convertMermaidToReactFlow } from '../index'
 import { convertMermaidToReactFlowWithContext } from './convert-with-context'
 
-vi.mock('../mermaid-to-react-flow', () => ({
+vi.mock('../index', () => ({
   convertMermaidToReactFlow: vi.fn(),
 }))
 
