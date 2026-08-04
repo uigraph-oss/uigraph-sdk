@@ -5,6 +5,8 @@ import {
   SequenceNote,
   SequenceParticipantType,
 } from '../../types'
+import { buildValidatedContext } from '../../uig-converter/context'
+import { UigOutput } from '../../uig-converter/types'
 import { findArrowTokenFor } from './parser'
 
 /**
@@ -276,6 +278,7 @@ function collectRowItems(
 }
 
 type BlockEntry = {
+  nodeId: string
   type: SequenceBlockType
   label: string
   color?: string
@@ -309,6 +312,7 @@ function collectBlocks(nodes: Node[]): BlockEntry[] {
     if (typeof block.endRow !== 'number') continue
 
     blocks.push({
+      nodeId: node.id,
       type: (block.type ?? 'rect') as SequenceBlockType,
       label: block.label ?? '',
       ...(block.color ? { color: block.color } : {}),
@@ -332,7 +336,12 @@ function collectBlocks(nodes: Node[]): BlockEntry[] {
   return blocks
 }
 
-type BoxEntry = { label: string; color?: string; participantNodeIds: string[] }
+type BoxEntry = {
+  nodeId: string
+  label: string
+  color?: string
+  participantNodeIds: string[]
+}
 
 function collectBoxes(
   nodes: Node[],
@@ -376,6 +385,7 @@ function collectBoxes(
     const backgroundColor = node.data?.backgroundColor
 
     boxes.push({
+      nodeId: node.id,
       label: box.label ?? '',
       ...(typeof backgroundColor === 'string'
         ? { color: backgroundColor }
@@ -403,10 +413,11 @@ function participantDeclaration(
   return `${keyword} ${participant.mermaidId}${stereotype}${alias}`
 }
 
-export function convertReactFlowToSequenceMermaid(
+function emitSequenceMermaid(
   nodes: Node[],
   edges: Edge[]
-): string {
+): { mermaid: string; nodeIdMap: Map<string, string> } {
+  const nodeIdMap = new Map<string, string>()
   const participants = collectParticipants(nodes)
   const items = collectRowItems(nodes, edges, participants)
   const blocks = collectBlocks(nodes)
@@ -415,6 +426,10 @@ export function convertReactFlowToSequenceMermaid(
   const participantByNodeId = new Map(
     participants.map((participant) => [participant.nodeId, participant])
   )
+
+  for (const participant of participants) {
+    nodeIdMap.set(participant.nodeId, `participant-${participant.mermaidId}`)
+  }
 
   const rowByItemId = new Map<string, number>()
   const lastRowByItemId = new Map<string, number>()
@@ -432,7 +447,10 @@ export function convertReactFlowToSequenceMermaid(
   const titleNode = nodes.find((node) => node.id === 'sequence-title')
   if (titleNode) {
     const text = fieldValue(titleNode, 'text') ?? nodeLabel(titleNode)
-    if (text) lines.push(`  title ${encodeLabel(text)}`)
+    if (text) {
+      lines.push(`  title ${encodeLabel(text)}`)
+      nodeIdMap.set(titleNode.id, 'sequence-title')
+    }
   }
 
   const boxByFirstParticipant = new Map<string, BoxEntry>()
@@ -449,11 +467,15 @@ export function convertReactFlowToSequenceMermaid(
     )
   }
 
+  let boxIndex = 0
+
   for (const participant of participants) {
     const box = boxByFirstParticipant.get(participant.nodeId)
     if (box) {
       const color = box.color ? `${box.color} ` : ''
       lines.push(`  box ${color}${encodeLabel(box.label)}`.trimEnd())
+      nodeIdMap.set(box.nodeId, `sequence-box-box-${boxIndex}`)
+      boxIndex++
     }
 
     if (participant.createdRow === undefined) {
@@ -485,6 +507,8 @@ export function convertReactFlowToSequenceMermaid(
   }
 
   const openBlocks: BlockEntry[] = []
+  let blockIndex = 0
+  let parserRow = 0
 
   function indent(): string {
     return '  '.repeat(openBlocks.length + 1)
@@ -500,6 +524,8 @@ export function convertReactFlowToSequenceMermaid(
       const color =
         block.type === 'rect' && block.color ? `${block.color} ` : ''
       lines.push(`${indent()}${block.type} ${color}${label}`.trimEnd())
+      nodeIdMap.set(block.nodeId, `sequence-block-block-${blockIndex}`)
+      blockIndex++
       openBlocks.push(block)
     }
 
@@ -554,6 +580,8 @@ export function convertReactFlowToSequenceMermaid(
           lines.push(
             `${indent()}${source}${item.token}${target}: ${encodeLabel(item.label)}`
           )
+          nodeIdMap.set(item.nodeId, `message-${parserRow}`)
+          parserRow++
         }
       }
 
@@ -565,6 +593,8 @@ export function convertReactFlowToSequenceMermaid(
           lines.push(
             `${indent()}Note ${item.placement} ${names.join(',')}: ${encodeLabel(item.text)}`
           )
+          nodeIdMap.set(item.nodeId, `note-${parserRow}`)
+          parserRow++
         }
       }
     }
@@ -592,5 +622,24 @@ export function convertReactFlowToSequenceMermaid(
     lines.push(`${indent()}end`)
   }
 
-  return lines.join('\n')
+  return { mermaid: lines.join('\n'), nodeIdMap }
+}
+
+export function convertReactFlowToSequenceMermaid(
+  nodes: Node[],
+  edges: Edge[]
+): string {
+  return emitSequenceMermaid(nodes, edges).mermaid
+}
+
+export function convertReactFlowToSequenceUiGraph(
+  nodes: Node[],
+  edges: Edge[]
+): UigOutput {
+  const { mermaid, nodeIdMap } = emitSequenceMermaid(nodes, edges)
+
+  return {
+    mermaid,
+    context: buildValidatedContext(nodes, edges, [], nodeIdMap),
+  }
 }
