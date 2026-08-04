@@ -21,6 +21,7 @@ export { SEQUENCE_LAYOUT } from './mermaid-converter/constants/layout'
 export { sanitizeMermaidLabels } from './mermaid-converter/mermaid-sanitizer'
 export {
   convertReactFlowToSequenceMermaid,
+  convertReactFlowToSequenceUiGraph,
   isSequenceDiagram,
 } from './mermaid-converter/sequence-diagram/from-react-flow'
 export { estimateSequenceMessageBoxSize } from './mermaid-converter/sequence-diagram/layout'
