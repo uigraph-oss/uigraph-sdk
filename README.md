@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@uigraph/sdk)](https://www.npmjs.com/package/@uigraph/sdk)
 [![license](https://img.shields.io/badge/license-BUSL--1.1-blue)](LICENSE)
 
-Official TypeScript SDK for [UiGraph](https://github.com/uigraph-oss). Parse SQL and NoSQL schemas, convert Mermaid diagrams, and produce [React Flow](https://reactflow.dev/) node and edge data for architecture and data-model diagrams.
+Official TypeScript SDK for [UIGraph](https://github.com/uigraph-oss). Parse SQL and NoSQL schemas, convert Mermaid diagrams, and produce [React Flow](https://reactflow.dev/) node and edge data for architecture and data-model diagrams.
 
 ## Features
 
