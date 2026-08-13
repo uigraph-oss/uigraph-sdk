@@ -9,13 +9,18 @@ import {
 import { parseC4Diagram } from '../c4-diagram/parser'
 import { convertC4ToReactFlow } from '../c4-diagram/to-react-flow'
 import { convertMermaidToReactFlowWithContext } from '../context/convert-with-context'
-import canvas from './fixtures/fraud-detection-canvas.json'
+import canvases from './fixtures/c4-canvases.json'
 
-const nodes = canvas.nodes as unknown as Node<CustomData>[]
-const edges = canvas.edges as unknown as Edge<CustomData>[]
-
-const elementNodes = nodes.filter((node) => node.type === 'c4')
-const boundaryNodes = nodes.filter((node) => node.type === 'c4Boundary')
+/**
+ * Every C4 diagram in the example workspace, exactly as the canvas saved it.
+ * The mermaid these produce is the real export path, so a defect in any slot,
+ * keyword or fallback shows up here on the diagram that uses it.
+ */
+const savedCanvases = Object.entries(canvases).map(([name, canvas]) => ({
+  name,
+  nodes: canvas.nodes as unknown as Node<CustomData>[],
+  edges: canvas.edges as unknown as Edge<CustomData>[],
+}))
 
 function nodeName(node: Node<CustomData>): string {
   const field = node.data.componentFields?.find(
@@ -26,52 +31,35 @@ function nodeName(node: Node<CustomData>): string {
   return values[0].value
 }
 
-describe('a C4 component diagram saved from the canvas', () => {
+function relationshipLabel(edge: Edge<CustomData>): string {
+  const label = edge.label as string
+  const technology = edge.data?.c4RelTechnology
+
+  if (!technology) return label
+
+  return label.slice(0, -` [${technology}]`.length)
+}
+
+describe.each(savedCanvases)('$name', ({ nodes, edges }) => {
   const mermaid = convertReactFlowToC4Mermaid(nodes, edges)
   const parsed = parseC4Diagram(mermaid)
 
-  it('is recognised as a C4 canvas', () => {
+  const elementNodes = nodes.filter((node) => node.type === 'c4')
+  const boundaryNodes = nodes.filter((node) => node.type === 'c4Boundary')
+
+  it('is recognised as a C4 canvas and emits every node', () => {
     expect(isC4ReactFlowDiagram(nodes)).toBe(true)
-    expect(elementNodes).toHaveLength(22)
-    expect(boundaryNodes).toHaveLength(1)
-    expect(edges).toHaveLength(28)
+    expect(elementNodes.length + boundaryNodes.length).toBe(nodes.length)
+    expect(parsed.elements).toHaveLength(elementNodes.length)
+    expect(parsed.boundaries).toHaveLength(boundaryNodes.length)
+    expect(parsed.relationships).toHaveLength(edges.length)
   })
 
   it('keeps the diagram type', () => {
-    expect(parsed.type).toBe('C4Component')
-  })
-
-  it('keeps the container boundary and every component nested inside it', () => {
-    expect(mermaid).toContain(
-      'Container_Boundary(engine, "Fraud Detection Engine") {'
-    )
-
-    expect(parsed.boundaries).toHaveLength(1)
-    expect(parsed.boundaries[0]).toMatchObject({
-      id: 'engine',
-      label: 'Fraud Detection Engine',
-      kind: 'container',
-      parentId: undefined,
-    })
-
-    const nested = parsed.elements.filter(
-      (element) => element.parentId === 'engine'
-    )
-
-    expect(nested.map((element) => element.id).sort()).toEqual(
-      elementNodes
-        .filter((node) => node.parentId === 'engine')
-        .map((node) => node.id)
-        .sort()
-    )
-    expect(nested).toHaveLength(13)
+    expect(parsed.type).toBe(nodes[0].data.c4DiagramType)
   })
 
   it('keeps every element with its name, kind, shape, technology and description', () => {
-    expect(parsed.elements.map((element) => element.id).sort()).toEqual(
-      elementNodes.map((node) => node.id).sort()
-    )
-
     for (const node of elementNodes) {
       const element = parsed.elements.find((entry) => entry.id === node.id)
 
@@ -80,7 +68,7 @@ describe('a C4 component diagram saved from the canvas', () => {
         label: nodeName(node),
         kind: node.data.c4Kind,
         shape: node.data.c4Shape,
-        isExternal: node.data.isExternal,
+        isExternal: node.data.isExternal === true,
         parentId: node.parentId,
       })
       expect(element?.technology).toBe(node.data.technology)
@@ -88,66 +76,42 @@ describe('a C4 component diagram saved from the canvas', () => {
     }
   })
 
-  it('emits the shape and external keyword suffixes', () => {
-    expect(mermaid).toContain('Person(analyst, "Fraud Analyst"')
-    expect(mermaid).toContain('Person_Ext(dataScientist, "Data Scientist"')
-    expect(mermaid).toContain(
-      'System_Ext(deviceIntel, "Device Intelligence Provider"'
-    )
-    expect(mermaid).toContain(
-      'ContainerQueue(transactionStream, "Transaction Stream", "Kafka"'
-    )
-    expect(mermaid).toContain(
-      'ContainerDb(featureStore, "Feature Store", "Redis and Cassandra"'
-    )
-    expect(mermaid).toContain(
-      'ComponentDb(entityGraph, "Entity Graph", "JanusGraph"'
-    )
-    expect(mermaid).toContain(
-      'ComponentQueue(decisionLog, "Decision Log", "Kafka"'
-    )
-  })
+  it('keeps every boundary with its name, kind, type, node type and nesting', () => {
+    for (const node of boundaryNodes) {
+      const boundary = parsed.boundaries.find((entry) => entry.id === node.id)
 
-  it('splits the technology back out of the fused canvas label', () => {
-    expect(mermaid).toContain(
-      'Rel(authorisationApi, ingestGateway, "Requests a decision from", "gRPC")'
-    )
-    expect(mermaid).toContain(
-      'Rel(ingestGateway, featureResolver, "Requests the feature vector from")'
-    )
-    expect(mermaid).not.toContain('[gRPC]')
-  })
-
-  it('keeps every relationship with its label, technology and direction', () => {
-    expect(parsed.relationships).toHaveLength(edges.length)
-
-    for (const edge of edges) {
-      const relationship = parsed.relationships.find(
-        (entry) => entry.from === edge.source && entry.to === edge.target
-      )
-
-      const technology = edge.data?.c4RelTechnology
-      const label = edge.label as string
-      const expectedLabel = technology
-        ? label.slice(0, -` [${technology}]`.length)
-        : label
-
-      expect(relationship).toBeDefined()
-      expect(relationship).toMatchObject({
-        label: expectedLabel,
-        direction: edge.data?.c4RelDirection,
+      expect(boundary).toBeDefined()
+      expect(boundary).toMatchObject({
+        label: nodeName(node),
+        kind: node.data.c4BoundaryKind,
+        type: node.data.boundaryType,
+        parentId: node.parentId,
       })
-      expect(relationship?.technology).toBe(technology)
+      expect(boundary?.nodeType).toBe(node.data.c4NodeType)
+      expect(boundary?.description).toBe(node.data.description)
     }
   })
 
-  it('keeps the one relationship that was redirected on the canvas', () => {
-    expect(mermaid).toContain(
-      'Rel_U(shadowRunner, dataScientist, "Reports candidate performance to", "HTTPS")'
-    )
+  it('keeps every relationship with its label, technology, description and direction', () => {
+    for (const edge of edges) {
+      const isBack = edge.data?.c4RelDirection === 'back'
+      const relationship = parsed.relationships.find(
+        (entry) =>
+          entry.from === (isBack ? edge.target : edge.source) &&
+          entry.to === (isBack ? edge.source : edge.target)
+      )
+
+      expect(relationship).toBeDefined()
+      expect(relationship).toMatchObject({
+        label: relationshipLabel(edge),
+        direction: edge.data?.c4RelDirection,
+      })
+      expect(relationship?.technology).toBe(edge.data?.c4RelTechnology)
+      expect(relationship?.description).toBe(edge.data?.c4RelDescription)
+    }
   })
 
-  it('is stable across a second trip back through the canvas', () => {
+  it('is stable across a second trip through the canvas', () => {
     const reimported = convertC4ToReactFlow(parsed)
 
     expect(
@@ -155,7 +119,7 @@ describe('a C4 component diagram saved from the canvas', () => {
     ).toBe(mermaid)
   })
 
-  it('restores every node position and parent from the exported context', async () => {
+  it('restores every position, size and parent from the exported context', async () => {
     const exported = convertReactFlowToC4UiGraph(nodes, edges)
     const reimported = await convertMermaidToReactFlowWithContext(
       exported.mermaid,
@@ -163,12 +127,74 @@ describe('a C4 component diagram saved from the canvas', () => {
       { repositionNodes: true }
     )
 
+    expect(reimported.edges).toHaveLength(edges.length)
+
     for (const node of nodes) {
       const restored = reimported.nodes.find((entry) => entry.id === node.id)
 
       expect(restored).toBeDefined()
       expect(restored?.position).toEqual(node.position)
       expect(restored?.parentId).toBe(node.parentId)
+      expect(restored?.width).toBe(node.width)
+      expect(restored?.height).toBe(node.height)
     }
+  })
+})
+
+describe('the saved canvases as a corpus', () => {
+  const keywords = new Set<string>()
+
+  for (const { nodes, edges } of savedCanvases) {
+    for (const line of convertReactFlowToC4Mermaid(nodes, edges).split('\n')) {
+      const match = /^\s*([A-Za-z_]+)\(/.exec(line)
+      if (match) keywords.add(match[1])
+    }
+  }
+
+  it('covers every element keyword the exporter can emit', () => {
+    expect(
+      [...keywords].filter((keyword) => keyword.startsWith('Person'))
+    ).toEqual(expect.arrayContaining(['Person', 'Person_Ext']))
+
+    for (const kind of ['System', 'Container', 'Component']) {
+      expect([...keywords]).toEqual(
+        expect.arrayContaining([
+          kind,
+          `${kind}_Ext`,
+          `${kind}Db`,
+          `${kind}Db_Ext`,
+          `${kind}Queue`,
+          `${kind}Queue_Ext`,
+        ])
+      )
+    }
+  })
+
+  it('covers every boundary keyword the exporter can emit', () => {
+    expect([...keywords]).toEqual(
+      expect.arrayContaining([
+        'Boundary',
+        'Enterprise_Boundary',
+        'System_Boundary',
+        'Container_Boundary',
+        'Deployment_Node',
+        'Node_L',
+        'Node_R',
+      ])
+    )
+  })
+
+  it('covers every relationship keyword the exporter can emit', () => {
+    expect([...keywords]).toEqual(
+      expect.arrayContaining([
+        'Rel',
+        'BiRel',
+        'Rel_Back',
+        'Rel_U',
+        'Rel_D',
+        'Rel_L',
+        'Rel_R',
+      ])
+    )
   })
 })
