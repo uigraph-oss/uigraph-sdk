@@ -1,0 +1,1738 @@
+{
+  "nodes": [
+    {
+      "id": "engine",
+      "type": "c4Boundary",
+      "position": {
+        "x": 60,
+        "y": 784
+      },
+      "data": {
+        "source": "mermaid",
+        "c4DiagramType": "C4Component",
+        "c4BoundaryKind": "container",
+        "boundaryType": "CONTAINER",
+        "backgroundColor": "transparent",
+        "borderColor": "#828DA3",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Fraud Detection Engine"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 1326,
+        "height": 962
+      },
+      "width": 1326,
+      "height": 962,
+      "selectable": true,
+      "draggable": true,
+      "measured": {
+        "width": 1326,
+        "height": 962
+      }
+    },
+    {
+      "id": "analyst",
+      "type": "c4",
+      "position": {
+        "x": 60,
+        "y": 40
+      },
+      "width": 240,
+      "height": 136,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Fraud Analyst",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "person",
+        "c4Shape": "default",
+        "isExternal": false,
+        "description": "Reviews alerts and tunes rules.",
+        "fill": "#08427B",
+        "stroke": "#052E56",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Fraud Analyst"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 136
+      },
+      "measured": {
+        "width": 240,
+        "height": 136
+      }
+    },
+    {
+      "id": "dataScientist",
+      "type": "c4",
+      "position": {
+        "x": 390,
+        "y": 40
+      },
+      "width": 240,
+      "height": 154,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Data Scientist",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "person",
+        "c4Shape": "default",
+        "isExternal": true,
+        "description": "Trains and promotes scoring models.",
+        "fill": "#686868",
+        "stroke": "#4D4D4D",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Data Scientist"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 154
+      },
+      "measured": {
+        "width": 240,
+        "height": 154
+      }
+    },
+    {
+      "id": "authorisationApi",
+      "type": "c4",
+      "position": {
+        "x": 720,
+        "y": 40
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Authorisation API",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "container",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Calls the engine inline on every authorisation.",
+        "fill": "#438DD5",
+        "stroke": "#2E6295",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Authorisation API"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "transactionStream",
+      "type": "c4",
+      "position": {
+        "x": 1050,
+        "y": 40
+      },
+      "width": 240,
+      "height": 182,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Transaction Stream",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "container",
+        "c4Shape": "queue",
+        "isExternal": false,
+        "technology": "Kafka",
+        "description": "Carries every authorisation and settlement.",
+        "fill": "#438DD5",
+        "stroke": "#2E6295",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Transaction Stream"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 182
+      },
+      "measured": {
+        "width": 240,
+        "height": 182
+      }
+    },
+    {
+      "id": "featureStore",
+      "type": "c4",
+      "position": {
+        "x": 60,
+        "y": 302
+      },
+      "width": 240,
+      "height": 176,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Feature Store",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "container",
+        "c4Shape": "db",
+        "isExternal": false,
+        "technology": "Redis and Cassandra",
+        "description": "Serves online features and holds offline history.",
+        "fill": "#438DD5",
+        "stroke": "#2E6295",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Feature Store"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 176
+      },
+      "measured": {
+        "width": 240,
+        "height": 176
+      }
+    },
+    {
+      "id": "caseDb",
+      "type": "c4",
+      "position": {
+        "x": 390,
+        "y": 302
+      },
+      "width": 240,
+      "height": 176,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Case Store",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "container",
+        "c4Shape": "db",
+        "isExternal": false,
+        "technology": "PostgreSQL",
+        "description": "Holds alerts, cases and analyst decisions.",
+        "fill": "#438DD5",
+        "stroke": "#2E6295",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Case Store"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 176
+      },
+      "measured": {
+        "width": 240,
+        "height": 176
+      }
+    },
+    {
+      "id": "modelRegistry",
+      "type": "c4",
+      "position": {
+        "x": 720,
+        "y": 302
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Model Registry",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "container",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "MLflow",
+        "description": "Holds versioned models and their approval state.",
+        "fill": "#438DD5",
+        "stroke": "#2E6295",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Model Registry"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "deviceIntel",
+      "type": "c4",
+      "position": {
+        "x": 1050,
+        "y": 302
+      },
+      "width": 240,
+      "height": 146,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Device Intelligence Provider",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "system",
+        "c4Shape": "default",
+        "isExternal": true,
+        "description": "Supplies device and browser reputation.",
+        "fill": "#999999",
+        "stroke": "#6B6B6B",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Device Intelligence Provider"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 146
+      },
+      "measured": {
+        "width": 240,
+        "height": 146
+      }
+    },
+    {
+      "id": "sanctions",
+      "type": "c4",
+      "position": {
+        "x": 60,
+        "y": 558
+      },
+      "width": 240,
+      "height": 146,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Sanctions Screening Service",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "system",
+        "c4Shape": "default",
+        "isExternal": true,
+        "description": "Screens parties against watch lists.",
+        "fill": "#999999",
+        "stroke": "#6B6B6B",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Sanctions Screening Service"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 146
+      },
+      "measured": {
+        "width": 240,
+        "height": 146
+      }
+    },
+    {
+      "id": "ingestGateway",
+      "type": "c4",
+      "position": {
+        "x": 48,
+        "y": 72
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Ingest Gateway",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Validates and normalises inbound authorisations.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Ingest Gateway"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "featureResolver",
+      "type": "c4",
+      "position": {
+        "x": 378,
+        "y": 72
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Feature Resolver",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Assembles the online feature vector within budget.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Feature Resolver"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "velocityCounter",
+      "type": "c4",
+      "position": {
+        "x": 708,
+        "y": 72
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Velocity Counter",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Maintains sliding-window counts per card, device and merchant.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Velocity Counter"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "ruleEngine",
+      "type": "c4",
+      "position": {
+        "x": 1038,
+        "y": 72
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Rule Engine",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Drools",
+        "description": "Applies analyst-authored deterministic rules.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Rule Engine"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "modelScorer",
+      "type": "c4",
+      "position": {
+        "x": 48,
+        "y": 294
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Model Scorer",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java and ONNX Runtime",
+        "description": "Runs the gradient boosted scoring model.",
+        "fill": "#85bbf0",
+        "stroke": "#5d82a8",
+        "fontColor": "white",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Model Scorer"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "graphAnalyser",
+      "type": "c4",
+      "position": {
+        "x": 378,
+        "y": 294
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Graph Analyser",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Finds shared devices and accounts across the entity graph.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Graph Analyser"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "decisionOrchestrator",
+      "type": "c4",
+      "position": {
+        "x": 708,
+        "y": 294
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Decision Orchestrator",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Combines rules, score and graph signals into a decision.",
+        "fill": "#1168bd",
+        "stroke": "#0b4884",
+        "fontColor": "white",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Decision Orchestrator"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "challengeRouter",
+      "type": "c4",
+      "position": {
+        "x": 1038,
+        "y": 294
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Challenge Router",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Chooses between approve, challenge and decline.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Challenge Router"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "entityGraph",
+      "type": "c4",
+      "position": {
+        "x": 48,
+        "y": 516
+      },
+      "width": 240,
+      "height": 176,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Entity Graph",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "db",
+        "isExternal": false,
+        "technology": "JanusGraph",
+        "description": "Links cards, devices, accounts and merchants.",
+        "fill": "#438dd5",
+        "stroke": "#2e6295",
+        "fontColor": "white",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Entity Graph"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 176
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 176
+      }
+    },
+    {
+      "id": "decisionLog",
+      "type": "c4",
+      "position": {
+        "x": 378,
+        "y": 516
+      },
+      "width": 240,
+      "height": 160,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Decision Log",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "queue",
+        "isExternal": false,
+        "technology": "Kafka",
+        "description": "Carries every decision and its inputs for replay.",
+        "fill": "#438dd5",
+        "stroke": "#2e6295",
+        "fontColor": "white",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Decision Log"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 160
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 160
+      }
+    },
+    {
+      "id": "caseManager",
+      "type": "c4",
+      "position": {
+        "x": 708,
+        "y": 516
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Case Manager",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Opens, assigns and closes fraud cases.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Case Manager"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "feedbackLoop",
+      "type": "c4",
+      "position": {
+        "x": 1038,
+        "y": 516
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Feedback Loop",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Turns confirmed fraud into labelled training data.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Feedback Loop"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    },
+    {
+      "id": "shadowRunner",
+      "type": "c4",
+      "position": {
+        "x": 48,
+        "y": 772
+      },
+      "width": 240,
+      "height": 142,
+      "data": {
+        "source": "mermaid",
+        "diagramName": "Shadow Runner",
+        "c4DiagramType": "C4Component",
+        "c4Kind": "component",
+        "c4Shape": "default",
+        "isExternal": false,
+        "technology": "Java",
+        "description": "Scores live traffic with candidate models off the critical path.",
+        "fill": "#85BBF0",
+        "stroke": "#5D82A8",
+        "componentFields": [
+          {
+            "componentFieldId": "name",
+            "label": "Name",
+            "type": "Text Input",
+            "data": [
+              {
+                "value": "Shadow Runner"
+              }
+            ],
+            "hidden": true,
+            "required": false,
+            "order": 0
+          }
+        ]
+      },
+      "style": {
+        "width": 240,
+        "height": 142
+      },
+      "parentId": "engine",
+      "extent": "parent",
+      "measured": {
+        "width": 240,
+        "height": 142
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "c4-rel-authorisationApi-ingestGateway-0",
+      "source": "authorisationApi",
+      "target": "ingestGateway",
+      "sourceHandle": "source-bottom",
+      "targetHandle": "target-top",
+      "label": "Requests a decision from [gRPC]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "blue",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "gRPC",
+        "labelColor": "blue",
+        "labelOffsetY": -40
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "blue"
+      }
+    },
+    {
+      "id": "c4-rel-transactionStream-ingestGateway-1",
+      "source": "transactionStream",
+      "target": "ingestGateway",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Delivers settlements to [Kafka]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Kafka"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-ingestGateway-featureResolver-2",
+      "source": "ingestGateway",
+      "target": "featureResolver",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Requests the feature vector from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-featureResolver-featureStore-3",
+      "source": "featureResolver",
+      "target": "featureStore",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Reads online features from [RESP and CQL]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "RESP and CQL"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-featureResolver-velocityCounter-4",
+      "source": "featureResolver",
+      "target": "velocityCounter",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Reads sliding-window counts from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-featureResolver-deviceIntel-5",
+      "source": "featureResolver",
+      "target": "deviceIntel",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Requests device reputation from [JSON/HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "JSON/HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-velocityCounter-featureStore-6",
+      "source": "velocityCounter",
+      "target": "featureStore",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Writes updated counters to [RESP]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "RESP"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-ingestGateway-ruleEngine-7",
+      "source": "ingestGateway",
+      "target": "ruleEngine",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Requests rule outcomes from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-ingestGateway-modelScorer-8",
+      "source": "ingestGateway",
+      "target": "modelScorer",
+      "sourceHandle": "source-bottom",
+      "targetHandle": "target-top",
+      "label": "Requests a fraud score from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-modelScorer-modelRegistry-9",
+      "source": "modelScorer",
+      "target": "modelRegistry",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Loads the approved model from [JSON/HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "JSON/HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-ingestGateway-graphAnalyser-10",
+      "source": "ingestGateway",
+      "target": "graphAnalyser",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Requests linkage signals from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-graphAnalyser-entityGraph-11",
+      "source": "graphAnalyser",
+      "target": "entityGraph",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Traverses [Gremlin]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "red",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Gremlin",
+        "labelColor": "red",
+        "labelOffsetY": 20
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "red"
+      }
+    },
+    {
+      "id": "c4-rel-ingestGateway-decisionOrchestrator-12",
+      "source": "ingestGateway",
+      "target": "decisionOrchestrator",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Requests the final decision from",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-decisionOrchestrator-sanctions-13",
+      "source": "decisionOrchestrator",
+      "target": "sanctions",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Screens the counterparty with [JSON/HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "red",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "JSON/HTTPS",
+        "labelColor": "red",
+        "labelOffsetX": 40
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "red"
+      }
+    },
+    {
+      "id": "c4-rel-decisionOrchestrator-challengeRouter-14",
+      "source": "decisionOrchestrator",
+      "target": "challengeRouter",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Delegates the action to",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-challengeRouter-authorisationApi-15",
+      "source": "challengeRouter",
+      "target": "authorisationApi",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Returns approve, challenge or decline to [gRPC]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "green",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "gRPC",
+        "labelColor": "green",
+        "labelOffsetX": -50,
+        "labelOffsetY": 30
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "green"
+      }
+    },
+    {
+      "id": "c4-rel-decisionOrchestrator-decisionLog-16",
+      "source": "decisionOrchestrator",
+      "target": "decisionLog",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Publishes the decision and its inputs to [Kafka]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Kafka"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-decisionLog-caseManager-17",
+      "source": "decisionLog",
+      "target": "caseManager",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Delivers high-risk decisions to [Kafka]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Kafka"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-caseManager-caseDb-18",
+      "source": "caseManager",
+      "target": "caseDb",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Reads from and writes to [JDBC]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "JDBC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-analyst-caseManager-19",
+      "source": "analyst",
+      "target": "caseManager",
+      "sourceHandle": "source-bottom",
+      "targetHandle": "target-top",
+      "label": "Reviews and dispositions cases in [HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-analyst-ruleEngine-20",
+      "source": "analyst",
+      "target": "ruleEngine",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Authors and tunes rules in [HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-caseManager-feedbackLoop-21",
+      "source": "caseManager",
+      "target": "feedbackLoop",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Sends confirmed outcomes to",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-feedbackLoop-featureStore-22",
+      "source": "feedbackLoop",
+      "target": "featureStore",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Writes labels to [CQL]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "CQL"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-dataScientist-modelRegistry-23",
+      "source": "dataScientist",
+      "target": "modelRegistry",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left",
+      "label": "Promotes candidate models in [HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-decisionLog-shadowRunner-24",
+      "source": "decisionLog",
+      "target": "shadowRunner",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Replays live traffic into [Kafka]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Kafka"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-shadowRunner-modelRegistry-25",
+      "source": "shadowRunner",
+      "target": "modelRegistry",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Loads candidate models from [JSON/HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "JSON/HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-shadowRunner-dataScientist-26",
+      "source": "shadowRunner",
+      "target": "dataScientist",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
+      "label": "Reports candidate performance to [HTTPS]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "up",
+        "c4RelTechnology": "HTTPS"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    },
+    {
+      "id": "c4-rel-decisionLog-entityGraph-27",
+      "source": "decisionLog",
+      "target": "entityGraph",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "label": "Updates linkages in [Gremlin]",
+      "type": "simplebezier",
+      "style": {
+        "stroke": "#828DA3",
+        "strokeWidth": 1.5
+      },
+      "data": {
+        "source": "mermaid",
+        "c4RelDirection": "default",
+        "c4RelTechnology": "Gremlin"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 14,
+        "height": 14,
+        "color": "#828DA3"
+      }
+    }
+  ]
+}
