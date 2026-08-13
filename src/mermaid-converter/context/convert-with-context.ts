@@ -8,6 +8,7 @@ import {
 import { ComponentInputType } from '../../components/component-type'
 import { generateGroupNodeFromNodes } from '../../react-flow/group'
 import { CustomData, ReactFlowData, RFComponentField } from '../../types'
+import { isC4ReactFlowDiagram } from '../c4-diagram/from-react-flow'
 import { convertMermaidToReactFlow } from '../index'
 import { isSequenceDiagram } from '../sequence-diagram/from-react-flow'
 import { contextSchema } from './context-schema'
@@ -323,7 +324,14 @@ export async function convertMermaidToReactFlowWithContext(
     }),
   ]
 
+  // Both keep their own layout: sequence is row/column addressed, and C4 places
+  // children relative to their boundary, which the reposition pass reads as
+  // absolute.
   if (isSequenceDiagram(combinedNodes)) {
+    return { edges: resolvedEdges, nodes: combinedNodes }
+  }
+
+  if (isC4ReactFlowDiagram(combinedNodes)) {
     return { edges: resolvedEdges, nodes: combinedNodes }
   }
 

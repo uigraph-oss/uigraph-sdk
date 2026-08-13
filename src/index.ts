@@ -7,6 +7,11 @@ export { syncBaseData } from './sync-data/sync-base-data'
 
 export { convertMermaidToReactFlow } from './mermaid-converter'
 export {
+  convertReactFlowToC4Mermaid,
+  convertReactFlowToC4UiGraph,
+  isC4ReactFlowDiagram,
+} from './mermaid-converter/c4-diagram/from-react-flow'
+export {
   isC4Diagram,
   parseC4Diagram,
 } from './mermaid-converter/c4-diagram/parser'
