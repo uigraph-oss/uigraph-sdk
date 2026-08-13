@@ -19,13 +19,14 @@
   "scripts": {
     "prepare": "husky",
     "test": "vitest --run",
+    "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
     "lint": "tsc --noEmit && eslint .",
     "lint:fix": "eslint . --fix",
     "exports": "tsx ./write-exports.ts",
     "build": "tsdown --config ./tsdown.config.ts",
-    "dev": "concurrently --names \"R,T\" --prefix-colors \"blue.dim,magenta.dim\" \"tsdown --config ./tsdown.config.ts --watch\" \"tsc --noEmit --watch\"",
+    "dev": "tsdown --config ./tsdown.config.ts --watch",
     "start": "bun run --watch ./src/__lab__/index.ts"
   },
   "dependencies": {

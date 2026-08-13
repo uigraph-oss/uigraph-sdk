@@ -279,6 +279,7 @@ export function convertC4ToReactFlow(data: C4DiagramData): ReactFlowData {
       position: { x: placement.x, y: placement.y },
       data: {
         source: 'mermaid',
+        c4DiagramType: data.type,
         c4BoundaryKind: boundary.kind,
         boundaryType: boundary.type,
         description: boundary.description,
@@ -321,6 +322,7 @@ export function convertC4ToReactFlow(data: C4DiagramData): ReactFlowData {
         source: 'mermaid',
         diagramId: element.subDiagramId,
         diagramName: element.label,
+        c4DiagramType: data.type,
         c4Kind: element.kind,
         c4Shape: element.shape,
         isExternal: element.isExternal,
@@ -396,6 +398,9 @@ export function convertC4ToReactFlow(data: C4DiagramData): ReactFlowData {
         style: { stroke: lineColor, strokeWidth: style?.lineWidth ?? 1.5 },
         data: {
           source: 'mermaid',
+          c4RelDirection: rel.direction,
+          c4RelTechnology: rel.technology,
+          c4RelDescription: rel.description,
           labelColor: style?.textColor,
           labelOffsetX: style?.offsetX,
           labelOffsetY: style?.offsetY,
