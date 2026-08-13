@@ -198,3 +198,91 @@ describe('the saved canvases as a corpus', () => {
     )
   })
 })
+
+describe('a C4 canvas the user has rearranged', () => {
+  const shapes = savedCanvases.find(
+    (canvas) => canvas.name === 'Context All Shapes'
+  )!
+
+  it('still declares a node that was put inside a group', () => {
+    const nodes: Node<CustomData>[] = [
+      {
+        id: 'group-1',
+        type: 'group',
+        position: { x: 0, y: 0 },
+        data: { childNodes: ['personExt'] },
+      },
+      ...shapes.nodes.map((node) => {
+        if (node.id !== 'personExt') return node
+
+        return { ...node, parentId: 'group-1' }
+      }),
+    ]
+
+    const parsed = parseC4Diagram(
+      convertReactFlowToC4Mermaid(nodes, shapes.edges)
+    )
+
+    expect(parsed.elements.map((element) => element.id)).toContain('personExt')
+    expect(
+      parsed.elements.find((element) => element.id === 'personExt')?.parentId
+    ).toBeUndefined()
+
+    for (const relationship of parsed.relationships) {
+      expect(parsed.elements.map((element) => element.id)).toContain(
+        relationship.from
+      )
+      expect(parsed.elements.map((element) => element.id)).toContain(
+        relationship.to
+      )
+    }
+  })
+})
+
+describe('parallel relationships between the same pair', () => {
+  const styled = savedCanvases.find(
+    (canvas) => canvas.name === 'Container Styled'
+  )!
+
+  it('keeps both of them in the mermaid', () => {
+    const parsed = parseC4Diagram(
+      convertReactFlowToC4Mermaid(styled.nodes, styled.edges)
+    )
+
+    expect(parsed.relationships).toHaveLength(styled.edges.length)
+    expect(parsed.relationships).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: 'api',
+          to: 'db',
+          label: 'Reads from and writes to',
+        }),
+        expect.objectContaining({
+          from: 'db',
+          to: 'api',
+          label: 'Returns rows to',
+          direction: 'back',
+        }),
+      ])
+    )
+  })
+
+  it('gives each of them its own styling in the context sidecar', async () => {
+    const exported = convertReactFlowToC4UiGraph(styled.nodes, styled.edges)
+    const reimported = await convertMermaidToReactFlowWithContext(
+      exported.mermaid,
+      exported.context,
+      { repositionNodes: true }
+    )
+
+    expect(Object.keys(exported.context.edges ?? {})).toHaveLength(
+      styled.edges.length
+    )
+
+    for (const edge of styled.edges) {
+      const restored = reimported.edges.find((entry) => entry.id === edge.id)
+
+      expect(restored?.style?.stroke).toBe(edge.style?.stroke)
+    }
+  })
+})

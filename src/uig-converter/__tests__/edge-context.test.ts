@@ -25,7 +25,7 @@ describe('what reaches the edge context', () => {
     expect(contextEdges).toEqual({})
   })
 
-  it('keeps one entry for a pair even when two edges join them', () => {
+  it('keeps an entry per edge when two of them join the same pair', () => {
     const contextEdges = buildContextEdges(
       [
         { id: 'e1', source: 'a', target: 'b', label: 'first' },
@@ -34,8 +34,21 @@ describe('what reaches the edge context', () => {
       ID_MAP
     )
 
-    expect(Object.keys(contextEdges)).toEqual(['A-B'])
-    expect(contextEdges['A-B'].label).toBe('second')
+    expect(Object.keys(contextEdges)).toEqual(['A-B', 'A-B#1'])
+    expect(contextEdges['A-B'].label).toBe('first')
+    expect(contextEdges['A-B#1'].label).toBe('second')
+  })
+
+  it('counts an edge that records nothing when it numbers the next one', () => {
+    const contextEdges = buildContextEdges(
+      [
+        { id: 'e1', source: 'a', target: 'b' },
+        { id: 'e2', source: 'a', target: 'b', label: 'second' },
+      ],
+      ID_MAP
+    )
+
+    expect(Object.keys(contextEdges)).toEqual(['A-B#1'])
   })
 
   it('leaves the style out when nothing about the line was set', () => {

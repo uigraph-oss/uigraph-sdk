@@ -269,8 +269,26 @@ export async function convertMermaidToReactFlowWithContext(
     )
   })
 
-  const rfEdgesPromises = reactFlowData.edges.map(async (edge) => {
-    const ctx = validatedContext.edges?.[`${edge.source}-${edge.target}`]
+  /**
+   * `buildContextEdges` keys the first edge of a source/target pair on the bare
+   * pair and suffixes the rest with their position. A sidecar written before
+   * that only ever holds the bare pair, so it stays the fallback.
+   */
+  const edgeOrdinals = new Map<string, number>()
+  const edgeContextKeys = reactFlowData.edges.map((edge) => {
+    const pair = `${edge.source}-${edge.target}`
+    const ordinal = edgeOrdinals.get(pair) ?? 0
+    edgeOrdinals.set(pair, ordinal + 1)
+
+    if (ordinal === 0) return { pair, key: pair }
+
+    return { pair, key: `${pair}#${ordinal}` }
+  })
+
+  const rfEdgesPromises = reactFlowData.edges.map(async (edge, index) => {
+    const { pair, key } = edgeContextKeys[index]
+    const ctx =
+      validatedContext.edges?.[key] ?? validatedContext.edges?.[pair] ?? null
     if (!ctx) return edge
 
     return {

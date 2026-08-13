@@ -193,6 +193,20 @@ function emitC4Mermaid(
     (node) => isC4Element(node) || isC4Boundary(node)
   )
   const c4NodeIds = new Set(c4Nodes.map((node) => node.id))
+  const boundaryIds = new Set(
+    c4Nodes.filter((node) => isC4Boundary(node)).map((node) => node.id)
+  )
+
+  /**
+   * Only a boundary nests its children in the mermaid source. A C4 node
+   * parented to anything else — a group node drawn on the canvas — still has to
+   * be declared, or the relationships that reference it point at nothing.
+   */
+  function parentOf(node: Node): string | undefined {
+    if (node.parentId && boundaryIds.has(node.parentId)) return node.parentId
+
+    return undefined
+  }
 
   function renderNode(node: Node, indentation: string): string {
     const data = nodeData(node)
@@ -247,7 +261,7 @@ function emitC4Mermaid(
     const lines: string[] = []
 
     for (const node of c4Nodes) {
-      if (node.parentId !== parentId) continue
+      if (parentOf(node) !== parentId) continue
 
       lines.push(renderNode(node, indentation))
 
