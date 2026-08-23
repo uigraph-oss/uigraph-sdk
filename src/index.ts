@@ -4,6 +4,7 @@ export * from './nosql-parser'
 export * from './sql-parser'
 
 export { syncBaseData } from './sync-data/sync-base-data'
+export { computeDiagramSyncHash } from './sync-hash'
 
 export { convertMermaidToReactFlow } from './mermaid-converter'
 export {
