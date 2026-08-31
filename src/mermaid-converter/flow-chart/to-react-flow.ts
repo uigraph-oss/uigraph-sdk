@@ -45,6 +45,12 @@ const NESTED_SUBGRAPH_SEPARATION_HORIZONTAL =
 const NESTED_SUBGRAPH_SEPARATION_VERTICAL =
   LAYOUT_SPACING.NESTED_SUBGRAPH_SEPARATION_VERTICAL // Distance between nested subgraph ranks (increased)
 
+// Minimum rendered size of a subgraph container
+const MIN_SUBGRAPH_WIDTH_HORIZONTAL =
+  LAYOUT_SPACING.MIN_SUBGRAPH_WIDTH_HORIZONTAL
+const MIN_SUBGRAPH_WIDTH_VERTICAL = LAYOUT_SPACING.MIN_SUBGRAPH_WIDTH_VERTICAL
+const MIN_SUBGRAPH_HEIGHT = LAYOUT_SPACING.MIN_SUBGRAPH_HEIGHT
+
 // Margin constants for different layout contexts
 const META_GRAPH_MARGIN = LAYOUT_SPACING.META_GRAPH_MARGIN // Outer margin for the entire diagram
 const NESTED_CONTENT_MARGIN = LAYOUT_SPACING.NESTED_CONTENT_MARGIN // Margin around content within nested subgraphs (increased)
@@ -186,6 +192,7 @@ function layoutSubgraphs(
   direction: string
 ): Map<string, SubgraphLayout> {
   const subgraphLayouts = new Map<string, SubgraphLayout>()
+  const isHorizontal = direction === 'LR' || direction === 'RL'
 
   // Process subgraphs in hierarchical order
   const orderedSubgraphs = processSubgraphsInHierarchicalOrder(subgraphs)
@@ -325,9 +332,14 @@ function layoutSubgraphs(
       SUBGRAPH_HEADER_HEIGHT +
       SUBGRAPH_CONTENT_TOP_MARGIN
 
-    // Use only a small fixed buffer for width/height (no multipliers)
-    const width = baseWidth + 4 // Small buffer (reduced)
-    const height = baseHeight + 4
+    const width = Math.max(
+      baseWidth + SUBGRAPH_PADDING * 3,
+      isHorizontal ? MIN_SUBGRAPH_WIDTH_HORIZONTAL : MIN_SUBGRAPH_WIDTH_VERTICAL
+    )
+    const height = Math.max(
+      baseHeight + SUBGRAPH_PADDING * 2,
+      MIN_SUBGRAPH_HEIGHT
+    )
 
     subgraphLayouts.set(subgraph.id, {
       id: subgraph.id,
@@ -565,9 +577,15 @@ function adjustParentSizesAfterPositioning(
       const newWidth = Math.max(
         layout.width,
         requiredWidth,
-        isHorizontal ? 600 : 240
+        isHorizontal
+          ? MIN_SUBGRAPH_WIDTH_HORIZONTAL
+          : MIN_SUBGRAPH_WIDTH_VERTICAL
       )
-      const newHeight = Math.max(layout.height, requiredHeight, 200)
+      const newHeight = Math.max(
+        layout.height,
+        requiredHeight,
+        MIN_SUBGRAPH_HEIGHT
+      )
 
       if (newWidth > layout.width || newHeight > layout.height) {
         debugLog(
