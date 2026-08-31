@@ -1,6 +1,6 @@
-# UiGraph SDK
+# UIGraph SDK
 
-Use the UiGraph SDK to parse SQL, convert Mermaid diagrams, and build React Flow data for your diagrams.
+Use the UIGraph SDK to parse SQL, convert Mermaid diagrams, and build React Flow data for your diagrams.
 
 ## Install
 

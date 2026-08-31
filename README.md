@@ -54,14 +54,14 @@ const ast = new SqlToAstParser(dialect).parse(sql)
 
 ## Package entry points
 
-| Import | Use when |
-|--------|----------|
-| `@uigraph/sdk` | Full SDK (Node.js or bundlers) |
-| `@uigraph/sdk/browser` | Browser environments |
-| `@uigraph/sdk/headless` | Server-side conversion without DOM APIs |
-| `@uigraph/sdk/aws-icons` | AWS icon metadata |
-| `@uigraph/sdk/azure-icons` | Azure icon metadata |
-| `@uigraph/sdk/animated-nodes` | Animated node icon metadata |
+| Import                        | Use when                                |
+| ----------------------------- | --------------------------------------- |
+| `@uigraph/sdk`                | Full SDK (Node.js or bundlers)          |
+| `@uigraph/sdk/browser`        | Browser environments                    |
+| `@uigraph/sdk/headless`       | Server-side conversion without DOM APIs |
+| `@uigraph/sdk/aws-icons`      | AWS icon metadata                       |
+| `@uigraph/sdk/azure-icons`    | Azure icon metadata                     |
+| `@uigraph/sdk/animated-nodes` | Animated node icon metadata             |
 
 ```ts
 import { convertMermaidToReactFlow } from '@uigraph/sdk/browser'
@@ -99,7 +99,7 @@ This project is licensed under the [Business Source License 1.1](LICENSE) (BUSL-
 
 - **Source available today** — you can read, modify, and redistribute the code under the terms of the license.
 - **Non-production use** — free for development, testing, evaluation, and internal proof-of-concept.
-- **Production use** — requires a commercial license from UiGraph. Production use means any use that supports the ongoing operation of your business or organization.
+- **Production use** — requires a commercial license from UIGraph. Production use means any use that supports the ongoing operation of your business or organization.
 - **Future open source** — each version automatically converts to [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) four years after it is first published under BUSL.
 
 BUSL is not an OSI-approved open source license during the initial term. For commercial licensing questions, open an issue or contact the maintainers.
