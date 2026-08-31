@@ -34,18 +34,15 @@ describe('nothing lands on top of anything else', () => {
     }
   })
 
-  it.fails(
-    'keeps a node that joins nothing clear of a group it does not belong to',
-    async () => {
-      const { nodes } = await convertFlowChartToReactFlow(
-        'flowchart TB\n  subgraph S1\n    A --> B\n  end\n  Loose\n  B --> Loose\n  Far'
-      )
-      const group = boxOf(nodes.find((node) => node.id === 'subgraph-S1')!)
-      const far = boxOf(nodes.find((node) => node.id === 'Far')!)
+  it('keeps a node that joins nothing clear of a group it does not belong to', async () => {
+    const { nodes } = await convertFlowChartToReactFlow(
+      'flowchart TB\n  subgraph S1\n    A --> B\n  end\n  Loose\n  B --> Loose\n  Far'
+    )
+    const group = boxOf(nodes.find((node) => node.id === 'subgraph-S1')!)
+    const far = boxOf(nodes.find((node) => node.id === 'Far')!)
 
-      expect(far.left >= group.right || far.right <= group.left).toBe(true)
-    }
-  )
+    expect(far.left >= group.right || far.right <= group.left).toBe(true)
+  })
 
   it('keeps two boxes in the same rank at least a node separation apart', async () => {
     const { nodes } = await convertFlowChartToReactFlow(
