@@ -238,6 +238,12 @@ describe('C4 edges', () => {
     expect(flow.edges.every((edge) => edge.markerEnd)).toBe(true)
   })
 
+  it('renders edges with orthogonal (smoothstep) routing, not free-curving bezier', () => {
+    const flow = convertC4ToReactFlow(parseC4Diagram(CONTEXT_DIAGRAM))
+
+    expect(flow.edges.every((edge) => edge.type === 'smoothstep')).toBe(true)
+  })
+
   it('flips source and target for Rel_Back', () => {
     const flow = convertC4MermaidToReactFlow(`
 C4Container

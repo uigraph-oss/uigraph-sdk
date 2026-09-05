@@ -1421,7 +1421,10 @@ function createReactFlowElements(
       strokeWidth: 2.5,
     }
 
-    const edgeType = 'default'
+    // 'smoothstep' renders orthogonal (right-angle) paths — matches how
+    // architecture diagrams are conventionally hand-drawn, instead of the
+    // free-curving bezier 'default' type.
+    const edgeType = 'smoothstep'
 
     switch (edge.type) {
       case '-->':

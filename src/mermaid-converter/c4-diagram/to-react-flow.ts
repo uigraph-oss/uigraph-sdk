@@ -394,7 +394,10 @@ export function convertC4ToReactFlow(data: C4DiagramData): ReactFlowData {
         sourceHandle: `source-${side.source}`,
         targetHandle: `target-${side.target}`,
         label,
-        type: 'simplebezier',
+        // 'smoothstep' renders orthogonal (right-angle) paths — matches how
+        // architecture diagrams are conventionally hand-drawn, instead of
+        // the free-curving 'simplebezier' type.
+        type: 'smoothstep',
         style: { stroke: lineColor, strokeWidth: style?.lineWidth ?? 1.5 },
         data: {
           source: 'mermaid',

@@ -293,6 +293,14 @@ describe('convertMermaidToReactFlow', () => {
     expect(result.edges.length).toBeGreaterThanOrEqual(1)
   })
 
+  it('renders edges with orthogonal (smoothstep) routing, not free-curving bezier', async () => {
+    const code = 'flowchart TB\n  A --> B\n  A --> C'
+    const result = await convertMermaidToReactFlow(code)
+    result.edges.forEach((edge) => {
+      expect(edge.type).toBe('smoothstep')
+    })
+  })
+
   it('converts diagram with node shapes to positioned nodes', async () => {
     const code = 'flowchart TB\n  A[rect] --> B(round) --> C{diamond}'
     const result = await convertMermaidToReactFlow(code)
