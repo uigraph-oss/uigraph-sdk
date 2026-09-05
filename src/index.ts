@@ -38,3 +38,28 @@ export { buildMetaData, flattenMetaData } from './components/data-structure'
 export { contextSchema } from './mermaid-converter/context/context-schema'
 export { convertMermaidToReactFlowWithContext } from './mermaid-converter/context/convert-with-context'
 export { convertUiGraphToMermaid } from './uig-converter'
+
+export {
+  NODE_TYPE_REGISTRY,
+  SHAPE_IDS,
+  STROKE_STYLES,
+  buildNodeStyleDataPatch,
+  getNodeTypeSpec,
+  isGeometryEditableNodeType,
+} from './registry'
+export type {
+  DiagramTypeId,
+  NodeStylePatchInput,
+  NodeTypeSpec,
+  ShapeId,
+  StrokeStyleId,
+} from './registry'
+
+export {
+  DEFAULT_THEME_ID,
+  THEME_REGISTRY,
+  THEME_ROLES,
+  buildThemeCatalogPromptContext,
+  getTheme,
+} from './registry'
+export type { ThemeColorPair, ThemeRole, ThemeSpec } from './registry'

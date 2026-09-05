@@ -92,15 +92,12 @@ describe('parseMermaidCode', () => {
   it('parses chain of edges A --> B --> C', () => {
     const code = 'flowchart LR\n  A --> B --> C'
     const result = parseMermaidCode(code)
-    expect(result.nodes.length).toBeGreaterThanOrEqual(2)
-    expect(result.edges.length).toBeGreaterThanOrEqual(1)
-    const ids = result.nodes.map((n) => n.id)
-    expect(ids).toContain('A')
-    expect(ids).toContain('B')
-    if (result.nodes.length >= 3) {
-      expect(ids).toContain('C')
-      expect(result.edges.length).toBeGreaterThanOrEqual(2)
-    }
+    expect(result.nodes.map((n) => n.id)).toEqual(['A', 'B', 'C'])
+    expect(result.edges).toHaveLength(2)
+    expect(result.edges[0].source).toBe('A')
+    expect(result.edges[0].target).toBe('B')
+    expect(result.edges[1].source).toBe('B')
+    expect(result.edges[1].target).toBe('C')
   })
 
   it('parses node shapes: rect, round, diamond', () => {
@@ -314,6 +311,134 @@ describe('convertMermaidToReactFlow', () => {
     expect(result.nodes).toHaveLength(2)
     expect(result.edges).toHaveLength(1)
   })
+
+  it('strips quote delimiters from a piped edge label', async () => {
+    // -->|"label"| is common LLM output (mirrors the quoted-string edge
+    // label syntax Mermaid also accepts) — the quotes are delimiters, not
+    // part of the text, and previously leaked through as literal characters.
+    const code = 'flowchart TB\n  A -->|"POST /reset"| B'
+    const result = await convertMermaidToReactFlow(code)
+    expect(result.edges[0].label).toBe('POST /reset')
+  })
+
+  it('drops an edge from a node to the subgraph it already lives inside', async () => {
+    // A member node pointing at its own parent subgraph's id is a
+    // degenerate edge: the node is already visually inside that boundary,
+    // so the "connection" has no real second endpoint and only produced a
+    // stray line looping back into the same box.
+    const code = `flowchart TB
+  subgraph S1
+    A
+  end
+  B --> S1
+  A --> S1`
+    const result = await convertMermaidToReactFlow(code)
+    const targetsOwnParent = result.edges.filter(
+      (e) => e.source === 'A' && e.target === 'subgraph-S1'
+    )
+    expect(targetsOwnParent).toHaveLength(0)
+    // The edge from outside the subgraph into it is still meaningful and
+    // must survive the filter.
+    expect(
+      result.edges.some((e) => e.source === 'B' && e.target === 'subgraph-S1')
+    ).toBe(true)
+  })
+
+  it('flips edge handles when the target ends up above the source in a TB layout', async () => {
+    // Every edge previously got a fixed source-bottom/target-top handle
+    // pair regardless of where the nodes actually ended up. Nodes living
+    // inside a subgraph are positioned by a separate layout pass from
+    // standalone nodes, so their relative rank can diverge from the
+    // nominal top-to-bottom flow — when that happens the fixed handles
+    // forced the edge to loop below its source and curl back up to reach
+    // a target it could only approach from above. This reproduces that
+    // layout shape (mirrors a real "Stripe checkout" generate output that
+    // hit it): two subgraphs side by side, a fan-out/fan-in pair of
+    // standalone nodes below them, and edges from those standalone nodes
+    // back up into a subgraph member.
+    const code = `flowchart TB
+  u[User]
+  subgraph client [Client]
+    app[App]
+  end
+  subgraph backend [Backend]
+    api[API]
+    wh[Handler]
+    db[(Database)]
+  end
+  subgraph stripe [Stripe]
+    checkout[Checkout]
+  end
+  provision[Activate]
+  failnode[Reject]
+
+  u --> app
+  app --> api
+  api --> stripe
+  stripe --> api
+  api --> app
+  app --> checkout
+  checkout --> stripe
+  stripe --> app
+  stripe --> wh
+  wh --> provision
+  wh --> failnode
+  provision --> db
+  failnode --> db`
+    const result = await convertMermaidToReactFlow(code)
+    const provisionToDb = result.edges.find(
+      (e) => e.source === 'provision' && e.target === 'db'
+    )
+    const failnodeToDb = result.edges.find(
+      (e) => e.source === 'failnode' && e.target === 'db'
+    )
+    expect(provisionToDb).toMatchObject({
+      sourceHandle: 'source-top',
+      targetHandle: 'target-bottom',
+    })
+    expect(failnodeToDb).toMatchObject({
+      sourceHandle: 'source-top',
+      targetHandle: 'target-bottom',
+    })
+  })
+})
+
+describe('convertMermaidToReactFlow - meta-graph spacing', () => {
+  it('uses tight node spacing, not wide container spacing, for a diagram with no subgraphs', async () => {
+    // A plain chain of standalone nodes was being laid out with the spacing
+    // meant for arranging whole subgraph containers against each other
+    // (ranksep 280), producing huge empty gaps between small boxes. With no
+    // subgraphs present, it should use the much tighter node-to-node ranksep
+    // (180) instead.
+    const code = 'flowchart TB\n  A[Start] --> B[Middle] --> C[End]'
+    const result = await convertMermaidToReactFlow(code)
+    const a = result.nodes.find((n) => n.id === 'A')!
+    const b = result.nodes.find((n) => n.id === 'B')!
+
+    const rankGap = (b.position.y as number) - (a.position.y as number)
+    // Old (bug) behavior produced a gap on the order of 280 + node height;
+    // the fix keeps it near the 180px node-level ranksep plus node height.
+    expect(rankGap).toBeLessThan(280)
+  })
+
+  it('still uses wide container spacing when top-level subgraphs are present', async () => {
+    const code = `flowchart TB
+  subgraph one
+    A[Start]
+  end
+  subgraph two
+    B[End]
+  end
+  A --> B`
+    const result = await convertMermaidToReactFlow(code)
+    const subgraphOne = result.nodes.find((n) => n.id === 'subgraph-one')!
+    const subgraphTwo = result.nodes.find((n) => n.id === 'subgraph-two')!
+
+    const rankGap = Math.abs(
+      (subgraphTwo.position.y as number) - (subgraphOne.position.y as number)
+    )
+    expect(rankGap).toBeGreaterThan(180)
+  })
 })
 
 describe('debugConvertMermaid', () => {
@@ -384,6 +509,66 @@ describe('parseSequenceDiagram', () => {
     Client->>Server: Request`
     const result = parseSequenceDiagram(code)
     expect(result.participants).toHaveLength(2)
+  })
+})
+
+describe('convertMermaidToReactFlow - node sizing for shapes with edge insets', () => {
+  it('sizes a short stadium/terminator label wide enough to clear its rounded ends', async () => {
+    // A stadium's fully-rounded ends reserve `height` px of the node's total
+    // width for the silhouette, not for text — a node sized only from the
+    // generic text-width formula leaves too little room and the label wraps
+    // mid-word (e.g. "Done" rendering as "Don" / "e").
+    const code = 'flowchart TB\n  start --> done(["Done"])'
+    const result = await convertMermaidToReactFlow(code)
+    const done = result.nodes.find((n) => n.id === 'done')
+
+    expect(done?.data?.shape).toBe('terminator')
+    const style = done!.style as { width: number; height: number }
+    const usableWidth = style.width - style.height
+    expect(usableWidth).toBeGreaterThan(30)
+  })
+
+  it('sizes a cylinder tall enough to clear its elliptical caps', async () => {
+    const code = 'flowchart TB\n  api --> db[("Proposals DB")]'
+    const result = await convertMermaidToReactFlow(code)
+    const db = result.nodes.find((n) => n.id === 'db')
+
+    expect(db?.data?.shape).toBe('cylinder')
+    const style = db!.style as { width: number; height: number }
+    expect(style.height).toBeGreaterThanOrEqual(58)
+  })
+
+  it('sizes a subroutine wide enough to clear its side bars', async () => {
+    const code = 'flowchart TB\n  a --> proc[["Process the incoming request"]]'
+    const result = await convertMermaidToReactFlow(code)
+    const proc = result.nodes.find((n) => n.id === 'proc')
+
+    expect(proc?.data?.shape).toBe('subroutine')
+    const style = proc!.style as { width: number; height: number }
+    // Side inset is max(24, 20% of width) on each side; the box should be
+    // comfortably larger than the generic (no-inset-awareness) formula would
+    // have produced for this label (text width 224px + 60px generic padding
+    // = 284px), proving the inset adjustment actually widened the box.
+    expect(style.width).toBeGreaterThan(284)
+  })
+})
+
+describe('convertMermaidToReactFlow - chained arrows', () => {
+  it('connects every node in a single-line chain end to end', async () => {
+    // Regression for a real generate output where a 4-node linear pipeline
+    // written as one chained line produced only the first edge, leaving the
+    // rest of the pipeline completely disconnected on the canvas.
+    const code =
+      'flowchart LR\n  start(["Start"]) --> etl[["ETL subroutine"]] --> dwh[("Data warehouse")] --> stop(["End"])'
+    const result = await convertMermaidToReactFlow(code)
+
+    expect(result.nodes).toHaveLength(4)
+    expect(result.edges).toHaveLength(3)
+    expect(result.edges.map((e) => `${e.source}->${e.target}`)).toEqual([
+      'start->etl',
+      'etl->dwh',
+      'dwh->stop',
+    ])
   })
 })
 

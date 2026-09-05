@@ -23,6 +23,8 @@ const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   stadium: 'terminator',
   circle: 'ellipse',
   diamond: 'diamond',
+  cylinder: 'cylinder',
+  subroutine: 'subroutine',
 }
 // Layout spacing constants - Fine-tune these for better visual separation
 const SUBGRAPH_HEADER_HEIGHT = LAYOUT_SPACING.SUBGRAPH_HEADER_HEIGHT // Increased for proper title clearance
@@ -113,6 +115,31 @@ function calculateNodeSize(
   if (shape === 'circle') {
     const size = Math.max(width, height) + 10 // Equal dimensions for circles
     return { width: size, height: size }
+  }
+  // Several non-rectangular shapes reserve edge padding for their silhouette
+  // beyond the generic `baseWidth`/`baseHeight` padding above — e.g. a
+  // stadium/terminator's fully-rounded ends eat `height` px of usable width
+  // for text. Without accounting for this, short labels on these shapes
+  // wrap mid-word (the inner text box is narrower than the box's own size
+  // suggests). These mirror uigraph-ui's `shape-components-list.tsx`
+  // `getTextInset` formulas for the matching portal shape (stadium ->
+  // terminator, cylinder -> cylinder, subroutine -> subroutine) — kept in
+  // sync manually for now; a future pass should share one source instead of
+  // duplicating these numbers across packages.
+  if (shape === 'stadium') {
+    const sideInset = Math.max(12, height / 2) * 2
+    return { width: Math.max(width, maxLineWidth + sideInset + 20), height }
+  }
+  if (shape === 'cylinder') {
+    const capInset = Math.max(12, Math.min(height * 0.18, width * 0.5) + 8) * 2
+    return {
+      width,
+      height: Math.max(height, lines.length * 18 + capInset + 10),
+    }
+  }
+  if (shape === 'subroutine') {
+    const sideInset = Math.max(24, width * 0.2)
+    return { width: Math.max(width, maxLineWidth + sideInset + 20), height }
   }
   return { width, height }
 }
@@ -671,13 +698,23 @@ function layoutMetaGraph(
   subgraphPositions: Map<string, { x: number; y: number }>
   standalonePositions: Map<string, { x: number; y: number }>
 } {
-  // Create meta-graph for top-level layout with generous spacing
+  // Create meta-graph for top-level layout. This graph positions both
+  // top-level subgraph containers AND plain standalone nodes — but a diagram
+  // with no subgraphs at all (the common case for a simple AI-generated
+  // flowchart) has only the latter, and shouldn't pay the wide spacing meant
+  // for arranging whole containers against each other.
+  const hasTopLevelSubgraphs = Array.from(subgraphLayouts.values()).some(
+    (layout) => !layout.parentId
+  )
   const g = new dagre.graphlib.Graph()
   g.setGraph({
     rankdir: direction,
-    // Container separation - ensure top-level elements don't overlap
-    nodesep: CONTAINER_SEPARATION_HORIZONTAL, // Horizontal spacing between top-level containers
-    ranksep: CONTAINER_SEPARATION_VERTICAL, // Vertical spacing between container ranks
+    nodesep: hasTopLevelSubgraphs
+      ? CONTAINER_SEPARATION_HORIZONTAL // Horizontal spacing between top-level containers
+      : NODE_SEPARATION_HORIZONTAL, // Horizontal spacing between plain nodes
+    ranksep: hasTopLevelSubgraphs
+      ? CONTAINER_SEPARATION_VERTICAL // Vertical spacing between container ranks
+      : NODE_SEPARATION_VERTICAL, // Vertical spacing between plain node ranks
     // Outer margins for the entire diagram
     marginx: META_GRAPH_MARGIN,
     marginy: META_GRAPH_MARGIN,
@@ -1318,8 +1355,65 @@ function createReactFlowElements(
     })
   })
 
+  // An edge from a node straight to the subgraph it already lives inside
+  // (e.g. a member node pointing at its own parent's boundary) is a
+  // degenerate artifact of resolving a subgraph-id edge target: the node is
+  // already visually inside that boundary, so the "edge" has no meaningful
+  // endpoint pair and only adds a stray line back into the same box.
+  const nodeSubgraphById = new Map(nodes.map((n) => [n.id, n.subgraph]))
+  const meaningfulEdges = edges.filter((edge) => {
+    if (
+      edge.isTargetSubgraph &&
+      nodeSubgraphById.get(edge.source) === edge.target
+    ) {
+      debugLog(
+        `Dropping edge ${edge.source} -> ${edge.target}: source already lives inside this subgraph`
+      )
+      return false
+    }
+    if (
+      edge.isSourceSubgraph &&
+      nodeSubgraphById.get(edge.target) === edge.source
+    ) {
+      debugLog(
+        `Dropping edge ${edge.source} -> ${edge.target}: target already lives inside this subgraph`
+      )
+      return false
+    }
+    return true
+  })
+
+  // Per-node primary-axis position (top-left corner is enough — we only
+  // need relative ordering, not exact centers) so each edge's handle side
+  // can be chosen from where its endpoints actually sit rather than a
+  // single direction guess for the whole diagram. Without this, an edge
+  // whose target sits above its source (e.g. two branches fanning back
+  // in to a shared node further up the layout) still got a top-to-bottom
+  // handle pair, forcing the line to loop below the source and back up.
+  const nodeAxisPosition = new Map<string, { x: number; y: number }>()
+  orderedSubgraphs.forEach((subgraph) => {
+    const position = subgraphPositions.get(subgraph.id)
+    if (position) nodeAxisPosition.set(`subgraph-${subgraph.id}`, position)
+  })
+  nodes.forEach((node) => {
+    if (node.subgraph) {
+      const subgraphLayout = subgraphLayouts.get(node.subgraph)
+      const subgraphPosition = subgraphPositions.get(node.subgraph)
+      const nodeLayout = subgraphLayout?.nodes.get(node.id)
+      if (nodeLayout && subgraphPosition) {
+        nodeAxisPosition.set(node.id, {
+          x: subgraphPosition.x + nodeLayout.x,
+          y: subgraphPosition.y + nodeLayout.y,
+        })
+      }
+    } else {
+      const standalonePos = standalonePositions.get(node.id)
+      if (standalonePos) nodeAxisPosition.set(node.id, standalonePos)
+    }
+  })
+
   // Create edges with consistent styling
-  const reactFlowEdges: Edge[] = edges.map((edge, index) => {
+  const reactFlowEdges: Edge[] = meaningfulEdges.map((edge, index) => {
     const edgeStyle: {
       strokeWidth: number
       strokeDasharray?: string
@@ -1358,6 +1452,28 @@ function createReactFlowElements(
       ? `subgraph-${edge.target}`
       : edge.target
 
+    // Pick handles from where the endpoints actually sit, falling back to
+    // the nominal layout direction only when a position is unavailable.
+    // Flipping to the opposite side when the target is behind the source
+    // along the primary axis is what avoids the loop-back curve described
+    // above nodeAxisPosition.
+    const isHorizontalLayout = direction === 'LR' || direction === 'RL'
+    let sourceHandle = isHorizontalLayout ? 'source-right' : 'source-bottom'
+    let targetHandle = isHorizontalLayout ? 'target-left' : 'target-top'
+    const sourcePoint = nodeAxisPosition.get(sourceId)
+    const targetPoint = nodeAxisPosition.get(targetId)
+    if (sourcePoint && targetPoint) {
+      if (isHorizontalLayout) {
+        if (targetPoint.x < sourcePoint.x) {
+          sourceHandle = 'source-left'
+          targetHandle = 'target-right'
+        }
+      } else if (targetPoint.y < sourcePoint.y) {
+        sourceHandle = 'source-top'
+        targetHandle = 'target-bottom'
+      }
+    }
+
     // Create edge with explicit properties - ensure consistent styling
     return {
       id: `edge-${edge.source}-${edge.target}-${index}`,
@@ -1378,12 +1494,8 @@ function createReactFlowElements(
         width: 20,
         height: 20,
       },
-      sourceHandle:
-        direction === 'LR' || direction === 'RL'
-          ? 'source-right'
-          : 'source-bottom',
-      targetHandle:
-        direction === 'LR' || direction === 'RL' ? 'target-left' : 'target-top',
+      sourceHandle,
+      targetHandle,
       zIndex: 0,
     }
   })

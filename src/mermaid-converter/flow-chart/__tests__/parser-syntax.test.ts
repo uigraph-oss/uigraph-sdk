@@ -8,10 +8,42 @@ describe('node shapes beyond the common three', () => {
     expect(nodes.find((node) => node.id === 'A')?.shape).toBe('circle')
   })
 
-  it('reads a bracket inside parentheses as a stadium', () => {
+  it('reads a bracket inside parentheses as a stadium and strips both delimiter layers from the label', () => {
     const { nodes } = parseMermaidCode('flowchart LR\n  A([Start]) --> B')
 
-    expect(nodes.find((node) => node.id === 'A')?.shape).toBe('stadium')
+    const nodeA = nodes.find((node) => node.id === 'A')
+    expect(nodeA?.shape).toBe('stadium')
+    expect(nodeA?.label).toBe('Start')
+  })
+
+  it('reads a quoted bracket inside parentheses as a stadium with a clean label', () => {
+    const { nodes } = parseMermaidCode(
+      'flowchart LR\n  user(["User"]) --> portal'
+    )
+
+    const user = nodes.find((node) => node.id === 'user')
+    expect(user?.shape).toBe('stadium')
+    expect(user?.label).toBe('User')
+  })
+
+  it('reads a parenthesis inside brackets as a cylinder with a clean label', () => {
+    const { nodes } = parseMermaidCode(
+      'flowchart LR\n  db[("Proposals DB")] --> api'
+    )
+
+    const db = nodes.find((node) => node.id === 'db')
+    expect(db?.shape).toBe('cylinder')
+    expect(db?.label).toBe('Proposals DB')
+  })
+
+  it('reads a double bracket as a subroutine with a clean label', () => {
+    const { nodes } = parseMermaidCode(
+      'flowchart LR\n  proc[["Process"]] --> next'
+    )
+
+    const proc = nodes.find((node) => node.id === 'proc')
+    expect(proc?.shape).toBe('subroutine')
+    expect(proc?.label).toBe('Process')
   })
 
   it('falls back to a rectangle for a node that carries no brackets', () => {
@@ -90,6 +122,43 @@ describe('connectors', () => {
     const { edges } = parseMermaidCode('flowchart LR\n  A B')
 
     expect(edges).toHaveLength(0)
+  })
+
+  it('reads every hop of a chained arrow line, not just the first', () => {
+    // A --> B --> C on one line is common, idiomatic Mermaid for a simple
+    // linear flow. The edge parser used to return only the first hop,
+    // silently dropping every node/edge after it.
+    const { nodes, edges } = parseMermaidCode(
+      'flowchart LR\n  A --> B --> C --> D'
+    )
+
+    expect(nodes.map((n) => n.id)).toEqual(['A', 'B', 'C', 'D'])
+    expect(edges).toHaveLength(3)
+    expect(edges.map((e) => `${e.source}->${e.target}`)).toEqual([
+      'A->B',
+      'B->C',
+      'C->D',
+    ])
+  })
+
+  it('reads a chained arrow line where each hop carries its own label', () => {
+    const { edges } = parseMermaidCode('flowchart LR\n  A -->|yes| B -->|no| C')
+
+    expect(edges.map((e) => e.label)).toEqual(['yes', 'no'])
+  })
+
+  it('reads a chained arrow line mixing compound shapes without leaking delimiters into labels', () => {
+    // Regression for a real generate output: a stadium node followed by a
+    // subroutine node followed by a cylinder node in one chained line used
+    // to both drop the later hops AND leak a stray "]" from the doubled
+    // subroutine bracket into the next edge's label.
+    const code =
+      'flowchart LR\n  start(["Start"]) --> etl[["ETL subroutine"]] --> dwh[("Data warehouse")] --> stop(["End"])'
+    const { nodes, edges } = parseMermaidCode(code)
+
+    expect(nodes.map((n) => n.id)).toEqual(['start', 'etl', 'dwh', 'stop'])
+    expect(edges).toHaveLength(3)
+    edges.forEach((e) => expect(e.label).toBe(''))
   })
 })
 
