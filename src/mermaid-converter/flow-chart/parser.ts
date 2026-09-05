@@ -796,10 +796,16 @@ export function parseMermaidCode(code: string): {
           }
 
           // Add edge
+          // Strip surrounding quotes before cleaning, same as node labels —
+          // pipe-label syntax like -->|"POST /reset"| otherwise leaves the
+          // literal quote characters in the rendered label.
+          const unquotedEdgeLabel = edgeLabel
+            .replace(/^"(.*)"$/s, '$1')
+            .replace(/^'(.*)'$/s, '$1')
           edges.push({
             source: sourceId,
             target: targetId,
-            label: enhancedCleanLabel(edgeLabel),
+            label: enhancedCleanLabel(unquotedEdgeLabel),
             type: edgeType,
             isSourceSubgraph: isSourceSubgraph,
             isTargetSubgraph: isTargetSubgraph,

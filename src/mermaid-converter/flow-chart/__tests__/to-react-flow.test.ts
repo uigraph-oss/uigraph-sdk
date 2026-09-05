@@ -311,6 +311,96 @@ describe('convertMermaidToReactFlow', () => {
     expect(result.nodes).toHaveLength(2)
     expect(result.edges).toHaveLength(1)
   })
+
+  it('strips quote delimiters from a piped edge label', async () => {
+    // -->|"label"| is common LLM output (mirrors the quoted-string edge
+    // label syntax Mermaid also accepts) — the quotes are delimiters, not
+    // part of the text, and previously leaked through as literal characters.
+    const code = 'flowchart TB\n  A -->|"POST /reset"| B'
+    const result = await convertMermaidToReactFlow(code)
+    expect(result.edges[0].label).toBe('POST /reset')
+  })
+
+  it('drops an edge from a node to the subgraph it already lives inside', async () => {
+    // A member node pointing at its own parent subgraph's id is a
+    // degenerate edge: the node is already visually inside that boundary,
+    // so the "connection" has no real second endpoint and only produced a
+    // stray line looping back into the same box.
+    const code = `flowchart TB
+  subgraph S1
+    A
+  end
+  B --> S1
+  A --> S1`
+    const result = await convertMermaidToReactFlow(code)
+    const targetsOwnParent = result.edges.filter(
+      (e) => e.source === 'A' && e.target === 'subgraph-S1'
+    )
+    expect(targetsOwnParent).toHaveLength(0)
+    // The edge from outside the subgraph into it is still meaningful and
+    // must survive the filter.
+    expect(
+      result.edges.some((e) => e.source === 'B' && e.target === 'subgraph-S1')
+    ).toBe(true)
+  })
+
+  it('flips edge handles when the target ends up above the source in a TB layout', async () => {
+    // Every edge previously got a fixed source-bottom/target-top handle
+    // pair regardless of where the nodes actually ended up. Nodes living
+    // inside a subgraph are positioned by a separate layout pass from
+    // standalone nodes, so their relative rank can diverge from the
+    // nominal top-to-bottom flow — when that happens the fixed handles
+    // forced the edge to loop below its source and curl back up to reach
+    // a target it could only approach from above. This reproduces that
+    // layout shape (mirrors a real "Stripe checkout" generate output that
+    // hit it): two subgraphs side by side, a fan-out/fan-in pair of
+    // standalone nodes below them, and edges from those standalone nodes
+    // back up into a subgraph member.
+    const code = `flowchart TB
+  u[User]
+  subgraph client [Client]
+    app[App]
+  end
+  subgraph backend [Backend]
+    api[API]
+    wh[Handler]
+    db[(Database)]
+  end
+  subgraph stripe [Stripe]
+    checkout[Checkout]
+  end
+  provision[Activate]
+  failnode[Reject]
+
+  u --> app
+  app --> api
+  api --> stripe
+  stripe --> api
+  api --> app
+  app --> checkout
+  checkout --> stripe
+  stripe --> app
+  stripe --> wh
+  wh --> provision
+  wh --> failnode
+  provision --> db
+  failnode --> db`
+    const result = await convertMermaidToReactFlow(code)
+    const provisionToDb = result.edges.find(
+      (e) => e.source === 'provision' && e.target === 'db'
+    )
+    const failnodeToDb = result.edges.find(
+      (e) => e.source === 'failnode' && e.target === 'db'
+    )
+    expect(provisionToDb).toMatchObject({
+      sourceHandle: 'source-top',
+      targetHandle: 'target-bottom',
+    })
+    expect(failnodeToDb).toMatchObject({
+      sourceHandle: 'source-top',
+      targetHandle: 'target-bottom',
+    })
+  })
 })
 
 describe('convertMermaidToReactFlow - meta-graph spacing', () => {
