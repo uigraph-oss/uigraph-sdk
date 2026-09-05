@@ -23,6 +23,8 @@ const MERMAID_TO_PORTAL_SHAPE: Record<string, string> = {
   stadium: 'terminator',
   circle: 'ellipse',
   diamond: 'diamond',
+  cylinder: 'cylinder',
+  subroutine: 'subroutine',
 }
 // Layout spacing constants - Fine-tune these for better visual separation
 const SUBGRAPH_HEADER_HEIGHT = LAYOUT_SPACING.SUBGRAPH_HEADER_HEIGHT // Increased for proper title clearance
@@ -113,6 +115,31 @@ function calculateNodeSize(
   if (shape === 'circle') {
     const size = Math.max(width, height) + 10 // Equal dimensions for circles
     return { width: size, height: size }
+  }
+  // Several non-rectangular shapes reserve edge padding for their silhouette
+  // beyond the generic `baseWidth`/`baseHeight` padding above — e.g. a
+  // stadium/terminator's fully-rounded ends eat `height` px of usable width
+  // for text. Without accounting for this, short labels on these shapes
+  // wrap mid-word (the inner text box is narrower than the box's own size
+  // suggests). These mirror uigraph-ui's `shape-components-list.tsx`
+  // `getTextInset` formulas for the matching portal shape (stadium ->
+  // terminator, cylinder -> cylinder, subroutine -> subroutine) — kept in
+  // sync manually for now; a future pass should share one source instead of
+  // duplicating these numbers across packages.
+  if (shape === 'stadium') {
+    const sideInset = Math.max(12, height / 2) * 2
+    return { width: Math.max(width, maxLineWidth + sideInset + 20), height }
+  }
+  if (shape === 'cylinder') {
+    const capInset = Math.max(12, Math.min(height * 0.18, width * 0.5) + 8) * 2
+    return {
+      width,
+      height: Math.max(height, lines.length * 18 + capInset + 10),
+    }
+  }
+  if (shape === 'subroutine') {
+    const sideInset = Math.max(24, width * 0.2)
+    return { width: Math.max(width, maxLineWidth + sideInset + 20), height }
   }
   return { width, height }
 }
@@ -671,13 +698,23 @@ function layoutMetaGraph(
   subgraphPositions: Map<string, { x: number; y: number }>
   standalonePositions: Map<string, { x: number; y: number }>
 } {
-  // Create meta-graph for top-level layout with generous spacing
+  // Create meta-graph for top-level layout. This graph positions both
+  // top-level subgraph containers AND plain standalone nodes — but a diagram
+  // with no subgraphs at all (the common case for a simple AI-generated
+  // flowchart) has only the latter, and shouldn't pay the wide spacing meant
+  // for arranging whole containers against each other.
+  const hasTopLevelSubgraphs = Array.from(subgraphLayouts.values()).some(
+    (layout) => !layout.parentId
+  )
   const g = new dagre.graphlib.Graph()
   g.setGraph({
     rankdir: direction,
-    // Container separation - ensure top-level elements don't overlap
-    nodesep: CONTAINER_SEPARATION_HORIZONTAL, // Horizontal spacing between top-level containers
-    ranksep: CONTAINER_SEPARATION_VERTICAL, // Vertical spacing between container ranks
+    nodesep: hasTopLevelSubgraphs
+      ? CONTAINER_SEPARATION_HORIZONTAL // Horizontal spacing between top-level containers
+      : NODE_SEPARATION_HORIZONTAL, // Horizontal spacing between plain nodes
+    ranksep: hasTopLevelSubgraphs
+      ? CONTAINER_SEPARATION_VERTICAL // Vertical spacing between container ranks
+      : NODE_SEPARATION_VERTICAL, // Vertical spacing between plain node ranks
     // Outer margins for the entire diagram
     marginx: META_GRAPH_MARGIN,
     marginy: META_GRAPH_MARGIN,

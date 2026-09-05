@@ -52,11 +52,16 @@ describe('nothing lands on top of anything else', () => {
     const next = boxOf(nodes.find((node) => node.id === 'B')!)
     const below = boxOf(nodes.find((node) => node.id === 'C')!)
 
+    // A -> B are successive ranks along the LR flow direction, so their
+    // on-screen horizontal gap is dagre's `ranksep`, mapped in this codebase
+    // to the `*_VERTICAL` constant regardless of rankdir (see to-react-flow.ts's
+    // dagre.setGraph calls). A and C are both first-in-chain (same rank),
+    // stacked on-screen vertically via `nodesep`, mapped to `*_HORIZONTAL`.
     expect(next.left - first.right).toBeGreaterThanOrEqual(
-      LAYOUT_SPACING.NODE_SEPARATION_HORIZONTAL
+      LAYOUT_SPACING.NODE_SEPARATION_VERTICAL
     )
     expect(below.top - first.bottom).toBeGreaterThanOrEqual(
-      LAYOUT_SPACING.NODE_SEPARATION_VERTICAL
+      LAYOUT_SPACING.NODE_SEPARATION_HORIZONTAL
     )
   })
 })

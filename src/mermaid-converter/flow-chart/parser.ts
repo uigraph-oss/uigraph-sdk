@@ -16,13 +16,30 @@ function cleanLabel(label: string): string {
 }
 */
 
+// Delimiter pairs for shapes whose Mermaid syntax nests one bracket type
+// inside another (e.g. stadium `([Text])`, cylinder `[(Text)]`). These must
+// be checked, in `getNodeShape`, before the generic single-bracket rect/round
+// checks below, since a compound shape's definition also contains a plain
+// `[`/`]` or `(`/`)` pair and would otherwise be misclassified.
+const COMPOUND_SHAPE_DELIMITERS: Record<
+  string,
+  { open: string; close: string }
+> = {
+  circle: { open: '((', close: '))' },
+  stadium: { open: '([', close: '])' },
+  cylinder: { open: '[(', close: ')]' },
+  subroutine: { open: '[[', close: ']]' },
+}
+
 function getNodeShape(nodeDefinition: string): string {
   if (nodeDefinition.includes('{') && nodeDefinition.includes('}'))
     return 'diamond'
-  if (nodeDefinition.includes('((') && nodeDefinition.includes('))'))
-    return 'circle'
-  if (nodeDefinition.includes('([') && nodeDefinition.includes('])'))
-    return 'stadium'
+  for (const [shape, { open, close }] of Object.entries(
+    COMPOUND_SHAPE_DELIMITERS
+  )) {
+    if (nodeDefinition.includes(open) && nodeDefinition.includes(close))
+      return shape
+  }
   if (nodeDefinition.includes('[') && nodeDefinition.includes(']'))
     return 'rect'
   if (nodeDefinition.includes('(') && nodeDefinition.includes(')'))
@@ -210,14 +227,29 @@ export function parseMermaidCode(code: string): {
         const shape = getNodeShape(fullDef)
 
         let rawLabel = nodeId
-        const labelContentMatch = shapeDef.match(/^[\[\(\{](.*)[\]\)\}]$/s)
-        if (labelContentMatch) {
-          rawLabel = labelContentMatch[1]
-          // Strip surrounding quotes if present
-          rawLabel = rawLabel
-            .replace(/^"(.*)"$/, '$1')
-            .replace(/^'(.*)'$/, '$1')
+        const compoundDelimiters = COMPOUND_SHAPE_DELIMITERS[shape]
+        if (
+          compoundDelimiters &&
+          shapeDef.startsWith(compoundDelimiters.open) &&
+          shapeDef.endsWith(compoundDelimiters.close)
+        ) {
+          // Compound shapes nest a bracket pair inside another (e.g. stadium's
+          // `([Text])`) — strip both delimiter layers at once rather than the
+          // single outer layer the generic regex below would leave behind.
+          rawLabel = shapeDef.slice(
+            compoundDelimiters.open.length,
+            shapeDef.length - compoundDelimiters.close.length
+          )
+        } else {
+          const labelContentMatch = shapeDef.match(/^[\[\(\{](.*)[\]\)\}]$/s)
+          if (labelContentMatch) {
+            rawLabel = labelContentMatch[1]
+          }
         }
+        // Strip surrounding quotes if present
+        rawLabel = rawLabel
+          .replace(/^"(.*)"$/s, '$1')
+          .replace(/^'(.*)'$/s, '$1')
 
         const label = enhancedCleanLabel(rawLabel)
         nodeDefinitions.set(nodeId, { label, shape, fullDef })
@@ -515,7 +547,23 @@ export function parseMermaidCode(code: string): {
         const openChar = openCharMatch[1]
         const openPos = idx + rest.indexOf(openChar)
         const closeChar = openChar === '[' ? ']' : openChar === '(' ? ')' : '}'
-        const closePos = str.indexOf(closeChar, openPos + 1)
+        // Track nesting depth of the same bracket type rather than taking the
+        // first closing char found — compound shapes double up the same
+        // bracket (subroutine `[["Text"]]`), and a naive indexOf stops at the
+        // inner one, truncating the token and leaking a stray delimiter into
+        // whatever gets parsed next on the line.
+        let depth = 0
+        let closePos = -1
+        for (let pos = openPos; pos < str.length; pos++) {
+          if (str[pos] === openChar) depth++
+          else if (str[pos] === closeChar) {
+            depth--
+            if (depth === 0) {
+              closePos = pos
+              break
+            }
+          }
+        }
         if (closePos !== -1) {
           const full = str
             .slice(startIndex + idMatch[0].search(/\S/), closePos + 1)
@@ -528,214 +576,241 @@ export function parseMermaidCode(code: string): {
       return { id, full: id, endIndex: idx }
     }
 
+    // Arrow heads recognized between two node tokens. Declared outside
+    // parseEdge so both the hop-parsing loop and its trailing-label guard
+    // can reference the same list.
+    const arrowHeads = ['-.->', '-->', '==>', '->>', '<->', '-<>', '<-', '->']
+
+    // Parses every chained hop on a line (`A --> B --> C --> D` is 3 edges,
+    // not 1) by repeatedly treating the previous hop's target as the next
+    // hop's source. A line with a single arrow still returns a one-element
+    // array, so callers always get a list.
     function parseEdge(str: string) {
       try {
+        const hops: {
+          sourceId: string
+          sourceFull: string
+          targetId: string
+          targetFull: string
+          edgeType: string
+          edgeLabel: string
+        }[] = []
+
         let i = 0
-        // source token
-        const src = extractToken(str, i)
+        let src = extractToken(str, i)
         if (!src) return null
         i = src.endIndex
 
-        // consume whitespace
-        while (i < str.length && /\s/.test(str[i])) i++
+        while (true) {
+          // consume whitespace
+          while (i < str.length && /\s/.test(str[i])) i++
 
-        // Enhanced operator and label parsing to support both
-        // 1) pipe labels:   A -->|Yes| B
-        // 2) inline labels: A -- Yes --> B
-        // and legacy connectors without arrows: A --- B, A -.-> B, etc.
+          // Enhanced operator and label parsing to support both
+          // 1) pipe labels:   A -->|Yes| B
+          // 2) inline labels: A -- Yes --> B
+          // and legacy connectors without arrows: A --- B, A -.-> B, etc.
 
-        // First, try to locate a known arrow head further in the string.
-        const arrowHeads = [
-          '-.->',
-          '-->',
-          '==>',
-          '->>',
-          '<->',
-          '-<>',
-          '<-',
-          '->',
-        ]
-        let foundArrowIndex = -1
-        let foundArrow = ''
-        for (const ah of arrowHeads) {
-          const idx = str.indexOf(ah, i)
-          if (idx !== -1 && (foundArrowIndex === -1 || idx < foundArrowIndex)) {
-            foundArrowIndex = idx
-            foundArrow = ah
+          // First, try to locate a known arrow head further in the string.
+          let foundArrowIndex = -1
+          let foundArrow = ''
+          for (const ah of arrowHeads) {
+            const idx = str.indexOf(ah, i)
+            if (
+              idx !== -1 &&
+              (foundArrowIndex === -1 || idx < foundArrowIndex)
+            ) {
+              foundArrowIndex = idx
+              foundArrow = ah
+            }
           }
-        }
 
-        let op: string | null = null
-        let edgeLabel = ''
+          let op: string | null = null
+          let edgeLabel = ''
 
-        if (foundArrowIndex !== -1) {
-          // There is an arrow head later in the string. The region between
-          // current index and the arrow head can contain dashes and an inline label.
-          const between = str.slice(i, foundArrowIndex)
+          if (foundArrowIndex !== -1) {
+            // There is an arrow head later in the string. The region between
+            // current index and the arrow head can contain dashes and an inline label.
+            const between = str.slice(i, foundArrowIndex)
 
-          // First, check for pipe label BEFORE the arrow (non-standard but tolerated)
-          const prePipeMatch = between.match(/\|(.*?)\|/)
-          if (prePipeMatch) {
-            edgeLabel = prePipeMatch[1]
+            // First, check for pipe label BEFORE the arrow (non-standard but tolerated)
+            const prePipeMatch = between.match(/\|(.*?)\|/)
+            if (prePipeMatch) {
+              edgeLabel = prePipeMatch[1]
+            } else {
+              // Remove leading/trailing connector chars, what's left is an inline label
+              const inline = between
+                .replace(/^\s*[\-\.=:\~]+\s*/g, '')
+                .replace(/\s*[\-\.=:\~]+\s*$/g, '')
+                .trim()
+              if (inline) edgeLabel = inline
+            }
+
+            op = foundArrow
+            // Advance past the arrow head
+            i = foundArrowIndex + foundArrow.length
+
+            // Standard Mermaid syntax places pipe labels AFTER the operator:
+            //   A -->|label| B  or  A -.->|label| B
+            // If we didn't already capture a label, or even if we did, prefer the
+            // explicit pipe label immediately after the arrow.
+            while (i < str.length && /\s/.test(str[i])) i++
+            if (str[i] === '|') {
+              const next = str.indexOf('|', i + 1)
+              if (next !== -1) {
+                edgeLabel = str.slice(i + 1, next)
+                i = next + 1
+              }
+            }
+          } else if (hops.length === 0) {
+            // Fallback to legacy immediate-operator parsing (no arrow head
+            // found). Only meaningful for the first hop — chaining a legacy
+            // connector isn't a pattern that needs support.
+            const operators = ['---', '-.-', '::', ':-:', '...', '~', '===']
+            for (const o of operators.sort((a, b) => b.length - a.length)) {
+              if (str.startsWith(o, i)) {
+                op = o
+                i += o.length
+                break
+              }
+            }
+            if (!op) return null
+
+            // optional edge label |label| after operator
+            while (i < str.length && /\s/.test(str[i])) i++
+            if (str[i] === '|') {
+              const next = str.indexOf('|', i + 1)
+              if (next !== -1) {
+                edgeLabel = str.slice(i + 1, next)
+                i = next + 1
+              }
+            }
           } else {
-            // Remove leading/trailing connector chars, what's left is an inline label
-            const inline = between
-              .replace(/^\s*[\-\.=:\~]+\s*/g, '')
-              .replace(/\s*[\-\.=:\~]+\s*$/g, '')
-              .trim()
-            if (inline) edgeLabel = inline
+            // No further arrow to chain onto this line — stop.
+            break
           }
 
-          op = foundArrow
-          // Advance past the arrow head
-          i = foundArrowIndex + foundArrow.length
-
-          // Standard Mermaid syntax places pipe labels AFTER the operator:
-          //   A -->|label| B  or  A -.->|label| B
-          // If we didn't already capture a label, or even if we did, prefer the
-          // explicit pipe label immediately after the arrow.
+          // skip whitespace then parse target
           while (i < str.length && /\s/.test(str[i])) i++
-          if (str[i] === '|') {
-            const next = str.indexOf('|', i + 1)
-            if (next !== -1) {
-              edgeLabel = str.slice(i + 1, next)
-              i = next + 1
+          const tgt = extractToken(str, i)
+          if (!tgt) break
+
+          const trailing = str.slice(tgt.endIndex).trimStart()
+          if (
+            !edgeLabel &&
+            !trailing.startsWith(':::') &&
+            !arrowHeads.some((ah) => trailing.includes(ah))
+          ) {
+            const colonLabelMatch = trailing.match(/^:\s*(.+)$/)
+            if (colonLabelMatch) {
+              edgeLabel = colonLabelMatch[1].trim()
             }
           }
-        } else {
-          // Fallback to legacy immediate-operator parsing (no arrow head found)
-          const operators = ['---', '-.-', '::', ':-:', '...', '~', '===']
-          for (const o of operators.sort((a, b) => b.length - a.length)) {
-            if (str.startsWith(o, i)) {
-              op = o
-              i += o.length
-              break
-            }
-          }
-          if (!op) return null
 
-          // optional edge label |label| after operator
-          while (i < str.length && /\s/.test(str[i])) i++
-          if (str[i] === '|') {
-            const next = str.indexOf('|', i + 1)
-            if (next !== -1) {
-              edgeLabel = str.slice(i + 1, next)
-              i = next + 1
-            }
-          }
+          const isReverseArrow = op === '<-'
+
+          hops.push({
+            sourceId: isReverseArrow ? tgt.id : src.id,
+            sourceFull: isReverseArrow ? tgt.full : src.full,
+            targetId: isReverseArrow ? src.id : tgt.id,
+            targetFull: isReverseArrow ? src.full : tgt.full,
+            edgeType: isReverseArrow ? '->' : op!,
+            edgeLabel,
+          })
+
+          src = tgt
+          i = tgt.endIndex
         }
 
-        // skip whitespace then parse target
-        while (i < str.length && /\s/.test(str[i])) i++
-        const tgt = extractToken(str, i)
-        if (!tgt) return null
-
-        const trailing = str.slice(tgt.endIndex).trimStart()
-        if (!edgeLabel && !trailing.startsWith(':::')) {
-          const colonLabelMatch = trailing.match(/^:\s*(.+)$/)
-          if (colonLabelMatch) {
-            edgeLabel = colonLabelMatch[1].trim()
-          }
-        }
-
-        const isReverseArrow = op === '<-'
-
-        return {
-          sourceId: isReverseArrow ? tgt.id : src.id,
-          sourceFull: isReverseArrow ? tgt.full : src.full,
-          targetId: isReverseArrow ? src.id : tgt.id,
-          targetFull: isReverseArrow ? src.full : tgt.full,
-          edgeType: isReverseArrow ? '->' : op!,
-          edgeLabel,
-        }
+        return hops.length > 0 ? hops : null
       } catch {
         return null
       }
     }
 
-    const parsedEdge = parseEdge(line)
-    if (!parsedEdge) {
+    const parsedEdges = parseEdge(line)
+    if (!parsedEdges) {
       debugLog(
         `Line "${line}" did not match edge pattern - checking for standalone nodes`
       )
     }
 
-    if (parsedEdge) {
-      try {
-        const { sourceId, targetId, edgeType, edgeLabel } = parsedEdge
-        debugLog(
-          `Found edge: ${sourceId} ${edgeType} ${targetId} with label: "${edgeLabel}" in context: ${
-            currentSubgraph || 'global'
-          }`
-        )
+    if (parsedEdges) {
+      for (const { sourceId, targetId, edgeType, edgeLabel } of parsedEdges) {
+        try {
+          debugLog(
+            `Found edge: ${sourceId} ${edgeType} ${targetId} with label: "${edgeLabel}" in context: ${
+              currentSubgraph || 'global'
+            }`
+          )
 
-        // Check if source/target are subgraphs
-        const isSourceSubgraph = subgraphMap.has(sourceId)
-        const isTargetSubgraph = subgraphMap.has(targetId)
+          // Check if source/target are subgraphs
+          const isSourceSubgraph = subgraphMap.has(sourceId)
+          const isTargetSubgraph = subgraphMap.has(targetId)
 
-        debugLog(
-          `Source "${sourceId}" is ${
-            isSourceSubgraph ? 'a subgraph' : 'a node'
-          }`
-        )
-        debugLog(
-          `Target "${targetId}" is ${
-            isTargetSubgraph ? 'a subgraph' : 'a node'
-          }`
-        )
+          debugLog(
+            `Source "${sourceId}" is ${
+              isSourceSubgraph ? 'a subgraph' : 'a node'
+            }`
+          )
+          debugLog(
+            `Target "${targetId}" is ${
+              isTargetSubgraph ? 'a subgraph' : 'a node'
+            }`
+          )
 
-        // Handle source node creation
-        if (!isSourceSubgraph) {
-          const existingSource = nodeMap.get(sourceId)
-          if (existingSource) {
-            debugLog(
-              `Source ${sourceId} already exists in subgraph: ${
-                existingSource.subgraph || 'none'
-              }`
-            )
-          } else {
-            createOrGetNode(sourceId, currentSubgraph)
+          // Handle source node creation
+          if (!isSourceSubgraph) {
+            const existingSource = nodeMap.get(sourceId)
+            if (existingSource) {
+              debugLog(
+                `Source ${sourceId} already exists in subgraph: ${
+                  existingSource.subgraph || 'none'
+                }`
+              )
+            } else {
+              createOrGetNode(sourceId, currentSubgraph)
+            }
           }
-        }
 
-        // Handle target node creation
-        if (!isTargetSubgraph) {
-          const existingTarget = nodeMap.get(targetId)
+          // Handle target node creation
+          if (!isTargetSubgraph) {
+            const existingTarget = nodeMap.get(targetId)
 
-          if (existingTarget) {
-            debugLog(
-              `Target ${targetId} already exists in subgraph: ${
-                existingTarget.subgraph || 'none'
-              }`
-            )
-          } else {
-            // Target doesn't exist yet - assign to current subgraph if we're inside one
-            const targetSubgraph = currentSubgraph
+            if (existingTarget) {
+              debugLog(
+                `Target ${targetId} already exists in subgraph: ${
+                  existingTarget.subgraph || 'none'
+                }`
+              )
+            } else {
+              // Target doesn't exist yet - assign to current subgraph if we're inside one
+              const targetSubgraph = currentSubgraph
 
-            debugLog(
-              `Creating target ${targetId} with subgraph assignment: ${
-                targetSubgraph || 'none'
-              } (current subgraph: ${currentSubgraph || 'none'})`
-            )
-            createOrGetNode(targetId, targetSubgraph)
+              debugLog(
+                `Creating target ${targetId} with subgraph assignment: ${
+                  targetSubgraph || 'none'
+                } (current subgraph: ${currentSubgraph || 'none'})`
+              )
+              createOrGetNode(targetId, targetSubgraph)
+            }
           }
+
+          // Add edge
+          edges.push({
+            source: sourceId,
+            target: targetId,
+            label: enhancedCleanLabel(edgeLabel),
+            type: edgeType,
+            isSourceSubgraph: isSourceSubgraph,
+            isTargetSubgraph: isTargetSubgraph,
+          })
+
+          debugLog(
+            `Added edge: ${sourceId} -> ${targetId} (source subgraph: ${isSourceSubgraph}, target subgraph: ${isTargetSubgraph})`
+          )
+        } catch (error) {
+          debugLog(`Error parsing edge: ${line}`, error)
         }
-
-        // Add edge
-        edges.push({
-          source: sourceId,
-          target: targetId,
-          label: enhancedCleanLabel(edgeLabel),
-          type: edgeType,
-          isSourceSubgraph: isSourceSubgraph,
-          isTargetSubgraph: isTargetSubgraph,
-        })
-
-        debugLog(
-          `Added edge: ${sourceId} -> ${targetId} (source subgraph: ${isSourceSubgraph}, target subgraph: ${isTargetSubgraph})`
-        )
-      } catch (error) {
-        debugLog(`Error parsing edge: ${line}`, error)
       }
     } else {
       // Parse standalone node definitions
