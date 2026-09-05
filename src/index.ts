@@ -54,3 +54,12 @@ export type {
   ShapeId,
   StrokeStyleId,
 } from './registry'
+
+export {
+  DEFAULT_THEME_ID,
+  THEME_REGISTRY,
+  THEME_ROLES,
+  buildThemeCatalogPromptContext,
+  getTheme,
+} from './registry'
+export type { ThemeColorPair, ThemeRole, ThemeSpec } from './registry'

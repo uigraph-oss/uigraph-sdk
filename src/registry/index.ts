@@ -13,3 +13,12 @@ export type {
   ShapeId,
   StrokeStyleId,
 } from './node-types'
+
+export {
+  DEFAULT_THEME_ID,
+  THEME_REGISTRY,
+  THEME_ROLES,
+  buildThemeCatalogPromptContext,
+  getTheme,
+} from './themes'
+export type { ThemeColorPair, ThemeRole, ThemeSpec } from './themes'
